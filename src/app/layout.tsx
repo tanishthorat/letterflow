@@ -14,6 +14,16 @@ const roboto = Roboto({
 export const metadata: Metadata = {
   title: "Letterflow",
   description: "Email template management made simple",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "letterflow",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
