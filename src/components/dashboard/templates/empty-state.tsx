@@ -1,23 +1,28 @@
 "use client";
 
 import Image from "next/image";
-import { Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useTemplateStore } from "@/lib/stores/template";
 
 const TEMPLATE_OPTIONS = [
   {
+    type: "empty",
     title: "Empty Email",
     description: "Create an email from scratch by using Blocks and Modules",
     lightImage: "https://my.stripo.email/resources/account/assets/images/empty-template_light.webp",
     darkImage: "https://my.stripo.email/resources/account/assets/images/empty-template_dark.webp",
   },
   {
+    type: "basic",
     title: "Basic Templates",
     description: "Quick start with basic templates",
     lightImage: "https://my.stripo.email/resources/account/assets/images/basic-templates_light.webp",
     darkImage: "https://my.stripo.email/resources/account/assets/images/basic-templates_dark.webp",
   },
   {
+    type: "prepared",
     title: "Pre-built Templates",
     description: "Edit and use right away any of templates",
     lightImage: "https://my.stripo.email/resources/account/assets/images/prepared-templates_light.webp",
@@ -26,6 +31,28 @@ const TEMPLATE_OPTIONS = [
 ];
 
 export function EmptyTemplatesState() {
+  const router = useRouter();
+  const { createTemplate } = useTemplateStore();
+  const [isCreating, setIsCreating] = useState<string | null>(null);
+
+  const handleCreate = async (type: string, title: string) => {
+    setIsCreating(type);
+    try {
+      const template = await createTemplate({
+        name: `New ${title}`,
+        category: "other",
+      });
+      
+      if (template) {
+        router.push(`/editor/${template.id}`);
+      }
+    } catch (error) {
+      console.error("Failed to create template", error);
+    } finally {
+      setIsCreating(null);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] text-center max-w-4xl mx-auto px-4">
       <h1 className="text-3xl font-semibold mb-4 text-foreground">Design Your First Email</h1>
@@ -36,7 +63,17 @@ export function EmptyTemplatesState() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 w-full">
         {TEMPLATE_OPTIONS.map((option, index) => (
-          <button key={index} className="flex flex-col items-center p-6 bg-card border-2 border-border rounded-xl hover:border-primary/50 transition-colors text-left group">
+          <button 
+            key={index}
+            disabled={!!isCreating}
+            onClick={() => handleCreate(option.type, option.title)}
+            className="flex flex-col items-center p-6 bg-card border-2 border-border rounded-xl hover:border-primary/50 transition-colors text-left group relative disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isCreating === option.type && (
+              <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex items-center justify-center rounded-xl">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            )}
             <div className="w-full h-56 relative mb-2 rounded-lg overflow-hidden flex items-center justify-center group-hover:scale-105 transition-transform">
               <Image 
                 src={option.lightImage} 

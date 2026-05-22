@@ -3,91 +3,54 @@
 import { useEffect, useState, useMemo } from "react";
 import { useDebounce } from "use-debounce";
 import Link from "next/link";
-import { Plus, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Plus, Search, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyTemplatesState } from "@/components/dashboard/templates/empty-state";
+import { useTemplateStore } from "@/lib/stores/template";
 import type { EmailTemplate } from "@/lib/db.types";
-
-// const DEMO_TEMPLATES: EmailTemplate[] = [
-//   {
-//     id: "1",
-//     user_id: "demo",
-//     name: "Welcome Email",
-//     subject: "Welcome to {{company_name}}!",
-//     body: "Hi {{first_name}}, thanks for joining us!",
-//     category: "welcome",
-//     status: "published",
-//     variables: { company_name: "string", first_name: "string" },
-//     created_at: new Date().toISOString(),
-//     updated_at: new Date().toISOString(),
-//   },
-//   {
-//     id: "2",
-//     user_id: "demo",
-//     name: "Password Reset",
-//     subject: "Reset your password",
-//     body: "Click here to reset your password: {{reset_link}}",
-//     category: "transactional",
-//     status: "published",
-//     variables: { reset_link: "string" },
-//     created_at: new Date().toISOString(),
-//     updated_at: new Date().toISOString(),
-//   },
-//   {
-//     id: "3",
-//     user_id: "demo",
-//     name: "Order Confirmation",
-//     subject: "Your order {{order_id}} is confirmed",
-//     body: "Thank you for your purchase. Total: {{total}}",
-//     category: "transactional",
-//     status: "published",
-//     variables: { order_id: "string", total: "string" },
-//     created_at: new Date().toISOString(),
-//     updated_at: new Date().toISOString(),
-//   },
-//   {
-//     id: "4",
-//     user_id: "demo",
-//     name: "Marketing Campaign",
-//     subject: "{{campaign_name}} - Limited Time Offer",
-//     body: "Don't miss out! {{offer_description}}",
-//     category: "marketing",
-//     status: "draft",
-//     variables: { campaign_name: "string", offer_description: "string" },
-//     created_at: new Date().toISOString(),
-//     updated_at: new Date().toISOString(),
-//   },
-//   {
-//     id: "5",
-//     user_id: "demo",
-//     name: "Notification Alert",
-//     subject: "Important: {{alert_type}}",
-//     body: "{{message}}",
-//     category: "notification",
-//     status: "published",
-//     variables: { alert_type: "string", message: "string" },
-//     created_at: new Date().toISOString(),
-//     updated_at: new Date().toISOString(),
-//   },
-// ];
 
 type Category = EmailTemplate["category"] | "all";
 
 export default function TemplatesPage() {
-  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
+  const router = useRouter();
+  const { templates, fetchTemplates, createTemplate, loading } = useTemplateStore();
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<Category>("all");
   const [debouncedSearch] = useDebounce(search, 300);
+  const [isCreating, setIsCreating] = useState(false);
+
+  useEffect(() => {
+    fetchTemplates();
+  }, [fetchTemplates]);
+
+  const handleCreateNew = async () => {
+    setIsCreating(true);
+    try {
+      const template = await createTemplate({
+        name: "Untitled Template",
+        category: "other",
+      });
+      if (template) {
+        router.push(`/editor/${template.id}`);
+      }
+    } catch (error) {
+      console.error("Error creating template", error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const categories: Category[] = [
     "all",
-    "welcome",
     "transactional",
     "marketing",
-    "notification",
+    "support",
+    "billing",
+    "system",
     "other",
   ];
 
@@ -115,7 +78,15 @@ export default function TemplatesPage() {
     }
   };
 
-  if (templates.length === 0) {
+  if (loading && templates.length === 0) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (templates.length === 0 && !search) {
     return <EmptyTemplatesState />;
   }
 
@@ -129,8 +100,12 @@ export default function TemplatesPage() {
             Manage your email templates
           </p>
         </div>
-        <Button className="bg-accent text-accent-foreground hover:bg-accent/90">
-          <Plus className="w-4 h-4 mr-2" />
+        <Button 
+          onClick={handleCreateNew} 
+          disabled={isCreating}
+          className="bg-accent text-accent-foreground hover:bg-accent/90"
+        >
+          {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
           Create Template
         </Button>
       </div>
@@ -168,7 +143,12 @@ export default function TemplatesPage() {
         <Card>
           <CardContent className="pt-6 text-center">
             <p className="text-muted-foreground mb-4">No templates found</p>
-            <Button className="bg-accent text-accent-foreground hover:bg-accent/90">
+            <Button 
+              onClick={handleCreateNew} 
+              disabled={isCreating}
+              className="bg-accent text-accent-foreground hover:bg-accent/90"
+            >
+              {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
               Create your first template
             </Button>
           </CardContent>
@@ -193,9 +173,13 @@ export default function TemplatesPage() {
                   <Badge variant="outline">
                     {template.category}
                   </Badge>
-                  <span>{Object.keys(template.variables).length} vars</span>
+                  <span>{template.placeholders.length} vars</span>
                 </div>
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => router.push(`/editor/${template.id}`)}
+                >
                   Edit
                 </Button>
               </CardContent>

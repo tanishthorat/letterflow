@@ -93,7 +93,7 @@ export function UserNav() {
           <DropdownMenuItem className="flex flex-col items-start gap-1.5 p-3 cursor-pointer rounded-md">
             <div className="flex items-center gap-2">
               <Monitor className="w-4 h-4 text-muted-foreground group-focus/dropdown-menu-item:text-sidebar-foreground" />
-              <span className="text-sm font-medium">MH 27squad's workspace</span>
+              <span className="text-sm font-medium">MH 27squad&apos;s workspace</span>
             </div>
             <span className="text-xs text-muted-foreground pl-6">Workspace</span>
           </DropdownMenuItem>
