@@ -41,7 +41,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         suppressHydrationWarning
         className={cn(
           "mt-16 min-h-screen bg-background transition-all duration-300 ease-in-out",
-          collapsed ? "ml-20" : "ml-64"
+          collapsed ? "ml-18" : "ml-64"
         )}
       >
         <div className="p-8">{children}</div>

@@ -8,75 +8,76 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyTemplatesState } from "@/components/dashboard/templates/empty-state";
 import type { EmailTemplate } from "@/lib/db.types";
 
-const DEMO_TEMPLATES: EmailTemplate[] = [
-  {
-    id: "1",
-    user_id: "demo",
-    name: "Welcome Email",
-    subject: "Welcome to {{company_name}}!",
-    body: "Hi {{first_name}}, thanks for joining us!",
-    category: "welcome",
-    status: "published",
-    variables: { company_name: "string", first_name: "string" },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    user_id: "demo",
-    name: "Password Reset",
-    subject: "Reset your password",
-    body: "Click here to reset your password: {{reset_link}}",
-    category: "transactional",
-    status: "published",
-    variables: { reset_link: "string" },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    user_id: "demo",
-    name: "Order Confirmation",
-    subject: "Your order {{order_id}} is confirmed",
-    body: "Thank you for your purchase. Total: {{total}}",
-    category: "transactional",
-    status: "published",
-    variables: { order_id: "string", total: "string" },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "4",
-    user_id: "demo",
-    name: "Marketing Campaign",
-    subject: "{{campaign_name}} - Limited Time Offer",
-    body: "Don't miss out! {{offer_description}}",
-    category: "marketing",
-    status: "draft",
-    variables: { campaign_name: "string", offer_description: "string" },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "5",
-    user_id: "demo",
-    name: "Notification Alert",
-    subject: "Important: {{alert_type}}",
-    body: "{{message}}",
-    category: "notification",
-    status: "published",
-    variables: { alert_type: "string", message: "string" },
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-];
+// const DEMO_TEMPLATES: EmailTemplate[] = [
+//   {
+//     id: "1",
+//     user_id: "demo",
+//     name: "Welcome Email",
+//     subject: "Welcome to {{company_name}}!",
+//     body: "Hi {{first_name}}, thanks for joining us!",
+//     category: "welcome",
+//     status: "published",
+//     variables: { company_name: "string", first_name: "string" },
+//     created_at: new Date().toISOString(),
+//     updated_at: new Date().toISOString(),
+//   },
+//   {
+//     id: "2",
+//     user_id: "demo",
+//     name: "Password Reset",
+//     subject: "Reset your password",
+//     body: "Click here to reset your password: {{reset_link}}",
+//     category: "transactional",
+//     status: "published",
+//     variables: { reset_link: "string" },
+//     created_at: new Date().toISOString(),
+//     updated_at: new Date().toISOString(),
+//   },
+//   {
+//     id: "3",
+//     user_id: "demo",
+//     name: "Order Confirmation",
+//     subject: "Your order {{order_id}} is confirmed",
+//     body: "Thank you for your purchase. Total: {{total}}",
+//     category: "transactional",
+//     status: "published",
+//     variables: { order_id: "string", total: "string" },
+//     created_at: new Date().toISOString(),
+//     updated_at: new Date().toISOString(),
+//   },
+//   {
+//     id: "4",
+//     user_id: "demo",
+//     name: "Marketing Campaign",
+//     subject: "{{campaign_name}} - Limited Time Offer",
+//     body: "Don't miss out! {{offer_description}}",
+//     category: "marketing",
+//     status: "draft",
+//     variables: { campaign_name: "string", offer_description: "string" },
+//     created_at: new Date().toISOString(),
+//     updated_at: new Date().toISOString(),
+//   },
+//   {
+//     id: "5",
+//     user_id: "demo",
+//     name: "Notification Alert",
+//     subject: "Important: {{alert_type}}",
+//     body: "{{message}}",
+//     category: "notification",
+//     status: "published",
+//     variables: { alert_type: "string", message: "string" },
+//     created_at: new Date().toISOString(),
+//     updated_at: new Date().toISOString(),
+//   },
+// ];
 
 type Category = EmailTemplate["category"] | "all";
 
 export default function TemplatesPage() {
-  const [templates, setTemplates] = useState<EmailTemplate[]>(DEMO_TEMPLATES);
+  const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<Category>("all");
   const [debouncedSearch] = useDebounce(search, 300);
@@ -113,6 +114,10 @@ export default function TemplatesPage() {
         return "bg-gray-500/20 text-gray-400";
     }
   };
+
+  if (templates.length === 0) {
+    return <EmptyTemplatesState />;
+  }
 
   return (
     <div className="space-y-8">

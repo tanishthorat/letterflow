@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, Palette, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { Mail , Palette, Settings, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo, { CompactLogo } from "../ui/logo";
 
 const navigation = [
-  { name: "Templates", href: "/dashboard/templates", icon: LayoutGrid },
+  { name: "Templates", href: "/dashboard/templates", icon: Mail  },
   { name: "Components", href: "/dashboard/components", icon: Palette },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
@@ -25,17 +25,17 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       suppressHydrationWarning
       className={cn(
         "fixed left-0 top-0 h-screen bg-card border-r border-sidebar-border flex flex-col transition-all duration-300 ease-in-out z-40",
-        collapsed ? "w-20" : "w-64"
+        collapsed ? "w-18" : "w-64"
       )}
     >
       {/* Logo */}
-      <div className={cn("px-6 flex items-center justify-between relative transition-all duration-300 ease-in-out")}>
+      <div className={cn("px-4 flex items-center justify-between relative transition-all duration-300 ease-in-out")}>
         <Link href="/dashboard" className={cn("flex items-center gap-2 h-20 overflow-hidden transition-all duration-300 ease-in-out")}>
           {!collapsed && (
             <Logo className="w-60 h-60 text-foreground" />
           )}
           {collapsed && (
-            <div className="w-20 h-20 text-foreground">
+            <div className="w-28 h-28 text-foreground">
               <CompactLogo className="w-full h-full" />
             </div>
           )}
@@ -74,7 +74,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               href={item.href}
               className={cn(
                 "flex items-center gap-3 rounded-lg transition-colors",
-                collapsed ? "justify-center px-3 py-3" : "px-4 py-2",
+                collapsed ? "justify-center px-3 py-2" : "px-4 py-2",
                 isActive
                   ? "bg-sidebar-accent text-sidebar-accent-foreground"
                   : "text-sidebar-foreground hover:bg-sidebar-primary/10",

@@ -1,16 +1,11 @@
 "use client";
 
-import { Mail, ChevronDown, FolderPlus, HelpCircle, Bell, Plus, User } from "lucide-react";
+import { Mail, FolderPlus, HelpCircle, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/ui/search-bar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { UserNav } from "@/components/dashboard/user-nav";
 import { useAuth } from "@/lib/auth";
 
 interface HeaderProps {
@@ -35,18 +30,18 @@ export function Header({ collapsed }: HeaderProps) {
       suppressHydrationWarning
       className={cn(
         "fixed top-0 right-0 h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6 transition-all duration-300 ease-in-out z-30",
-        collapsed ? "left-20" : "left-64"
+        collapsed ? "left-18" : "left-64"
       )}
     >
       {/* Left section: Actions */}
       <div className="flex items-center gap-3">
         {/* Split Button for New Message */}
         <div className="flex items-center shadow-sm rounded-md">
-          <Button className="rounded-r-none gap-2 bg-primary hover:bg-primary/90 text-primary-foreground border border-primary">
+          <Button className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground border border-primary">
             <Mail className="w-4 h-4" />
             <span className="hidden sm:inline-block font-medium">New Message</span>
           </Button>
-          <DropdownMenu>
+          {/* <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button size="icon" className="rounded-l-none border border-l-primary-foreground/20 border-primary bg-primary hover:bg-primary/90 text-primary-foreground w-9">
                 <ChevronDown className="w-4 h-4" />
@@ -56,7 +51,7 @@ export function Header({ collapsed }: HeaderProps) {
               <DropdownMenuItem>Email Template</DropdownMenuItem>
               <DropdownMenuItem>Blank Message</DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
         </div>
 
         {/* New Folder */}
@@ -84,22 +79,7 @@ export function Header({ collapsed }: HeaderProps) {
             <Plus className="w-4 h-4" />
           </Button>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full w-9 h-9 border border-border overflow-hidden p-0 ring-2 ring-transparent hover:ring-primary/50 transition-all">
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <User className="w-5 h-5 text-muted-foreground" />
-                </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem onClick={handleSignOut} disabled={loading}>
-                {loading ? "Signing Out..." : "Sign Out"}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <UserNav />
         </div>
       </div>
     </header>

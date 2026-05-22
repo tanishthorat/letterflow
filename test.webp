@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en" prefix="og: http://ogp.me/ns#" translate="no" data-beasties-container>
+  <head>
+    <!-- Primary Meta Tags -->
+    <title>Stripo — FREE Email Template Builder: Drag and Drop Html Email Editor</title>
+    <meta name="title" content="Stripo — FREE Email Template Builder: Drag and Drop Html Email Editor">
+    <meta name="description" content="Stripo — free email template builder. Create professional and responsive emails fast with no HTML skills. Use it to automate email production.">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:site_name" content="Stripo.email">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://my.stripo.email/">
+    <meta property="og:title" content="Stripo — FREE Email Template Builder: Drag and Drop Html Email Editor">
+    <meta property="og:description" content="Stripo — free email template builder. Create professional and responsive emails fast with no HTML skills. Use it to automate email production.">
+    <meta property="og:image" content="https://stripo.email/assets/meta-tags-16a33a6a8531e519cc0936fbba0ad904e52d35f34a46c97a2c9f6f7dd7d336f2.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://my.stripo.email/">
+    <meta property="twitter:title" content="Stripo — FREE Email Template Builder: Drag and Drop Html Email Editor">
+    <meta property="twitter:description" content="Stripo — free email template builder. Create professional and responsive emails fast with no HTML skills. Use it to automate email production.">
+    <meta property="twitter:image" content="https://stripo-cdn.stripo.email/seo/big/SKf5otSBXlcDnu27gXKuwbp5wfcVzvkKQSRhpcWx.png">
+
+    <meta charset="utf-8">
+    <meta name="robots" content="noindex, follow">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.intercomcdn.com;
+              frame-src 'self' data: https://stripo-app.firebaseio.com https://stripo-app.firebaseapp.com *.stripe.com *.google.com *.facebook.com www.youtube.com https://www.pinterest.com intercom-sheets.com https://*.pinterest.com *.typeform.com  https://td.doubleclick.net https://googleads.g.doubleclick.net https://www.googletagmanager.com https://www.loom.com https://stripo.email *.stripo.email https://www.googletagmanager.com https://cdn.platform.openai.com;
+              style-src 'self' 'unsafe-inline' *;
+              script-src 'self' 'unsafe-eval' 'unsafe-inline' https://stripo.email www.youtube.com *.ampproject.org googletagmanager.com *.googletagmanager.com api.vk.com *.gstatic.com *.facebook.net *.google.com *.google-analytics.com *.stripe.com *.pingdom.net *.intercom.io *.intercomcdn.com *.stripo.email *.zscalertwo.net *.zscaler.com *.zscaler.net *.pinimg.com *.getsitecontrol.com *.vimeo.com https://vimeo.com https://cdn.jsdelivr.net/npm/party-js@latest/bundle/party.min.js https://stripo-app.firebaseio.com https://stripo-app.firebaseapp.com https://www.googleoptimize.com bat.bing.com *.typeform.com https://static.ads-twitter.com/uwt.js https://cdn.firstpromoter.com/fprom.js https://cdn.firstpromoter.com/fpr.js https://analytics.tiktok.com *.adroll.com *.esputnik.com *.clarity.ms https://static.userguiding.com https://js.userflow.com https://snap.licdn.com/li.lms-analytics/insight.min.js https://googleads.g.doubleclick.net https://*.amplitude.com https://appleid.cdn-apple.com cdn.cookieyes.com cdn.platform.openai.com;
+              img-src 'self' blob: data: *;
+              connect-src 'self' blob: *;
+              worker-src 'self' blob:;
+              child-src blob:;
+              font-src 'self' *;
+              base-uri 'self';
+              form-action 'self' *;
+              object-src 'self'">
+    <base href="/resources/account/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="icon" type="image/x-icon" href="assets/favicons/favicon.ico">
+
+    <!-- Save original Worker that will be overriden by TikTok browser extension -->
+    <!-- Required for Old Editor service worker creation -->
+    <script>
+      window['StripoWorker'] = window['Worker'];
+    </script>
+
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != 'dataLayer' ? '&l=' + l : '';
+        j.async = true;
+        j.src = 'https://stripo.email/xyz/gtm.js?ngsw-bypass=true&id=' + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, 'script', 'dataLayer', 'GTM-KGD7HVJ');
+    </script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Bing -->
+    <!-- general initialization was moved to gtm -->
+    <script>
+      window.uetq = window.uetq || [];
+    </script>
+    <!-- End Bing -->
+
+    <!-- GetSiteControl -->
+    <script>
+      window.gsc =
+        window.gsc ||
+        function () {
+          (gsc.q = gsc.q || []).push(arguments);
+        };
+    </script>
+    <script type="text/javascript" src="//l.getsitecontrol.com/y79v5q64.js"></script>
+    <!-- End GetSiteControl -->
+
+    <script type="application/javascript">
+      var global = window;
+    </script>
+
+    <!-- Favicons -->
+    <link class="stripo-styles-marker" rel="shortcut icon" href="assets/favicons/favicon.png">
+    <link rel="apple-touch-icon" sizes="57x57" href="assets/favicons/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="assets/favicons/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/favicons/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="assets/favicons/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="assets/favicons/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="assets/favicons/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="assets/favicons/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/favicons/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicons/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="assets/favicons/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="assets/favicons/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="assets/favicons/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="assets/favicons/android-chrome-192x192.png" sizes="192x192">
+    <meta name="msapplication-square70x70logo" content="assets/favicons/smalltile.png">
+    <meta name="msapplication-square150x150logo" content="assets/favicons/mediumtile.png">
+    <meta name="msapplication-wide310x150logo" content="assets/favicons/widetile.png">
+    <meta name="msapplication-square310x310logo" content="assets/favicons/largetile.png">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#2db441cc">
+  <style>*{scrollbar-width:thin;scrollbar-color:hsla(var(--acc-default-font-color_h, 0),var(--acc-default-font-color_s, 0%),var(--acc-default-font-color_l, 33.33%),calc(var(--acc-default-font-color_t, 1) - .4)) transparent}html{font-family:var(--acc-font-family, '"SF UI Text", Aptos, Roboto, Arial, sans-serif, -apple-system, BlinkMacSystemFont');background-color:hsl(var(--acc-main-bg-color_h, 0),var(--acc-main-bg-color_s, 0%),var(--acc-main-bg-color_l, 95%),var(--acc-main-bg-color_t, 1))}html{height:100%;overflow:hidden}body{margin:0;height:100%;overflow:hidden}@font-face{font-family:SF UI Text;font-style:normal;font-weight:400;font-display:swap;src:local("SF UI Text"),url("./media/sfuitext-regular-ZPFXG7XQ.woff2") format("woff2"),url("./media/sfuitext-regular-4TUZM5XJ.woff") format("woff")}@font-face{font-family:SF UI Text;font-style:normal;font-weight:500;font-display:swap;src:local("SF UI Text"),url("./media/sfuitext-medium-XDU24RLY.woff2") format("woff2"),url("./media/sfuitext-medium-AVJL6AYL.woff") format("woff")}@font-face{font-family:SF UI Text;font-style:normal;font-weight:700;font-display:swap;src:local("SF UI Text"),url("./media/sfuitext-bold-UJIHMPKX.woff2") format("woff2"),url("./media/sfuitext-bold-RQHU7WTW.woff") format("woff")}@font-face{font-family:SF UI Text;font-style:italic;font-weight:400;font-display:swap;src:local("SF UI Text"),url("./media/sfuitext-regularitalic-A2KI3VIS.woff2") format("woff2"),url("./media/sfuitext-regularitalic-4FRNWPFS.woff") format("woff")}@font-face{font-family:SF UI Text;font-style:italic;font-weight:500;font-display:swap;src:local("SF UI Text"),url("./media/sfuitext-mediumitalic-BESE7ZKD.woff2") format("woff2"),url("./media/sfuitext-mediumitalic-MKZFYK37.woff") format("woff")}@font-face{font-family:SF UI Text;font-style:italic;font-weight:700;font-display:swap;src:local("SF UI Text"),url("./media/sfuitext-bolditalic-L7DE44JY.woff2") format("woff2"),url("./media/sfuitext-bolditalic-FE2GF4IC.woff") format("woff")}</style><link rel="stylesheet" href="styles-SJBFQI7U.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="styles-SJBFQI7U.css"></noscript></head>
+  <body>
+    <acc-root></acc-root>
+
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+      <iframe src="https://stripo.email/xyz/ns.html?id=GTM-KGD7HVJ" height="0" width="0" style="display: none; visibility: hidden"></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <!-- Facebook Sdk -->
+    <script>
+      window.fbAsyncInit = function () {
+        FB.init({
+          appId:
+            window.location.hostname.indexOf('dev-account') >= 0 ||
+            window.location.hostname.indexOf('stage-account') >= 0
+              ? '226771407798774'
+              : '220581981751305',
+          xfbml: true,
+          version: 'v21.0',
+        });
+        FB.AppEvents.logPageView();
+      };
+    </script>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+    <!-- End Facebook Sdk -->
+  <link rel="modulepreload" href="chunk-CLJDB66G.js"><link rel="modulepreload" href="chunk-WYHY7J5F.js"><link rel="modulepreload" href="chunk-R4K6VRCK.js"><link rel="modulepreload" href="chunk-6OYDJPFU.js"><link rel="modulepreload" href="chunk-VVZNEX42.js"><link rel="modulepreload" href="chunk-EDM5PY5O.js"><link rel="modulepreload" href="chunk-XUODJ674.js"><link rel="modulepreload" href="chunk-JK6DJFON.js"><link rel="modulepreload" href="chunk-MMXITSL4.js"><link rel="modulepreload" href="chunk-ENURVRT7.js"><script src="polyfills-4KHH5YVN.js" type="module"></script><script src="main-S5ROREQS.js" type="module"></script></body>
+</html>
