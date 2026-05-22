@@ -2,25 +2,33 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { useDebounce } from "use-debounce";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Search, Loader2 } from "lucide-react";
+import { 
+  Loader2, 
+  History, 
+  SlidersHorizontal, 
+  Tag, 
+  LayoutGrid, 
+  ArrowDown, 
+  ChevronDown 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { EmptyTemplatesState } from "@/components/dashboard/templates/empty-state";
 import { useTemplateStore } from "@/lib/stores/template";
 import type { EmailTemplate } from "@/lib/db.types";
 
-type Category = EmailTemplate["category"] | "all";
-
 export default function TemplatesPage() {
   const router = useRouter();
-  const { templates, fetchTemplates, createTemplate, loading } = useTemplateStore();
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<Category>("all");
-  const [debouncedSearch] = useDebounce(search, 300);
+  const { templates, fetchTemplates, createTemplate, loading, searchQuery } = useTemplateStore();
+  const [debouncedSearch] = useDebounce(searchQuery, 300);
   const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
@@ -44,28 +52,15 @@ export default function TemplatesPage() {
     }
   };
 
-  const categories: Category[] = [
-    "all",
-    "transactional",
-    "marketing",
-    "support",
-    "billing",
-    "system",
-    "other",
-  ];
-
   const filteredTemplates = useMemo(() => {
     return templates.filter((template) => {
       const matchesSearch =
         template.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
         template.subject.toLowerCase().includes(debouncedSearch.toLowerCase());
-
-      const matchesCategory =
-        selectedCategory === "all" || template.category === selectedCategory;
-
-      return matchesSearch && matchesCategory;
+      
+      return matchesSearch;
     });
-  }, [templates, debouncedSearch, selectedCategory]);
+  }, [templates, debouncedSearch]);
 
   const statusBadgeColor = (status: EmailTemplate["status"]) => {
     switch (status) {
@@ -86,55 +81,72 @@ export default function TemplatesPage() {
     );
   }
 
-  if (templates.length === 0 && !search) {
+  if (templates.length === 0 && !searchQuery) {
     return <EmptyTemplatesState />;
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">Email Templates</h1>
-          <p className="text-lg text-muted-foreground">
-            Manage your email templates
-          </p>
+    <div className="space-y-6">
+      {/* Toolbar exactly matching image */}
+      <div className="flex items-center gap-4 border-b border-border pb-4">
+        <div className="flex items-center gap-2">
+          <h1 className="text-lg font-semibold">Emails</h1>
+          <span className="flex items-center justify-center bg-muted text-muted-foreground text-[10px] font-medium rounded-full w-5 h-5">
+            {filteredTemplates.length}
+          </span>
         </div>
-        <Button 
-          onClick={handleCreateNew} 
-          disabled={isCreating}
-          className="bg-accent text-accent-foreground hover:bg-accent/90"
-        >
-          {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
-          Create Template
-        </Button>
-      </div>
+        
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted text-foreground rounded-md h-8 px-3">
+            <History className="w-4 h-4" />
+            Recents
+          </Button>
 
-      {/* Filters */}
-      <div className="space-y-4">
-        {/* Search */}
-        <div className="relative">
-          <Search className="w-5 h-5 absolute left-3 top-3 text-muted-foreground" />
-          <Input
-            placeholder="Search templates by name or subject..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+          <Button variant="secondary" size="icon" className="bg-muted/50 hover:bg-muted rounded-md h-8 w-8">
+            <SlidersHorizontal className="w-4 h-4" />
+          </Button>
 
-        {/* Category Filter */}
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <Button
-              key={cat}
-              variant={selectedCategory === cat ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategory(cat)}
-            >
-              {cat.charAt(0).toUpperCase() + cat.slice(1)}
-            </Button>
-          ))}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
+                <Tag className="w-4 h-4" />
+                <ChevronDown className="w-3 h-3 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem>All Tags</DropdownMenuItem>
+              <DropdownMenuItem>Marketing</DropdownMenuItem>
+              <DropdownMenuItem>Transactional</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
+                <LayoutGrid className="w-4 h-4" />
+                <ChevronDown className="w-3 h-3 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem>Grid View</DropdownMenuItem>
+              <DropdownMenuItem>List View</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
+                <ArrowDown className="w-4 h-4" />
+                Name
+                <ChevronDown className="w-3 h-3 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem>Name (A-Z)</DropdownMenuItem>
+              <DropdownMenuItem>Date Created</DropdownMenuItem>
+              <DropdownMenuItem>Last Modified</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 

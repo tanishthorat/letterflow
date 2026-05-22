@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Search, Delete } from "lucide-react"
+import { Delete, Search, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
@@ -42,17 +42,18 @@ export const SearchBar = React.forwardRef<HTMLInputElement, SearchBarProps>(
     }
 
     const handleClear = () => {
+      // Create a synthetic event object that matches React.ChangeEvent<HTMLInputElement>
+      const event = {
+        target: { value: "" },
+        currentTarget: { value: "" }
+      } as React.ChangeEvent<HTMLInputElement>;
+      
+      // Call onChange directly with our fake event
+      onChange?.(event);
+      
+      // Focus the input element
       if (inputRef.current) {
-        // Clear internal value
-        inputRef.current.value = ""
-        setHasValue(false)
-        
-        // Dispatch native event so any parent onChange listeners fire
-        const event = new Event("input", { bubbles: true })
-        inputRef.current.dispatchEvent(event)
-        
-        // Focus the input again
-        inputRef.current.focus()
+        inputRef.current.focus();
       }
     }
 
@@ -77,7 +78,7 @@ export const SearchBar = React.forwardRef<HTMLInputElement, SearchBarProps>(
           <button
             type="button"
             onClick={handleClear}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded-sm "
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded-sm"
             aria-label="Clear search"
           >
             <Delete className="h-4 w-4" />

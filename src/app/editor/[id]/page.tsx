@@ -1,32 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTemplateStore } from "@/lib/stores/template";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { EditorHeader } from "@/components/editor/header";
+import type { EmailTemplate } from "@/lib/db.types";
 
 export default function EditorPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
   const { templates, fetchTemplates, loading } = useTemplateStore();
-  const [template, setTemplate] = useState<any>(null);
+  
+  const template = useMemo<EmailTemplate | undefined>(() => {
+    return templates.find((t) => t.id === id);
+  }, [templates, id]);
 
   useEffect(() => {
     if (templates.length === 0) {
       fetchTemplates();
     }
   }, [templates.length, fetchTemplates]);
-
-  useEffect(() => {
-    if (templates.length > 0) {
-      const found = templates.find((t) => t.id === id);
-      if (found) {
-        setTemplate(found);
-      }
-    }
-  }, [templates, id]);
 
   if (loading && !template) {
     return <div className="flex items-center justify-center min-h-screen">Loading editor...</div>;
@@ -42,23 +37,8 @@ export default function EditorPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Editor Header */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-border bg-background">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.push("/dashboard/templates")}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <h1 className="text-lg font-semibold">{template?.name || "Untitled Template"}</h1>
-            <p className="text-xs text-muted-foreground">Status: {template?.status}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline">Preview</Button>
-          <Button>Save changes</Button>
-        </div>
-      </header>
+    <div className="flex flex-col min-h-screen bg-background">
+      {template && <EditorHeader template={template} />}
 
       {/* Editor Workspace Placeholder */}
       <main className="flex-1 bg-muted p-8 flex items-center justify-center">

@@ -1,12 +1,14 @@
 "use client";
 
-import { Mail, FolderPlus, HelpCircle, Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Mail, FolderPlus, HelpCircle, Plus, Loader2 } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SearchBar } from "@/components/ui/search-bar";
 import { UserNav } from "@/components/dashboard/user-nav";
 import { useAuth } from "@/lib/auth";
+import { useTemplateStore } from "@/lib/stores/template";
 
 interface HeaderProps {
   collapsed: boolean;
@@ -14,7 +16,34 @@ interface HeaderProps {
 
 export function Header({ collapsed }: HeaderProps) {
   const router = useRouter();
-  const { signOut, loading } = useAuth();
+  const pathname = usePathname();
+  const { signOut } = useAuth();
+  const { searchQuery, setSearchQuery, createTemplate } = useTemplateStore();
+  const [isCreating, setIsCreating] = useState(false);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    if (pathname !== "/dashboard/templates" && e.target.value.trim() !== "") {
+      router.push("/dashboard/templates");
+    }
+  };
+
+  const handleCreateNew = async () => {
+    setIsCreating(true);
+    try {
+      const template = await createTemplate({
+        name: "Untitled Template",
+        category: "other",
+      });
+      if (template) {
+        router.push(`/editor/${template.id}`);
+      }
+    } catch (error) {
+      console.error("Error creating template", error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const handleSignOut = async () => {
     try {
@@ -37,21 +66,14 @@ export function Header({ collapsed }: HeaderProps) {
       <div className="flex items-center gap-3">
         {/* Split Button for New Message */}
         <div className="flex items-center shadow-sm rounded-md">
-          <Button className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground border border-primary">
-            <Mail className="w-4 h-4" />
+          <Button 
+            onClick={handleCreateNew} 
+            disabled={isCreating}
+            className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground border border-primary"
+          >
+            {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
             <span className="hidden sm:inline-block font-medium">New Message</span>
           </Button>
-          {/* <DropdownMenu modal={false}>
-            <DropdownMenuTrigger asChild>
-              <Button size="icon" className="rounded-l-none border border-l-primary-foreground/20 border-primary bg-primary hover:bg-primary/90 text-primary-foreground w-9">
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem>Email Template</DropdownMenuItem>
-              <DropdownMenuItem>Blank Message</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu> */}
         </div>
 
         {/* New Folder */}
@@ -62,7 +84,11 @@ export function Header({ collapsed }: HeaderProps) {
 
       {/* Middle section: Search */}
       <div className="flex-1 max-w-2xl px-4 lg:px-8 hidden md:block">
-        <SearchBar placeholder="Search by name, ID or preview link" />
+        <SearchBar 
+          placeholder="Search by name, subject or ID" 
+          value={searchQuery}
+          onChange={handleSearch}
+        />
       </div>
 
       {/* Right section: User & notifications */}
