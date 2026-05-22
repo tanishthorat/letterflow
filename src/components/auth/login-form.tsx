@@ -22,7 +22,11 @@ export function LoginForm() {
     setEmail,
     setPassword,
     error,
+    emailError,
+    passwordError,
     setError,
+    setEmailError,
+    setPasswordError,
     loading,
     setLoading,
     clearError,
@@ -33,13 +37,21 @@ export function LoginForm() {
     clearError();
     setLoading(true);
 
+    // clear field errors
+    setEmailError("");
+    setPasswordError("");
+
     try {
       // Validation
       if (!email.trim()) {
-        throw new Error("Email is required");
+        setEmailError("Please enter your email address");
+        setLoading(false);
+        return;
       }
       if (!password) {
-        throw new Error("Password is required");
+        setPasswordError("Please enter your password");
+        setLoading(false);
+        return;
       }
 
       await signIn(email, password);
@@ -56,7 +68,7 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md bg-card dark:bg-card border-border dark:border-border-dark p-8 shadow-lg">
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-4">
         <div className="flex items-center gap-2 mb-6 lg:hidden">
           <div className="w-8 h-10 bg-primary rounded flex items-center justify-center text-white font-bold text-lg">
             L
@@ -66,7 +78,7 @@ export function LoginForm() {
         <h1 className="text-2xl font-bold text-foreground mb-2">
           👋 Welcome Back!
         </h1>
-        <p className="text-sm text-muted">
+        <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link
             href="/signup"
@@ -85,7 +97,7 @@ export function LoginForm() {
         {/* Error Message */}
         {error && (
           <div className="flex items-center gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
@@ -101,6 +113,8 @@ export function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
             className="bg-input dark:bg-input-dark border-border dark:border-border-dark"
+            error={emailError}
+            errorAsPop
           />
         </div>
 
@@ -120,6 +134,8 @@ export function LoginForm() {
             value={password}
             onChange={setPassword}
             disabled={loading}
+            error={passwordError}
+            errorAsPop
           />
         </div>
 
@@ -127,7 +143,8 @@ export function LoginForm() {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-medium mt-2"
+          fullWidth
+          size="lg"
         >
           {loading ? "Signing in..." : "Sign In"}
         </Button>
@@ -135,7 +152,7 @@ export function LoginForm() {
 
       {/* Footer */}
       <div className="mt-6 pt-6 border-t border-border dark:border-border-dark">
-        <p className="text-xs text-muted text-center">
+        <p className="text-xs text-muted-foreground text-center">
           By signing in, you agree to our{" "}
           <Link href="#" className="text-primary hover:underline">
             Terms of Service

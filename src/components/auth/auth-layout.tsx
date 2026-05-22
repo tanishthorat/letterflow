@@ -26,7 +26,7 @@ export function AuthLayout({ children, showBranding = true }: AuthLayoutProps) {
             <div className="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
               <div className="bg-white/10 dark:bg-white/10 text-foreground p-4 rounded-lg backdrop-blur-sm w-40 border border-white/20">
                 <h3 className="font-bold text-base mb-1">Email Accessibility</h3>
-                <p className="text-xs text-muted">WCAG 2.1 AAA compliant</p>
+                <p className="text-xs text-muted-foreground">WCAG 2.1 AAA compliant</p>
               </div>
             </div>
           </div>
@@ -36,10 +36,10 @@ export function AuthLayout({ children, showBranding = true }: AuthLayoutProps) {
             <h1 className="text-4xl font-bold mb-4 text-foreground">
               Email Templates Made Simple
             </h1>
-            <p className="text-sm text-muted mb-4 max-w-md">
+            <p className="text-sm text-muted-foreground mb-4 max-w-md">
               Design, manage, and send beautiful emails with Letterflow. Built for teams who care about email quality.
             </p>
-            <p className="text-sm text-muted">
+            <p className="text-sm text-muted-foreground">
               Join thousands of companies using Letterflow to streamline their email workflow.
             </p>
           </div>

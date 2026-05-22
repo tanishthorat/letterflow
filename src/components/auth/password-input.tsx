@@ -11,6 +11,7 @@ interface PasswordInputProps {
   onChange: (value: string) => void;
   error?: string;
   disabled?: boolean;
+  errorAsPop?: boolean;
 }
 
 export function PasswordInput({
@@ -20,6 +21,7 @@ export function PasswordInput({
   onChange,
   error,
   disabled = false,
+  errorAsPop = false,
 }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -35,6 +37,8 @@ export function PasswordInput({
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
           className="pr-10"
+          error={error}
+          errorAsPop={errorAsPop}
         />
         <Button
           type="button"
@@ -51,7 +55,7 @@ export function PasswordInput({
           )}
         </Button>
       </div>
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      {error && !errorAsPop && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );
 }

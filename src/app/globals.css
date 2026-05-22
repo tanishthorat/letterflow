@@ -178,7 +178,7 @@
   --accent-foreground: #222222;
   
   /* Destructive - Bright red */
-  --destructive: #ff6b6b;
+  --destructive: #da2d2d;
   --destructive-foreground: #222222;
   
   /* Borders & Inputs */
@@ -309,6 +309,33 @@
 
   .border-accent-brand {
     @apply border-accent;
+  }
+
+  /* Tooltip styles */
+  .tooltip-default {
+    @apply bg-popover text-popover-foreground;
+  }
+
+  .tooltip-error {
+    @apply bg-destructive text-destructive-foreground;
+  }
+
+  .tooltip-success {
+    @apply bg-green-600 text-white;
+  }
+
+  .tooltip-warning {
+    @apply bg-yellow-600 text-white;
+  }
+
+  /* Tooltip arrow - ensure visibility */
+  [data-slot="tooltip-content"] [role="tooltip"] {
+    @apply pointer-events-none;
+  }
+
+  [data-slot="tooltip-content"] svg {
+    visibility: visible !important;
+    display: block !important;
   }
 }
 
