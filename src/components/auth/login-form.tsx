@@ -69,12 +69,6 @@ export function LoginForm() {
     <Card className="w-full max-w-md bg-card dark:bg-card border-border dark:border-border-dark p-8 shadow-lg">
       {/* Header */}
       <div className="mb-4">
-        <div className="flex items-center gap-2 mb-6 lg:hidden">
-          <div className="w-8 h-10 bg-primary rounded flex items-center justify-center text-white font-bold text-lg">
-            L
-          </div>
-          <span className="font-bold text-lg text-foreground">Letterflow</span>
-        </div>
         <h1 className="text-2xl font-bold text-foreground mb-2">
           👋 Welcome Back!
         </h1>
@@ -104,11 +98,11 @@ export function LoginForm() {
 
         {/* Email Input */}
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          {/* <Label htmlFor="email">Email</Label> */}
           <Input
             id="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
@@ -120,15 +114,7 @@ export function LoginForm() {
 
         {/* Password Input */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-            <Link
-              href="#"
-              className="text-xs text-primary hover:underline"
-            >
-              Forgot?
-            </Link>
-          </div>
+          
           <PasswordInput
             label=""
             value={password}
@@ -137,6 +123,15 @@ export function LoginForm() {
             error={passwordError}
             errorAsPop
           />
+          <div className="flex items-end justify-end">
+            {/* <Label htmlFor="password">Password</Label> */}
+            <Link
+              href="#"
+              className="text-sm text-primary hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </div>
         </div>
 
         {/* Submit Button */}

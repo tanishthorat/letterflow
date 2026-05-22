@@ -7,7 +7,7 @@ interface AuthStore {
   loading: boolean;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, name: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signInWithGitHub: () => Promise<void>;
@@ -24,12 +24,17 @@ export const useAuth = create<AuthStore>((set) => {
     setUser: (user) => set({ user }),
     setLoading: (loading) => set({ loading }),
 
-    signUp: async (email: string, password: string) => {
+    signUp: async (email: string, password: string, name: string) => {
       set({ loading: true });
       try {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
+          options: {
+            data: {
+              name,
+            },
+          },
         });
         if (error) throw error;
         set({ user: data.user });

@@ -17,8 +17,10 @@ export function SignupForm() {
     const router = useRouter();
     const { signUp } = useAuth();
     const {
+        name,
         email,
         password,
+        setName,
         setEmail,
         setPassword,
         error,
@@ -27,13 +29,11 @@ export function SignupForm() {
         setLoading,
         clearError,
     } = useAuthForm();
-
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [passwordError, setPasswordError] = useState("");
     const [success, setSuccess] = useState(false);
 
     const validatePasswords = () => {
-        if (password !== confirmPassword) {
+        if (!password) {
             setPasswordError("Passwords do not match");
             return false;
         }
@@ -57,6 +57,9 @@ export function SignupForm() {
 
         try {
             // Validation
+            if (!name.trim()) {
+                throw new Error("Name is required");
+            }
             if (!email.trim()) {
                 throw new Error("Email is required");
             }
@@ -64,7 +67,7 @@ export function SignupForm() {
                 throw new Error("Password is required");
             }
 
-            await signUp(email, password);
+            await signUp(email, password, name);
             setSuccess(true);
 
             // Brief delay to show success state
@@ -103,12 +106,7 @@ export function SignupForm() {
         <Card className="w-full max-w-md bg-card dark:bg-card border-border dark:border-border-dark p-8 shadow-lg">
             {/* Header */}
             <div className="mb-4">
-                <div className="flex items-center gap-2 mb-6 lg:hidden">
-                    <div className="w-8 h-10 bg-primary rounded flex items-center justify-center text-white font-bold text-lg">
-                        L
-                    </div>
-                    <span className="font-bold text-lg text-foreground">Letterflow</span>
-                </div>
+
                 <h1 className="text-2xl font-bold text-foreground mb-2">
                     Create Account
                 </h1>
@@ -133,13 +131,27 @@ export function SignupForm() {
                     </div>
                 )}
 
+                {/* Name Input */}
+                <div className="space-y-2">
+                    {/* <Label htmlFor="name">Full Name</Label> */}
+                    <Input
+                        id="name"
+                        type="text"
+                        placeholder="Enter a name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        disabled={loading}
+                        className="bg-input dark:bg-input-dark border-border dark:border-border-dark"
+                    />
+                </div>
+
                 {/* Email Input */}
                 <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    {/* <Label htmlFor="email">Email</Label> */}
                     <Input
                         id="email"
                         type="email"
-                        placeholder="you@example.com"
+                        placeholder="Enter your email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={loading}
@@ -147,43 +159,28 @@ export function SignupForm() {
                     />
                 </div>
 
-                {/* Password Input */}
-                <PasswordInput
-                    label="Password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={setPassword}
-                    disabled={loading}
-                    error={passwordError ? "" : undefined}
-                />
+                <div className="space-y-1">
 
-                {/* Confirm Password Input */}
-                <PasswordInput
-                    label="Confirm Password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={setConfirmPassword}
-                    disabled={loading}
-                    error={passwordError}
-                />
 
-                {/* Password Requirements */}
-                <div className="text-xs text-muted-foreground space-y-1">
-                    <p>Password requirements:</p>
-                    <ul className="list-disc list-inside space-y-0.5 pl-1">
-                        <li className={password.length >= 8 ? "text-primary" : ""}>
-                            At least 8 characters
-                        </li>
-                        <li className={password === confirmPassword && password ? "text-primary" : ""}>
-                            Passwords match
-                        </li>
-                    </ul>
-                </div>
+                    {/* Password Input */}
+                    <PasswordInput
+                        label=""
+                        placeholder="Password"
+                        value={password}
+                        onChange={setPassword}
+                        disabled={loading}
+                        error={passwordError ? "" : undefined}
+                    />
+
+                    {/* Password Requirements */}
+                    <div className="text-xs text-center w-full text-muted-foreground">
+                        <p>At least 10 Latin letters, with one uppercase and one digit.</p>
+                    </div></div>
 
                 {/* Submit Button */}
                 <Button
                     type="submit"
-                    disabled={loading || !password || !confirmPassword}
+                    disabled={loading || !name || !password}
                     fullWidth
                     size="lg"
                 >

@@ -80,12 +80,8 @@ function Input({
         <TooltipContent
           side="top"
           align="start"
-          sideOffset={2}
-          className={cn(
-            "max-w-xs font-medium",
-            hasError && "bg-destructive text-destructive-foreground"
-          )}
-          arrowClassName="bg-destructive fill-destructive"
+          sideOffset={8}
+          variant="error"
         >
           {error}
         </TooltipContent>

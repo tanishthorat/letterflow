@@ -1,8 +1,10 @@
 import { useState } from "react";
 
 interface UseAuthFormReturn {
+  name: string;
   email: string;
   password: string;
+  setName: (value: string) => void;
   setEmail: (value: string) => void;
   setPassword: (value: string) => void;
   error: string;
@@ -17,6 +19,7 @@ interface UseAuthFormReturn {
 }
 
 export function useAuthForm(): UseAuthFormReturn {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -30,8 +33,10 @@ export function useAuthForm(): UseAuthFormReturn {
   const setPasswordErrorWrapper = (value: string) => setPasswordError(value);
 
   return {
+    name,
     email,
     password,
+    setName,
     setEmail,
     setPassword,
     error,

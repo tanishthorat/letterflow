@@ -1,4 +1,6 @@
 import React, { ReactNode } from "react";
+import Image from "next/image";
+import Link from "next/link";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -7,41 +9,41 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children, showBranding = true }: AuthLayoutProps) {
   return (
-    <div className="h-screen flex overflow-hidden bg-background dark:bg-background">
+    <div className="h-screen flex overflow-hidden bg-secondary">
       {/* Left Sidebar - Branding & Hero */}
       {showBranding && (
         <div className="hidden lg:flex w-1/3 relative flex-col justify-end p-12 bg-gradient-to-b from-[#33cc4a]/20 to-[#1a3a1a] dark:from-[#33cc4a]/30 dark:to-[#222222] border-r border-border">
-          {/* Decorative Background Elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div
-              className="absolute inset-0 opacity-10"
-              style={{
-                backgroundImage:
-                  "radial-gradient(circle at center, currentColor 1px, transparent 1px)",
-                backgroundSize: "20px 20px",
-              }}
-            />
-
-            {/* Floating brand cards */}
-            <div className="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="bg-white/10 dark:bg-white/10 text-foreground p-4 rounded-lg backdrop-blur-sm w-40 border border-white/20">
-                <h3 className="font-bold text-base mb-1">Email Accessibility</h3>
-                <p className="text-xs text-muted-foreground">WCAG 2.1 AAA compliant</p>
-              </div>
-            </div>
-          </div>
+          {/* Background Image with Overlay */}
+          <Image
+            src="/auth/global-accessibility-day.png"
+            alt="Global Accessibility Awareness Day"
+            fill
+            className="object-cover"
+            priority
+          />
+          
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-linear-to-b from-transparent to-black/90" />
 
           {/* Content */}
-          <div className="relative z-10">
-            <h1 className="text-4xl font-bold mb-4 text-foreground">
-              Email Templates Made Simple
-            </h1>
-            <p className="text-sm text-muted-foreground mb-4 max-w-md">
-              Design, manage, and send beautiful emails with Letterflow. Built for teams who care about email quality.
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Join thousands of companies using Letterflow to streamline their email workflow.
-            </p>
+          
+
+          {/* Marketing Banner */}
+          <div className="bottom-0 left-0 right-0 p-8 relative z-20">
+            <div className="text-white">
+              <h2 className="text-2xl font-bold mb-3">Global Accessibility Awareness Day 2026</h2>
+              <p className="text-sm mb-2">Do your emails reach every subscriber? For millions of people, interacting with an email isn&apos;t easy.</p>
+              <p className="text-sm">
+                <Link 
+                  target="_blank" 
+                  href="https://tanishdev.me"
+                  className="underline hover:text-opacity-80 transition-opacity"
+                >
+                  Explore
+                </Link>
+                {" "}how to design emails that work for everyone.
+              </p>
+            </div>
           </div>
         </div>
       )}

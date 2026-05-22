@@ -16,7 +16,7 @@ interface PasswordInputProps {
 
 export function PasswordInput({
   label = "Password",
-  placeholder = "••••••••",
+  placeholder = "Password",
   value,
   onChange,
   error,
@@ -36,7 +36,7 @@ export function PasswordInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          className="pr-10"
+          className="bg-input dark:bg-input-dark border-border dark:border-border-dark"
           error={error}
           errorAsPop={errorAsPop}
         />

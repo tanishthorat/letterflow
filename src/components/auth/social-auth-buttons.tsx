@@ -56,7 +56,7 @@ export function SocialAuthButtons({ isLoading: parentLoading = false }: SocialAu
                 <Button
                     type="button"
                     variant="outline"
-                    className="flex-1 h-10 rounded-lg bg-input dark:bg-input-dark border-border dark:border-border-dark hover:bg-secondary dark:hover:bg-secondary/20 justify-center"
+                    className="flex-1 h-10 rounded-lg bg-input dark:bg-input-dark border-2 border-border dark:border-border-dark hover:bg-secondary dark:hover:bg-secondary/20 justify-center"
                     disabled={isLoading}
                     onClick={handleGoogleSignIn}
                     aria-label="Sign in with Google"
@@ -66,14 +66,14 @@ export function SocialAuthButtons({ isLoading: parentLoading = false }: SocialAu
                     ) : (
                         <GoogleIcon className="w-4 h-4 mr-2" />
                     )}
-                    <span className="font-medium">{googleLoading ? "Signing in..." : "Sign In with Google"}</span>
+                    <span className="font-light">{googleLoading ? "Signing in..." : "Sign In with Google"}</span>
                 </Button>
 
                 {/* GitHub square icon button */}
                 <Button
                     type="button"
                     variant="outline"
-                    className="w-10 h-10 p-0 rounded-md border border-border dark:border-border-dark flex items-center justify-center bg-input dark:bg-input-dark hover:bg-secondary dark:hover:bg-secondary/20"
+                    className="w-10 h-10 p-0 rounded-md border-2 border-border dark:border-border-dark flex items-center justify-center bg-input dark:bg-input-dark hover:bg-secondary dark:hover:bg-secondary/20"
                     disabled={isLoading}
                     onClick={handleGitHubSignIn}
                     title="Sign in with GitHub"

@@ -93,7 +93,7 @@
   --popover-foreground: #222222;
   
   /* Primary - subtle dark neutral */
-  --primary: #222222;
+  --primary: var(--brand);
   --primary-foreground: #ffffff;
   
   /* Secondary - neutral gray */
@@ -162,15 +162,15 @@
   --popover-foreground: #ffffff;
   
   /* Primary - light neutral */
-  --primary: #ffffff;
+  --primary: var(--brand);
   --primary-foreground: #222222;
   
   /* Secondary - muted dark neutral */
-  --secondary: #3a3a3a;
+  --secondary: #1f1f1f;
   --secondary-foreground: #ffffff;
   
   /* Muted - disabled state */
-  --muted: #3a3a3a;
+  --muted: #1f1f1f;
   --muted-foreground: #999999;
   
   /* Accent - Brand green (vibrant in dark) */
@@ -182,7 +182,7 @@
   --destructive-foreground: #222222;
   
   /* Borders & Inputs */
-  --border: #3a3a3a;
+  --border: #1f1f1f;
   --input: #1a1a1a;
   --ring: #33cc4a;
   
@@ -198,7 +198,7 @@
   --sidebar-primary-foreground: #222222;
   --sidebar-accent: #33cc4a;
   --sidebar-accent-foreground: #222222;
-  --sidebar-border: #3a3a3a;
+  --sidebar-border: #1f1f1f;
   --sidebar-ring: #33cc4a;
   
   /* Chart colors - adjusted for dark mode visibility */
