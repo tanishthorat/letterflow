@@ -1,0 +1,416 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ========================================
+   DESIGN TOKEN SYSTEM - Letterflow Brand
+   Brand Color: #33cc4a (Vibrant Green)
+   ======================================== */
+
+@theme inline {
+  /* Brand & Primary Colors */
+  --color-brand: var(--brand);
+  --color-brand-light: var(--brand-light);
+  --color-brand-dark: var(--brand-dark);
+  
+  /* Semantic Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  /* Surface Layers */
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-tertiary: var(--surface-tertiary);
+  
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* Chart/Data Colors */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  
+  /* Fonts */
+  --font-sans: var(--font-sans);
+  --font-mono: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  --font-heading: var(--font-sans);
+  
+  /* Radius Scale */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
+  --radius-full: 9999px;
+}
+
+/* ========================================
+   LIGHT MODE (Default)
+   ======================================== */
+
+:root {
+  /* Brand - Green Primary */
+  --brand: #33cc4a;
+  --brand-light: #4dd961;
+  --brand-dark: #2ba83a;
+  
+  /* Light mode surfaces - neutral palette */
+  --background: #ffffff;
+  --foreground: #222222;
+  --card: #f5f5f5;
+  --card-foreground: #222222;
+  --popover: #ffffff;
+  --popover-foreground: #222222;
+  
+  /* Primary - subtle dark neutral */
+  --primary: #222222;
+  --primary-foreground: #ffffff;
+  
+  /* Secondary - neutral gray */
+  --secondary: #e5e5e5;
+  --secondary-foreground: #222222;
+  
+  /* Muted - disabled/secondary state */
+  --muted: #e5e5e5;
+  --muted-foreground: #999999;
+  
+  /* Accent - Brand green */
+  --accent: #33cc4a;
+  --accent-foreground: #ffffff;
+  
+  /* Destructive - Red */
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  
+  /* Borders & Inputs */
+  --border: #e0e0e0;
+  --input: #f5f5f5;
+  --ring: #33cc4a;
+  
+  /* Surface Layers */
+  --surface-primary: #ffffff;
+  --surface-secondary: #f5f5f5;
+  --surface-tertiary: #f0f0f0;
+  
+  /* Sidebar */
+  --sidebar: #f5f5f5;
+  --sidebar-foreground: #222222;
+  --sidebar-primary: #222222;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #33cc4a;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #e0e0e0;
+  --sidebar-ring: #33cc4a;
+  
+  /* Chart colors */
+  --chart-1: #33cc4a;
+  --chart-2: #3b82f6;
+  --chart-3: #8b5cf6;
+  --chart-4: #ec4899;
+  --chart-5: #f59e0b;
+  
+  /* Radius */
+  --radius: 0.75rem;
+}
+
+/* ========================================
+   DARK MODE - Dark-First Premium Aesthetic
+   ======================================== */
+
+.dark {
+  /* Brand stays consistent */
+  --brand: #33cc4a;
+  --brand-light: #4dd961;
+  --brand-dark: #2ba83a;
+  
+  /* Dark mode surfaces - deep neutral/charcoal */
+  --background: #222222;
+  --foreground: #ffffff;
+  --card: #2a2a2a;
+  --card-foreground: #ffffff;
+  --popover: #2a2a2a;
+  --popover-foreground: #ffffff;
+  
+  /* Primary - light neutral */
+  --primary: #ffffff;
+  --primary-foreground: #222222;
+  
+  /* Secondary - muted dark neutral */
+  --secondary: #3a3a3a;
+  --secondary-foreground: #ffffff;
+  
+  /* Muted - disabled state */
+  --muted: #3a3a3a;
+  --muted-foreground: #999999;
+  
+  /* Accent - Brand green (vibrant in dark) */
+  --accent: #33cc4a;
+  --accent-foreground: #222222;
+  
+  /* Destructive - Bright red */
+  --destructive: #ff6b6b;
+  --destructive-foreground: #222222;
+  
+  /* Borders & Inputs */
+  --border: #3a3a3a;
+  --input: #1a1a1a;
+  --ring: #33cc4a;
+  
+  /* Surface Layers */
+  --surface-primary: #222222;
+  --surface-secondary: #2a2a2a;
+  --surface-tertiary: #2a2a2a;
+  
+  /* Sidebar */
+  --sidebar: #222222;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #222222;
+  --sidebar-accent: #33cc4a;
+  --sidebar-accent-foreground: #222222;
+  --sidebar-border: #3a3a3a;
+  --sidebar-ring: #33cc4a;
+  
+  /* Chart colors - adjusted for dark mode visibility */
+  --chart-1: #33cc4a;
+  --chart-2: #60a5fa;
+  --chart-3: #a78bfa;
+  --chart-4: #f472b6;
+  --chart-5: #fbbf24;
+  
+  /* Radius */
+  --radius: 0.75rem;
+}
+
+/* ========================================
+   BASE LAYER STYLES
+   ======================================== */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans, "Roboto", "Arial", sans-serif);
+  }
+
+  /* Headings */
+  h1 {
+    @apply text-3xl font-bold tracking-tight;
+  }
+
+  h2 {
+    @apply text-2xl font-bold tracking-tight;
+  }
+
+  h3 {
+    @apply text-xl font-semibold tracking-tight;
+  }
+
+  h4 {
+    @apply text-lg font-semibold;
+  }
+
+  h5 {
+    @apply text-base font-semibold;
+  }
+
+  h6 {
+    @apply text-sm font-semibold;
+  }
+
+  /* Links */
+  a {
+    @apply text-accent hover:text-accent/80 transition-colors;
+  }
+
+  /* Code blocks */
+  code {
+    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono;
+  }
+
+  pre {
+    @apply bg-muted p-4 rounded-lg overflow-x-auto;
+  }
+
+  pre code {
+    @apply bg-transparent p-0;
+  }
+}
+
+/* ========================================
+   COMPONENT UTILITIES
+   ======================================== */
+
+@layer components {
+  /* Panel surfaces for editor/sidebar contexts */
+  .panel-surface {
+    @apply bg-surface-primary border border-border rounded-lg;
+  }
+
+  .panel-surface-secondary {
+    @apply bg-surface-secondary border border-border rounded-lg;
+  }
+
+  /* Subtle interactive states */
+  .interactive-hover {
+    @apply hover:bg-muted/30 transition-colors cursor-pointer;
+  }
+
+  /* Focus ring helper */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 dark:focus:ring-offset-background;
+  }
+
+  /* Brand green accent utilities */
+  .accent-brand {
+    @apply text-accent;
+  }
+
+  .bg-accent-brand {
+    @apply bg-accent;
+  }
+
+  .border-accent-brand {
+    @apply border-accent;
+  }
+}
+
+/* ========================================
+   ANIMATIONS & TRANSITIONS
+   ======================================== */
+
+@layer base {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInFromLeft {
+    from {
+      transform: translateX(-10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInFromRight {
+    from {
+      transform: translateX(10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInFromTop {
+    from {
+      transform: translateY(-10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInFromBottom {
+    from {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes pulse-subtle {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+}
+
+/* ========================================
+   SCROLLBAR STYLING
+   ======================================== */
+
+@layer base {
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full hover:bg-border/80;
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-color: oklch(from var(--border) l c h) transparent;
+    scrollbar-width: thin;
+  }
+}

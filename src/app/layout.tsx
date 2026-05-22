@@ -1,0 +1,39 @@
+import { Analytics } from "@vercel/analytics/next"
+import type { Metadata } from "next";
+import { Roboto } from "next/font/google";
+import { Providers } from "@/components/providers";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import "./globals.css";
+
+const roboto = Roboto({
+  weight: ["400", "500", "700"],
+  variable: "--font-sans",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Letterflow",
+  description: "Email template management made simple",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={`h-full antialiased  ${roboto.variable}`}
+    >
+      <body className="min-h-full flex flex-col bg-background text-foreground">
+        <Providers>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+        </Providers>
+        <Analytics />
+      </body>
+    </html>
+  );
+}
