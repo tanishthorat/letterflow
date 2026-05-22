@@ -3,8 +3,12 @@
 import { useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTemplateStore } from "@/lib/stores/template";
+import { useEditorStore } from "@/lib/editor/store";
 import { Button } from "@/components/ui/button";
 import { EditorHeader } from "@/components/editor/header";
+import { SidebarLeft } from "@/components/editor/sidebar-left";
+import { SidebarRight } from "@/components/editor/sidebar-right";
+import { Canvas } from "@/components/editor/canvas";
 import type { EmailTemplate } from "@/lib/db.types";
 
 export default function EditorPage() {
@@ -23,6 +27,13 @@ export default function EditorPage() {
     }
   }, [templates.length, fetchTemplates]);
 
+  // Load the design into the editor store when the template is ready
+  useEffect(() => {
+    if (template) {
+      useEditorStore.getState().loadDesign(template.body_design, template.global_styles);
+    }
+  }, [template]);
+
   if (loading && !template) {
     return <div className="flex items-center justify-center min-h-screen">Loading editor...</div>;
   }
@@ -37,16 +48,15 @@ export default function EditorPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col h-screen bg-background overflow-hidden">
       {template && <EditorHeader template={template} />}
 
-      {/* Editor Workspace Placeholder */}
-      <main className="flex-1 bg-muted p-8 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Editor Workspace</h2>
-          <p className="text-muted-foreground">Editing Template ID: {id}</p>
-        </div>
-      </main>
+      {/* Editor Shell */}
+      <div className="flex-1 flex overflow-hidden">
+        <SidebarLeft />
+        <Canvas />
+        <SidebarRight />
+      </div>
     </div>
   );
 }

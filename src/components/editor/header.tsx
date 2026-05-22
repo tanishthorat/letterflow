@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UserNav } from "@/components/dashboard/user-nav";
 import { useTemplateStore } from "@/lib/stores/template";
+import { useEditorStore } from "@/lib/editor/store";
 import { 
   ArrowLeft, CloudUpload, ChevronDown, Undo, History, Redo, 
   Monitor, Smartphone, Code, MonitorSmartphone, ClipboardCheck, 
@@ -36,7 +37,18 @@ export function EditorHeader({ template }: EditorHeaderProps) {
   const handleSave = async () => {
     if (!template) return;
     setIsSaving(true);
-    await updateTemplate(template.id, { name });
+    
+    // Get the latest design state from the Editor store
+    const { getDesign, clearDirty } = useEditorStore.getState();
+    const design = getDesign();
+    
+    await updateTemplate(template.id, { 
+      name,
+      body_design: { version: design.version, blocks: design.blocks },
+      global_styles: design.globalStyles 
+    });
+    
+    clearDirty();
     setIsSaving(false);
   };
 

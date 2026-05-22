@@ -1,0 +1,289 @@
+"use client";
+
+import React from "react";
+import { BlockType, EditorBlock, TextBlock, ImageBlock, ButtonBlock } from "./types";
+import { Type, Image as ImageIcon, MousePointerClick } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+export interface BlockConfig<T extends EditorBlock> {
+  type: BlockType;
+  label: string;
+  icon: React.ElementType;
+  defaultProps: T["props"];
+  renderCanvas: (props: { block: T }) => React.ReactNode;
+  renderInspector: (props: { block: T; onChange: (newProps: Partial<T["props"]>) => void }) => React.ReactNode;
+  renderEmail: (props: { block: T }) => React.ReactNode; 
+}
+
+// -------------------------------------------------------------
+// TEXT BLOCK
+// -------------------------------------------------------------
+const TextBlockConfig: BlockConfig<TextBlock> = {
+  type: "text",
+  label: "Text",
+  icon: Type,
+  defaultProps: {
+    content: "Enter your text here",
+    fontSize: 16,
+    color: "#ffffff",
+    align: "left",
+  },
+  renderCanvas: ({ block }) => (
+    <div style={{ textAlign: block.props.align, fontSize: `${block.props.fontSize}px`, color: block.props.color }}>
+      {block.props.content}
+    </div>
+  ),
+  renderInspector: ({ block, onChange }) => (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-xs text-muted-foreground">Content</Label>
+        <Textarea 
+          value={block.props.content} 
+          onChange={(e) => onChange({ content: e.target.value })} 
+          className="min-h-[100px]"
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Font Size (px)</Label>
+          <Input 
+            type="number" 
+            value={block.props.fontSize} 
+            onChange={(e) => onChange({ fontSize: Number(e.target.value) })} 
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Color</Label>
+          <div className="flex h-9 w-full rounded-md border border-input bg-background px-1 py-1">
+            <input 
+              type="color" 
+              className="w-full h-full border-none bg-transparent cursor-pointer"
+              value={block.props.color} 
+              onChange={(e) => onChange({ color: e.target.value })} 
+            />
+          </div>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs text-muted-foreground">Alignment</Label>
+        <select 
+          className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+          value={block.props.align} 
+          onChange={(e) => onChange({ align: e.target.value as "left" | "center" | "right" })}
+        >
+          <option value="left">Left</option>
+          <option value="center">Center</option>
+          <option value="right">Right</option>
+        </select>
+      </div>
+    </div>
+  ),
+  renderEmail: () => <div>{/* React Email Text Implementation Placeholder */}</div>
+};
+
+// -------------------------------------------------------------
+// IMAGE BLOCK
+// -------------------------------------------------------------
+const ImageBlockConfig: BlockConfig<ImageBlock> = {
+  type: "image",
+  label: "Image",
+  icon: ImageIcon,
+  defaultProps: {
+    src: "https://placehold.co/600x200/2a2a2a/ffffff?text=Image+Placeholder",
+    alt: "Placeholder",
+    width: "auto",
+    height: "auto",
+    align: "center",
+  },
+  renderCanvas: ({ block }) => (
+    <div style={{ textAlign: block.props.align, width: "100%" }}>
+      <img 
+        src={block.props.src} 
+        alt={block.props.alt} 
+        style={{ 
+          maxWidth: "100%", 
+          width: block.props.width === "auto" ? "auto" : `${block.props.width}px`,
+          height: block.props.height === "auto" ? "auto" : `${block.props.height}px`,
+          display: "inline-block"
+        }} 
+      />
+    </div>
+  ),
+  renderInspector: ({ block, onChange }) => (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-xs text-muted-foreground">Image URL</Label>
+        <Input 
+          type="text" 
+          value={block.props.src} 
+          onChange={(e) => onChange({ src: e.target.value })} 
+        />
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs text-muted-foreground">Alt Text</Label>
+        <Input 
+          type="text" 
+          value={block.props.alt} 
+          onChange={(e) => onChange({ alt: e.target.value })} 
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Width</Label>
+          <Input 
+            type="text" 
+            value={block.props.width} 
+            onChange={(e) => onChange({ width: e.target.value === "auto" ? "auto" : Number(e.target.value) })} 
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Height</Label>
+          <Input 
+            type="text" 
+            value={block.props.height} 
+            onChange={(e) => onChange({ height: e.target.value === "auto" ? "auto" : Number(e.target.value) })} 
+          />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs text-muted-foreground">Alignment</Label>
+        <select 
+          className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+          value={block.props.align} 
+          onChange={(e) => onChange({ align: e.target.value as "left" | "center" | "right" })}
+        >
+          <option value="left">Left</option>
+          <option value="center">Center</option>
+          <option value="right">Right</option>
+        </select>
+      </div>
+    </div>
+  ),
+  renderEmail: () => <div>{/* React Email Img Implementation Placeholder */}</div>
+};
+
+// -------------------------------------------------------------
+// BUTTON BLOCK
+// -------------------------------------------------------------
+const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
+  type: "button",
+  label: "Button",
+  icon: MousePointerClick,
+  defaultProps: {
+    text: "Click Me",
+    url: "#",
+    backgroundColor: "#33cc4a",
+    textColor: "#ffffff",
+    borderRadius: 4,
+    padding: 12,
+    align: "center",
+  },
+  renderCanvas: ({ block }) => (
+    <div style={{ textAlign: block.props.align }}>
+      <a 
+        href={block.props.url}
+        onClick={(e) => e.preventDefault()}
+        style={{
+          display: "inline-block",
+          backgroundColor: block.props.backgroundColor,
+          color: block.props.textColor,
+          borderRadius: `${block.props.borderRadius}px`,
+          padding: `${block.props.padding}px ${block.props.padding * 2}px`,
+          textDecoration: "none",
+          fontWeight: "bold",
+          fontFamily: "sans-serif"
+        }}
+      >
+        {block.props.text}
+      </a>
+    </div>
+  ),
+  renderInspector: ({ block, onChange }) => (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-xs text-muted-foreground">Button Text</Label>
+        <Input 
+          type="text" 
+          value={block.props.text} 
+          onChange={(e) => onChange({ text: e.target.value })} 
+        />
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs text-muted-foreground">URL</Label>
+        <Input 
+          type="text" 
+          value={block.props.url} 
+          onChange={(e) => onChange({ url: e.target.value })} 
+        />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Background</Label>
+          <div className="flex h-9 w-full rounded-md border border-input bg-background px-1 py-1">
+            <input 
+              type="color" 
+              className="w-full h-full border-none bg-transparent cursor-pointer"
+              value={block.props.backgroundColor} 
+              onChange={(e) => onChange({ backgroundColor: e.target.value })} 
+            />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Text Color</Label>
+          <div className="flex h-9 w-full rounded-md border border-input bg-background px-1 py-1">
+            <input 
+              type="color" 
+              className="w-full h-full border-none bg-transparent cursor-pointer"
+              value={block.props.textColor} 
+              onChange={(e) => onChange({ textColor: e.target.value })} 
+            />
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Radius (px)</Label>
+          <Input 
+            type="number" 
+            value={block.props.borderRadius} 
+            onChange={(e) => onChange({ borderRadius: Number(e.target.value) })} 
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Padding (px)</Label>
+          <Input 
+            type="number" 
+            value={block.props.padding} 
+            onChange={(e) => onChange({ padding: Number(e.target.value) })} 
+          />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs text-muted-foreground">Alignment</Label>
+        <select 
+          className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+          value={block.props.align} 
+          onChange={(e) => onChange({ align: e.target.value as "left" | "center" | "right" })}
+        >
+          <option value="left">Left</option>
+          <option value="center">Center</option>
+          <option value="right">Right</option>
+        </select>
+      </div>
+    </div>
+  ),
+  renderEmail: () => <div>{/* React Email Button Implementation Placeholder */}</div>
+};
+
+// -------------------------------------------------------------
+// REGISTRY EXPORTS
+// -------------------------------------------------------------
+export const BLOCK_REGISTRY: Record<BlockType, BlockConfig<any>> = {
+  text: TextBlockConfig,
+  image: ImageBlockConfig,
+  button: ButtonBlockConfig,
+};
+
+export const BLOCK_LIST = Object.values(BLOCK_REGISTRY);
