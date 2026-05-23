@@ -1,14 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { BLOCK_LIST } from "@/lib/editor/registry";
 import { useEditorStore } from "@/lib/editor/store";
-import { LAYOUT_PRESETS } from "@/lib/editor/layoutPresets";
+import { LAYOUT_PRESETS, type LayoutPreset } from "@/lib/editor/layoutPresets";
+import type { ContentBlock, BlockType } from "@/lib/editor/types";
 import { cn } from "@/lib/utils";
 import { useDraggable } from "@dnd-kit/core";
 import { Plus } from "lucide-react";
 
-function DraggableSidebarItem({ id, type, label, icon: Icon, payload, children }: any) {
+type BlockSidebarItemProps = {
+  id: string;
+  type: BlockType;
+  label: string;
+  icon?: React.ElementType;
+  payload?: Partial<ContentBlock["props"]>;
+  children?: React.ReactNode;
+};
+
+type StructureSidebarItemProps = {
+  id: string;
+  type: "structure";
+  label: string;
+  icon?: React.ElementType;
+  payload: LayoutPreset;
+  children?: React.ReactNode;
+};
+
+type DraggableSidebarItemProps = BlockSidebarItemProps | StructureSidebarItemProps;
+
+function DraggableSidebarItem({ id, type, label, icon: Icon, payload, children }: DraggableSidebarItemProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `sidebar-${id}`,
     data: {
@@ -52,9 +73,9 @@ function DraggableSidebarItem({ id, type, label, icon: Icon, payload, children }
     >
       {children ? (
         <div className="w-full mb-0 md:mb-2 pointer-events-none px-2">{children}</div>
-      ) : (
+      ) : Icon ? (
         <Icon className="w-5 h-5 md:w-6 md:h-6 text-muted-foreground group-hover:text-primary mb-0 md:mb-2 pointer-events-none" />
-      )}
+      ) : null}
       <span className="text-xs font-medium text-foreground hidden md:block pointer-events-none">{label}</span>
     </button>
   );
