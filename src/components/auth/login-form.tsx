@@ -2,7 +2,7 @@
 
 import { FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useAuthForm } from "@/hooks/useAuthForm";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ import { AlertCircle } from "lucide-react";
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const nextParam = searchParams.get("next");
   const { signIn } = useAuth();
   const {
     email,
@@ -55,7 +57,7 @@ export function LoginForm() {
       }
 
       await signIn(email, password);
-      router.push("/dashboard");
+      router.push(nextParam ? decodeURIComponent(nextParam) : "/dashboard");
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Sign in failed. Please try again.";

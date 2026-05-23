@@ -23,6 +23,7 @@ export function UserNav() {
   const handleSignOut = async () => {
     try {
       await signOut();
+      router.refresh();
       router.push("/login");
     } catch (error) {
       console.error("Sign out failed:", error);

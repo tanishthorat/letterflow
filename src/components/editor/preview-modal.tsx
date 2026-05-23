@@ -33,6 +33,8 @@ export function PreviewModal({ isOpen, onClose }: PreviewModalProps) {
           if (res.ok) {
             const htmlContent = await res.text();
             setHtml(htmlContent);
+          } else {
+            console.error("Failed to generate preview:", await res.text());
           }
         } catch (error) {
           console.error("Preview generation failed", error);
@@ -44,18 +46,6 @@ export function PreviewModal({ isOpen, onClose }: PreviewModalProps) {
       fetchPreview();
     }
   }, [isOpen, getDesign]);
-
-  useEffect(() => {
-    // Write the raw HTML directly to the iframe document
-    if (iframeRef.current && html) {
-      const doc = iframeRef.current.contentWindow?.document;
-      if (doc) {
-        doc.open();
-        doc.write(html);
-        doc.close();
-      }
-    }
-  }, [html]);
 
   if (!isOpen) return null;
 
@@ -88,9 +78,35 @@ export function PreviewModal({ isOpen, onClose }: PreviewModalProps) {
           </Button>
         </div>
 
-        <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full text-muted-foreground hover:text-foreground">
-          <X className="w-5 h-5" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="h-8 text-xs"
+            onClick={() => {
+              if (html) {
+                console.log("----- EXPORTED HTML -----");
+                console.log(html);
+                console.log("-------------------------");
+                
+                // Trigger download
+                const blob = new Blob([html], { type: "text/html" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "email-template.html";
+                a.click();
+                URL.revokeObjectURL(url);
+              }
+            }}
+            disabled={!html || loading}
+          >
+            Export HTML
+          </Button>
+          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full text-muted-foreground hover:text-foreground">
+            <X className="w-5 h-5" />
+          </Button>
+        </div>
       </div>
       
       <div className="flex-1 bg-muted/30 overflow-y-auto p-4 flex justify-center py-8">
@@ -102,6 +118,7 @@ export function PreviewModal({ isOpen, onClose }: PreviewModalProps) {
         >
           <iframe 
             ref={iframeRef} 
+            srcDoc={html || ""}
             className="w-full h-full min-h-[600px] flex-1 bg-white" 
             title="Email Preview"
           />

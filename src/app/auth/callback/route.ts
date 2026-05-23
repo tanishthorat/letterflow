@@ -1,11 +1,25 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+// Safe redirect — only allow relative paths, never external URLs
+function getSafeRedirectUrl(next: string | null, origin: string): string {
+  // We use /dashboard as fallback (adjust if your primary protected route is different)
+  if (!next) return origin + '/dashboard';
+  try {
+    const url = new URL(next, origin);
+    if (url.origin !== origin) return origin + '/dashboard';
+    return url.toString();
+  } catch {
+    return origin + '/dashboard';
+  }
+}
+
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+  const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const error = searchParams.get("error");
   const errorDescription = searchParams.get("error_description");
+  const next = searchParams.get("next");
 
   // Handle errors
   if (error) {
@@ -26,8 +40,8 @@ export async function GET(request: Request) {
         );
       }
 
-      // Redirect to dashboard on success
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      // Redirect to next param or dashboard on success
+      return NextResponse.redirect(getSafeRedirectUrl(next, origin));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Authentication failed";
       return NextResponse.redirect(

@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { useAuthForm } from "@/hooks/useAuthForm";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,8 @@ import { AlertCircle, CheckCircle } from "lucide-react";
 
 export function SignupForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const nextParam = searchParams.get("next");
     const { signUp } = useAuth();
     const {
         name,
@@ -72,7 +74,7 @@ export function SignupForm() {
 
             // Brief delay to show success state
             setTimeout(() => {
-                router.push("/dashboard");
+                router.push(nextParam ? decodeURIComponent(nextParam) : "/dashboard");
             }, 1500);
         } catch (err) {
             const message =

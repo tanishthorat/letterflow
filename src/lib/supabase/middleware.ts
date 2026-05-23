@@ -35,8 +35,32 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // This refreshes a user's session in the background
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const url = request.nextUrl.clone();
+  
+  // Define routes that do not require authentication
+  const isPublicRoute = 
+    url.pathname === '/' || 
+    url.pathname.startsWith('/auth/') || 
+    url.pathname.startsWith('/api/') || 
+    url.pathname === '/login' || 
+    url.pathname === '/signup';
+
+  const isAuthRoute = url.pathname === '/login' || url.pathname === '/signup';
+
+  // If unauthenticated and trying to access a protected route
+  if (!user && !isPublicRoute) {
+    url.pathname = '/login';
+    url.searchParams.set('next', request.nextUrl.pathname + request.nextUrl.search);
+    return NextResponse.redirect(url);
+  }
+
+  // If authenticated and trying to access login/signup
+  if (user && isAuthRoute) {
+    url.pathname = '/dashboard/templates';
+    return NextResponse.redirect(url);
+  }
 
   return response;
 }

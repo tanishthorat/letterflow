@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import { BlockType, EditorBlock, TextBlock, ImageBlock, ButtonBlock } from "./types";
 import { Type, Image as ImageIcon, MousePointerClick } from "lucide-react";

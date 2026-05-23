@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { Loader, AlertCircle } from "lucide-react";
@@ -12,6 +13,8 @@ interface SocialAuthButtonsProps {
 
 export function SocialAuthButtons({ isLoading: parentLoading = false }: SocialAuthButtonsProps) {
     const { signInWithGoogle, signInWithGitHub } = useAuth();
+    const searchParams = useSearchParams();
+    const nextParam = searchParams.get("next");
     const [googleLoading, setGoogleLoading] = useState(false);
     const [githubLoading, setGithubLoading] = useState(false);
     const [error, setError] = useState("");
@@ -20,7 +23,7 @@ export function SocialAuthButtons({ isLoading: parentLoading = false }: SocialAu
         setError("");
         setGoogleLoading(true);
         try {
-            await signInWithGoogle();
+            await signInWithGoogle(nextParam || undefined);
         } catch (err) {
             const message = err instanceof Error ? err.message : "Google sign in failed";
             setError(message);
@@ -32,7 +35,7 @@ export function SocialAuthButtons({ isLoading: parentLoading = false }: SocialAu
         setError("");
         setGithubLoading(true);
         try {
-            await signInWithGitHub();
+            await signInWithGitHub(nextParam || undefined);
         } catch (err) {
             const message = err instanceof Error ? err.message : "GitHub sign in failed";
             setError(message);

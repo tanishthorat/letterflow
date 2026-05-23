@@ -9,8 +9,8 @@ interface AuthStore {
   setLoading: (loading: boolean) => void;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
-  signInWithGitHub: () => Promise<void>;
+  signInWithGoogle: (redirectTo?: string) => Promise<void>;
+  signInWithGitHub: (redirectTo?: string) => Promise<void>;
   signOut: () => Promise<void>;
   getSession: () => Promise<void>;
 }
@@ -57,13 +57,19 @@ export const useAuth = create<AuthStore>((set) => {
       }
     },
 
-    signInWithGoogle: async () => {
+    signInWithGoogle: async (redirectTo?: string) => {
       set({ loading: true });
       try {
+        const origin = typeof window !== "undefined" ? window.location.origin : "";
+        const redirectUrl = new URL(`${origin}/auth/callback`);
+        if (redirectTo) {
+          redirectUrl.searchParams.set("next", redirectTo);
+        }
+
         const { error } = await supabase.auth.signInWithOAuth({
           provider: "google",
           options: {
-            redirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/auth/callback`,
+            redirectTo: redirectUrl.toString(),
           },
         });
         if (error) throw error;
@@ -73,13 +79,19 @@ export const useAuth = create<AuthStore>((set) => {
       }
     },
 
-    signInWithGitHub: async () => {
+    signInWithGitHub: async (redirectTo?: string) => {
       set({ loading: true });
       try {
+        const origin = typeof window !== "undefined" ? window.location.origin : "";
+        const redirectUrl = new URL(`${origin}/auth/callback`);
+        if (redirectTo) {
+          redirectUrl.searchParams.set("next", redirectTo);
+        }
+
         const { error } = await supabase.auth.signInWithOAuth({
           provider: "github",
           options: {
-            redirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/auth/callback`,
+            redirectTo: redirectUrl.toString(),
           },
         });
         if (error) throw error;
