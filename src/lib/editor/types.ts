@@ -1,4 +1,4 @@
-export type BlockType = "text" | "image" | "button";
+export type BlockType = "text" | "image" | "button" | "divider";
 
 export interface BaseBlock {
   id: string;
@@ -39,7 +39,65 @@ export interface ButtonBlock extends BaseBlock {
   };
 }
 
-export type EditorBlock = TextBlock | ImageBlock | ButtonBlock;
+export interface DividerBlock extends BaseBlock {
+  type: "divider";
+  props: {
+    lineColor: string;
+    lineWidth: number;
+    padding: number;
+  };
+}
+
+export type ContentBlock = TextBlock | ImageBlock | ButtonBlock | DividerBlock;
+export type EditorBlock = ContentBlock; // Alias for backwards compatibility
+
+export interface ColumnProps {
+  paddingTop?: number;
+  paddingBottom?: number;
+  paddingLeft?: number;
+  paddingRight?: number;
+  verticalAlign?: 'top' | 'middle' | 'bottom';
+  backgroundColor?: string;
+}
+
+export interface Column {
+  id: string;
+  widthRatio: number;
+  blocks: ContentBlock[];
+  props: ColumnProps;
+}
+
+export interface StructureProps {
+  backgroundColor?: string;
+  paddingTop?: number;
+  paddingBottom?: number;
+  paddingLeft?: number;
+  paddingRight?: number;
+  columnGap?: number;
+}
+
+export interface Structure {
+  id: string;
+  type: 'structure';
+  columns: Column[];
+  props: StructureProps;
+}
+
+export interface StripeProps {
+  backgroundColor?: string;
+  backgroundImageUrl?: string;
+  paddingTop?: number;
+  paddingBottom?: number;
+  fullWidth?: boolean;
+}
+
+export interface Stripe {
+  id: string;
+  type: 'stripe';
+  label?: string;
+  structures: Structure[];
+  props: StripeProps;
+}
 
 export interface GlobalStyles {
   bodyBackgroundColor: string;
@@ -52,7 +110,15 @@ export interface GlobalStyles {
 }
 
 export interface TemplateDesign {
-  version: string;
-  blocks: EditorBlock[];
+  version: '2.0';
+  stripes: Stripe[];
   globalStyles: GlobalStyles;
 }
+
+export type BlockAddress = {
+  stripeId: string;
+  structureId: string;
+  columnId: string;
+  index: number;
+};
+

@@ -17,7 +17,7 @@ export function PreviewModal({ isOpen, onClose }: PreviewModalProps) {
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const { getDesign, metadata } = useEditorStore();
+  const { getDesign } = useEditorStore();
 
   const fileSizeKB = html ? new Blob([html]).size / 1024 : 0;
 
@@ -116,7 +116,7 @@ export function PreviewModal({ isOpen, onClose }: PreviewModalProps) {
         <PreviewDeviceWrapper 
           viewMode={viewMode} 
           fileSizeKB={fileSizeKB}
-          subject={metadata?.subject || "Subject line"}
+          subject={"Subject line"}
           workspaceName="MH 27squad's workspace"
         >
           <iframe 

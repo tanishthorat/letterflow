@@ -1,12 +1,12 @@
 import React from "react";
-import { BlockType, EditorBlock, TextBlock, ImageBlock, ButtonBlock } from "./types";
-import { Type, Image as ImageIcon, MousePointerClick } from "lucide-react";
+import { BlockType, ContentBlock, TextBlock, ImageBlock, ButtonBlock, DividerBlock } from "./types";
+import { Type, Image as ImageIcon, MousePointerClick, Minus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Text as EmailText, Img as EmailImg, Button as EmailButton, Section } from "@react-email/components";
+import { Text as EmailText, Img as EmailImg, Button as EmailButton, Hr as EmailHr, Section } from "@react-email/components";
 
-export interface BlockConfig<T extends EditorBlock> {
+export interface BlockConfig<T extends ContentBlock> {
   type: BlockType;
   label: string;
   icon: React.ElementType;
@@ -16,9 +16,6 @@ export interface BlockConfig<T extends EditorBlock> {
   renderEmail: (props: { block: T }) => React.ReactNode; 
 }
 
-// -------------------------------------------------------------
-// TEXT BLOCK
-// -------------------------------------------------------------
 const TextBlockConfig: BlockConfig<TextBlock> = {
   type: "text",
   label: "Text",
@@ -80,17 +77,14 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
     </div>
   ),
   renderEmail: ({ block }) => (
-    <Section style={{ textAlign: block.props.align as any, padding: "16px" }}>
+    <div style={{ textAlign: block.props.align as any, padding: "16px" }}>
       <EmailText style={{ fontSize: `${block.props.fontSize}px`, color: block.props.color, margin: 0 }}>
         {block.props.content}
       </EmailText>
-    </Section>
+    </div>
   )
 };
 
-// -------------------------------------------------------------
-// IMAGE BLOCK
-// -------------------------------------------------------------
 const ImageBlockConfig: BlockConfig<ImageBlock> = {
   type: "image",
   label: "Image",
@@ -167,7 +161,7 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
     </div>
   ),
   renderEmail: ({ block }) => (
-    <Section style={{ textAlign: block.props.align as any, padding: "16px" }}>
+    <div style={{ textAlign: block.props.align as any, padding: "16px" }}>
       <EmailImg 
         src={block.props.src} 
         alt={block.props.alt} 
@@ -175,13 +169,10 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
         height={block.props.height === "auto" ? undefined : block.props.height}
         style={{ display: "inline-block", maxWidth: "100%" }}
       />
-    </Section>
+    </div>
   )
 };
 
-// -------------------------------------------------------------
-// BUTTON BLOCK
-// -------------------------------------------------------------
 const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
   type: "button",
   label: "Button",
@@ -290,7 +281,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
     </div>
   ),
   renderEmail: ({ block }) => (
-    <Section style={{ textAlign: block.props.align as any, padding: "16px" }}>
+    <div style={{ textAlign: block.props.align as any, padding: "16px" }}>
       <EmailButton 
         href={block.props.url}
         style={{
@@ -305,17 +296,69 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
       >
         {block.props.text}
       </EmailButton>
-    </Section>
+    </div>
   )
 };
 
-// -------------------------------------------------------------
-// REGISTRY EXPORTS
-// -------------------------------------------------------------
+const DividerBlockConfig: BlockConfig<DividerBlock> = {
+  type: "divider",
+  label: "Divider",
+  icon: Minus,
+  defaultProps: {
+    lineColor: "#e5e7eb",
+    lineWidth: 1,
+    padding: 20,
+  },
+  renderCanvas: ({ block }) => (
+    <div style={{ padding: `${block.props.padding}px 0` }}>
+      <hr style={{ borderColor: block.props.lineColor, borderWidth: `${block.props.lineWidth}px`, borderStyle: 'solid', margin: 0 }} />
+    </div>
+  ),
+  renderInspector: ({ block, onChange }) => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Line Color</Label>
+          <div className="flex h-9 w-full rounded-md border border-input bg-background px-1 py-1">
+            <input 
+              type="color" 
+              className="w-full h-full border-none bg-transparent cursor-pointer"
+              value={block.props.lineColor} 
+              onChange={(e) => onChange({ lineColor: e.target.value })} 
+            />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs text-muted-foreground">Height (px)</Label>
+          <Input 
+            type="number" 
+            value={block.props.lineWidth} 
+            onChange={(e) => onChange({ lineWidth: Number(e.target.value) })} 
+          />
+        </div>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs text-muted-foreground">Vertical Padding (px)</Label>
+        <Input 
+          type="number" 
+          value={block.props.padding} 
+          onChange={(e) => onChange({ padding: Number(e.target.value) })} 
+        />
+      </div>
+    </div>
+  ),
+  renderEmail: ({ block }) => (
+    <div style={{ padding: `${block.props.padding}px 0` }}>
+      <EmailHr style={{ borderColor: block.props.lineColor, borderWidth: `${block.props.lineWidth}px`, borderStyle: 'solid', margin: 0 }} />
+    </div>
+  )
+};
+
 export const BLOCK_REGISTRY: Record<BlockType, BlockConfig<any>> = {
   text: TextBlockConfig,
   image: ImageBlockConfig,
   button: ButtonBlockConfig,
+  divider: DividerBlockConfig,
 };
 
 export const BLOCK_LIST = Object.values(BLOCK_REGISTRY);

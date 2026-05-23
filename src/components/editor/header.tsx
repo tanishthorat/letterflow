@@ -25,7 +25,7 @@ interface EditorHeaderProps {
 export function EditorHeader({ template }: EditorHeaderProps) {
   const router = useRouter();
   const { updateTemplate } = useTemplateStore();
-  const { isDirty, getDesign, clearDirty, blocks, globalStyles } = useEditorStore();
+  const { isDirty, getDesign, clearDirty, globalStyles } = useEditorStore();
   
   const [name, setName] = useState(template.name);
   const [debouncedName] = useDebounce(name, 1000);
@@ -54,7 +54,7 @@ export function EditorHeader({ template }: EditorHeaderProps) {
         try {
           await updateTemplate(template.id, { 
             name: debouncedName,
-            body_design: { version: design.version, blocks: design.blocks },
+            body_design: design, // We can just pass the design, which now has .rows
             global_styles: design.globalStyles 
           });
           
@@ -68,7 +68,7 @@ export function EditorHeader({ template }: EditorHeaderProps) {
 
       return () => clearTimeout(timeoutId);
     }
-  }, [debouncedName, isDirty, blocks, globalStyles, template.name, template.id, getDesign, clearDirty, updateTemplate]);
+  }, [debouncedName, isDirty, globalStyles, template.name, template.id, getDesign, clearDirty, updateTemplate]);
 
   // Prevent accidental navigation if unsaved
   useEffect(() => {
@@ -98,7 +98,7 @@ export function EditorHeader({ template }: EditorHeaderProps) {
     try {
       await updateTemplate(template.id, { 
         name,
-        body_design: { version: design.version, blocks: design.blocks },
+        body_design: { version: design.version, stripes: design.stripes },
         global_styles: design.globalStyles 
       });
       

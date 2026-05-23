@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   try {
     const design: TemplateDesign = await request.json();
     
-    if (!design || !design.blocks) {
+    if (!design) {
       return new NextResponse("Invalid design payload", { status: 400 });
     }
 

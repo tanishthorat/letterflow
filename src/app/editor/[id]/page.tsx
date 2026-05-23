@@ -11,6 +11,8 @@ import { SidebarRight } from "@/components/editor/sidebar-right";
 import { Canvas } from "@/components/editor/canvas";
 import type { EmailTemplate } from "@/lib/db.types";
 
+import { EditorDndWrapper } from "@/components/editor/dnd-wrapper";
+
 export default function EditorPage() {
   const params = useParams();
   const router = useRouter();
@@ -54,11 +56,13 @@ export default function EditorPage() {
       {template && <EditorHeader template={template} />}
 
       {/* Editor Shell */}
-      <div className="flex-1 flex overflow-hidden">
-        <SidebarLeft />
-        <Canvas />
-        <SidebarRight />
-      </div>
+      <EditorDndWrapper>
+        <div className="flex-1 flex overflow-hidden">
+          <SidebarLeft />
+          <Canvas />
+          <SidebarRight />
+        </div>
+      </EditorDndWrapper>
     </div>
   );
 }
