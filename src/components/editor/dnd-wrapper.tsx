@@ -13,7 +13,8 @@ import {
   pointerWithin,
   Active,
   Over,
-  CollisionDetection
+  CollisionDetection,
+  Modifier
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useEditorStore } from "@/lib/editor/store";
@@ -25,6 +26,8 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
   const { stripes } = store;
   const [activeId, setActiveId] = useState<string | null>(null);
 
+  const [activeNode, setActiveNode] = useState<Active | null>(null);
+
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -32,6 +35,7 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
+    setActiveNode(event.active);
   };
 
   const customCollisionDetection: CollisionDetection = (args) => {
@@ -39,6 +43,8 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
     
     if (pointerIntersections.length > 0) {
       const typePriority: Record<string, number> = {
+        "structure-drop": 6,
+        "block-drop": 5,
         block: 4,
         column: 3,
         structure: 2,
@@ -59,13 +65,37 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
       return sorted;
     }
 
-    return closestCenter(args);
+    return [];
+  };
+
+  const snapCenterToCursor: Modifier = ({ transform, activeNodeRect }) => {
+    // In dnd-kit v6, pointerCoordinates isn't directly available in the Modifier arguments,
+    // but the transform.x and transform.y represent the current cursor delta.
+    // If the activeNodeRect was larger/smaller than our 80x80 overlay, we can adjust the origin.
+    // The overlay is 80x80 (w-20 h-20)
+    if (!activeNodeRect) {
+      return transform;
+    }
+    const overlaySize = 80;
+
+    return {
+      ...transform,
+      x: transform.x + activeNodeRect.width / 2 - overlaySize / 2,
+      y: transform.y + activeNodeRect.height / 2 - overlaySize / 2,
+    };
   };
 
   const handleSidebarDrop = (active: Active, over: Over, activeType: string, targetType: string) => {
     const payload = active.data.current?.payload;
 
     if (activeType === "structure") {
+      if (targetType === "structure-drop") {
+        const stripeId = over.data.current?.stripeId as string;
+        const insertIndex = over.data.current?.index as number;
+        store.addStructure(stripeId, payload, insertIndex);
+        return;
+      }
+
       let targetStripeId = over.data.current?.stripeId as string | undefined;
       if (!targetStripeId && stripes.length > 0) {
         targetStripeId = stripes[stripes.length - 1].id;
@@ -79,6 +109,15 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
 
     // Dropping a block from sidebar
     const blockType = activeType as BlockType;
+
+    if (targetType === "block-drop") {
+      const stripeId = over.data.current?.stripeId as string;
+      const structureId = over.data.current?.structureId as string;
+      const colId = over.data.current?.colId as string;
+      const insertIndex = over.data.current?.index as number;
+      store.addBlockToColumn(blockType, stripeId, structureId, colId, insertIndex, payload);
+      return;
+    }
 
     if (targetType === "column" || targetType === "block") {
       const targetStripeId = over.data.current?.stripeId as string;
@@ -197,6 +236,7 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
 
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveId(null);
+    setActiveNode(null);
     const { active, over } = event;
     if (!over) return;
 
@@ -234,9 +274,15 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
       onDragEnd={handleDragEnd}
     >
       {children}
-      <DragOverlay>
-        {activeId ? (
-          <div className="bg-primary/20 border-2 border-primary w-full h-16 rounded-md backdrop-blur-sm pointer-events-none" />
+      <DragOverlay dropAnimation={{ duration: 250, easing: 'ease' }} modifiers={[snapCenterToCursor]}>
+        {activeNode ? (
+          <div className="bg-zinc-900 border border-zinc-700 shadow-2xl rounded-lg flex items-center justify-center p-3 opacity-90 scale-105 pointer-events-none w-20 h-20">
+             <div className="w-12 h-12 border border-dashed border-zinc-500 rounded bg-zinc-800 flex items-center justify-center text-zinc-400">
+               <span className="text-[10px] font-medium uppercase tracking-wider">
+                 {(activeNode.data.current?.type as string)?.replace('-drop', '') || 'Move'}
+               </span>
+             </div>
+          </div>
         ) : null}
       </DragOverlay>
     </DndContext>

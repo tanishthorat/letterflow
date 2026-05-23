@@ -13,6 +13,7 @@ import type {
   SelectedNode
 } from "./types";
 import { LayoutPreset } from "./layoutPresets";
+import { DEFAULT_STRIPE_PROPS, DEFAULT_STRUCTURE_PROPS, DEFAULT_COLUMN_PROPS } from "./config";
 import {
   DEFAULT_GLOBAL_STYLES,
   createBlock,
@@ -33,7 +34,7 @@ interface EditorState {
   isDirty: boolean;
   
   // Stripe Actions
-  addStripe: (label?: string) => string;
+  addStripe: (label?: string, insertIndex?: number) => string;
   removeStripe: (stripeId: string) => void;
   duplicateStripe: (stripeId: string) => void;
   moveStripe: (stripeId: string, direction: 'up' | 'down') => void;
@@ -41,7 +42,7 @@ interface EditorState {
   reorderStripes: (startIndex: number, endIndex: number) => void;
 
   // Structure Actions
-  addStructure: (stripeId: string, preset: LayoutPreset) => void;
+  addStructure: (stripeId: string, preset: LayoutPreset, insertIndex?: number) => void;
   removeStructure: (stripeId: string, structureId: string) => void;
   duplicateStructure: (stripeId: string, structureId: string) => void;
   moveStructure: (stripeId: string, structureId: string, direction: 'up' | 'down') => void;
@@ -74,19 +75,27 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   selectedNode: null,
   isDirty: false,
 
-  addStripe: (label) => {
+  addStripe: (label, insertIndex) => {
     const newStripe: Stripe = {
       id: crypto.randomUUID(),
       type: 'stripe',
       label: label || 'New Stripe',
-      props: { backgroundColor: "transparent", paddingTop: 10, paddingBottom: 10 },
+      props: { ...DEFAULT_STRIPE_PROPS },
       structures: []
     };
-    set((state) => ({ 
-      stripes: [...state.stripes, newStripe], 
-      selectedNode: { type: 'stripe', stripeId: newStripe.id }, 
-      isDirty: true 
-    }));
+    set((state) => {
+      const stripes = [...state.stripes];
+      if (insertIndex !== undefined && insertIndex >= 0 && insertIndex <= stripes.length) {
+        stripes.splice(insertIndex, 0, newStripe);
+      } else {
+        stripes.push(newStripe);
+      }
+      return { 
+        stripes, 
+        selectedNode: { type: 'stripe', stripeId: newStripe.id }, 
+        isDirty: true 
+      };
+    });
     return newStripe.id;
   },
 
@@ -131,31 +140,28 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     isDirty: true
   })),
 
-  addStructure: (stripeId, preset) => set((state) => {
+  addStructure: (stripeId, preset, insertIndex) => set((state) => {
     const newStructure: Structure = {
       id: crypto.randomUUID(),
       type: 'structure',
-      props: { 
-        backgroundColor: "transparent", 
-        paddingTop: 20, 
-        paddingBottom: 20, 
-        paddingLeft: 20, 
-        paddingRight: 20,
-        marginTop: 0,
-        marginBottom: 0,
-        marginLeft: 0,
-        marginRight: 0,
-        columnGap: 35
-      },
+      props: { ...DEFAULT_STRUCTURE_PROPS },
       columns: preset.columns.map(ratio => ({
         id: crypto.randomUUID(),
         widthRatio: ratio,
         blocks: [],
-        props: {}
+        props: { ...DEFAULT_COLUMN_PROPS }
       }))
     };
     return {
-      stripes: updateStripeById(state.stripes, stripeId, s => ({ ...s, structures: [...s.structures, newStructure] })),
+      stripes: updateStripeById(state.stripes, stripeId, s => {
+        const structures = [...s.structures];
+        if (insertIndex !== undefined && insertIndex >= 0 && insertIndex <= structures.length) {
+          structures.splice(insertIndex, 0, newStructure);
+        } else {
+          structures.push(newStructure);
+        }
+        return { ...s, structures };
+      }),
       selectedNode: { type: 'structure', stripeId, structureId: newStructure.id },
       isDirty: true
     };
@@ -261,16 +267,16 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       id: newStripeId,
       type: 'stripe',
       label: 'New Stripe',
-      props: { backgroundColor: "transparent", paddingTop: 10, paddingBottom: 10 },
+      props: { ...DEFAULT_STRIPE_PROPS },
       structures: [{
         id: newStructureId,
         type: 'structure',
-        props: { backgroundColor: "transparent", paddingTop: 10, paddingBottom: 10, paddingLeft: 0, paddingRight: 0 },
+        props: { ...DEFAULT_STRUCTURE_PROPS },
         columns: [{
           id: newColumnId,
           widthRatio: 1,
           blocks: [newBlock],
-          props: {}
+          props: { ...DEFAULT_COLUMN_PROPS }
         }]
       }]
     };

@@ -23,6 +23,57 @@ import { BLOCK_REGISTRY } from "@/lib/editor/registry";
 import { cn } from "@/lib/utils";
 import React, { useState } from "react";
 import { Copy, Trash2, Rows, BoxSelect } from "lucide-react";
+import { useDndContext } from "@dnd-kit/core";
+import { DropZoneHint } from "./drop-zone-hint";
+
+function BlockDropZone({ stripeId, structureId, colId, index }: { stripeId: string, structureId: string, colId: string, index: number }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `block-drop-${stripeId}-${structureId}-${colId}-${index}`,
+    data: { type: "block-drop", stripeId, structureId, colId, index }
+  });
+  
+  const { active } = useDndContext();
+  const activeType = active?.data.current?.type as string | undefined;
+  const isNewBlock = activeType && ["text", "image", "button", "divider"].includes(activeType);
+
+  if (!isNewBlock) return null;
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "w-full transition-all relative z-50 flex items-center justify-center",
+        isOver ? "h-8 -my-4 opacity-100" : "h-4 -my-2 opacity-0"
+      )}
+    >
+      <DropZoneHint isOver={isOver} label="Drop block here" colorClass="bg-[#7faeef]" />
+    </div>
+  );
+}
+
+function StructureDropZone({ stripeId, index }: { stripeId: string, index: number }) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `structure-drop-${stripeId}-${index}`,
+    data: { type: "structure-drop", stripeId, index }
+  });
+  
+  const { active } = useDndContext();
+  const isDraggingSidebarStructure = active?.data.current?.type === "structure";
+
+  if (!isDraggingSidebarStructure) return null;
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "w-full transition-all relative z-50 flex items-center justify-center",
+        isOver ? "h-12 -my-6 opacity-100" : "h-6 -my-3 opacity-0"
+      )}
+    >
+      <DropZoneHint isOver={isOver} label="Drop layout here" colorClass="bg-[#a75d5d]" />
+    </div>
+  );
+}
 
 function EmptyDropZone() {
   const { isOver, setNodeRef } = useDroppable({
@@ -30,16 +81,21 @@ function EmptyDropZone() {
     data: { type: "canvas" }
   });
 
+  const { active } = useDndContext();
+  const activeType = active?.data.current?.type as string | undefined;
+  const isValid = activeType && ["structure", "block", "text", "image", "button", "divider"].includes(activeType);
+  const showHighlight = isOver && isValid;
+
   return (
     <div 
       ref={setNodeRef}
       className={cn(
         "flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground text-sm border-2 border-dashed m-4 rounded-xl transition-colors",
-        isOver ? "border-primary bg-primary/5 text-primary" : "border-transparent opacity-60"
+        showHighlight ? "border-primary bg-primary/5 text-primary" : "border-transparent opacity-60"
       )}
     >
       <p>No stripes added yet.</p>
-      <p className="text-xs mt-1">Click 'Add Stripe' or drag a layout from the sidebar to begin.</p>
+      <p className="text-xs mt-1">Click &apos;Add Stripe&apos; or drag a layout from the sidebar to begin.</p>
     </div>
   );
 }
@@ -94,6 +150,11 @@ function ColumnZone({ col, stripeId, structureId }: { col: any, stripeId: string
     data: { type: "column", stripeId, structureId, colId: col.id }
   });
 
+  const { active } = useDndContext();
+  const activeType = active?.data.current?.type as string | undefined;
+  const isBlock = activeType && ["block", "text", "image", "button", "divider"].includes(activeType);
+  const showHighlight = isOver && isBlock;
+
   const { selectedNode, selectNode } = useEditorStore();
   const isSelected = selectedNode?.type === 'column' && selectedNode.columnId === col.id;
 
@@ -107,7 +168,7 @@ function ColumnZone({ col, stripeId, structureId }: { col: any, stripeId: string
       className={cn(
         "flex flex-col relative transition-colors min-h-[60px] ring-2 ring-inset",
         isSelected ? "ring-[#7faeef] z-10" : "ring-transparent hover:ring-[#7faeef]/50",
-        isOver && "bg-[#7faeef]/10 ring-[#7faeef]"
+        showHighlight && "bg-[#7faeef]/10 ring-[#7faeef]"
       )}
       style={{
         flex: col.widthRatio,
@@ -124,12 +185,25 @@ function ColumnZone({ col, stripeId, structureId }: { col: any, stripeId: string
           Container
         </div>
       )}
+      {showHighlight && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40">
+          <div className="bg-[#7faeef] text-white text-[11px] font-medium px-3 py-1 rounded-full shadow-md whitespace-nowrap">
+            Drop block here
+          </div>
+        </div>
+      )}
       <SortableContext items={col.blocks.map((b:any) => b.id)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col min-h-full">
           {col.blocks.length > 0 ? (
-            col.blocks.map((block: any) => (
-              <BlockItem key={block.id} block={block} stripeId={stripeId} structureId={structureId} colId={col.id} />
-            ))
+            <>
+              <BlockDropZone stripeId={stripeId} structureId={structureId} colId={col.id} index={0} />
+              {col.blocks.map((block: any, index: number) => (
+                <React.Fragment key={block.id}>
+                  <BlockItem block={block} stripeId={stripeId} structureId={structureId} colId={col.id} />
+                  <BlockDropZone stripeId={stripeId} structureId={structureId} colId={col.id} index={index + 1} />
+                </React.Fragment>
+              ))}
+            </>
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-[#7faeef] opacity-80 pointer-events-none">
                <span className="text-[11px] font-medium tracking-wide">Drop content here</span>
@@ -286,8 +360,12 @@ function StripeItem({ stripe }: { stripe: any }) {
         >
           <SortableContext items={stripe.structures.map((s:any) => s.id)} strategy={verticalListSortingStrategy}>
             <div className="flex flex-col relative w-full h-full min-h-[40px]">
-              {stripe.structures.map((structure: any) => (
-                <StructureItem key={structure.id} structure={structure} stripeId={stripe.id} />
+              <StructureDropZone stripeId={stripe.id} index={0} />
+              {stripe.structures.map((structure: any, index: number) => (
+                <React.Fragment key={structure.id}>
+                  <StructureItem structure={structure} stripeId={stripe.id} />
+                  <StructureDropZone stripeId={stripe.id} index={index + 1} />
+                </React.Fragment>
               ))}
             </div>
           </SortableContext>
