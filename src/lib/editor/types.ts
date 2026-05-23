@@ -73,6 +73,10 @@ export interface StructureProps {
   paddingBottom?: number;
   paddingLeft?: number;
   paddingRight?: number;
+  marginTop?: number;
+  marginBottom?: number;
+  marginLeft?: number;
+  marginRight?: number;
   columnGap?: number;
 }
 
@@ -102,7 +106,11 @@ export interface Stripe {
 export interface GlobalStyles {
   bodyBackgroundColor: string;
   contentBackgroundColor: string;
+  backgroundImage?: string;
   contentWidth: number;
+  messageAlignment?: 'left' | 'center' | 'right';
+  underlineLinks?: boolean;
+  responsiveDesign?: boolean;
   defaultFontFamily: string;
   defaultFontSize: number;
   defaultTextColor: string;

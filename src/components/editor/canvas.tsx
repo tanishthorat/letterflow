@@ -72,9 +72,9 @@ function BlockItem({ block, stripeId, structureId, colId }: { block: any, stripe
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative cursor-grab active:cursor-grabbing border-2 border-transparent transition-colors",
-        isSelected && "border-blue-500 z-10",
-        "hover:border-blue-300"
+        "relative cursor-grab active:cursor-grabbing ring-2 ring-inset ring-transparent transition-colors",
+        isSelected && "ring-blue-500 z-10",
+        "hover:ring-blue-300"
       )}
       onClick={(e) => {
         e.stopPropagation();
@@ -105,9 +105,9 @@ function ColumnZone({ col, stripeId, structureId }: { col: any, stripeId: string
         selectNode({ type: 'column', stripeId, structureId, columnId: col.id });
       }}
       className={cn(
-        "flex flex-col relative transition-colors min-h-[60px] border-2",
-        isSelected ? "border-[#7faeef] z-10" : "border-transparent hover:border-[#7faeef]/50 border-dashed",
-        isOver && "bg-[#7faeef]/10 border-[#7faeef]"
+        "flex flex-col relative transition-colors min-h-[60px] ring-2 ring-inset",
+        isSelected ? "ring-[#7faeef] z-10" : "ring-transparent hover:ring-[#7faeef]/50",
+        isOver && "bg-[#7faeef]/10 ring-[#7faeef]"
       )}
       style={{
         flex: col.widthRatio,
@@ -168,8 +168,8 @@ function StructureItem({ structure, stripeId }: { structure: any, stripeId: stri
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative group border-2 transition-colors",
-        isSelected ? "border-[#a75d5d] z-20" : "border-transparent hover:border-[#a75d5d]/50"
+        "relative group ring-2 ring-inset transition-colors",
+        isSelected ? "ring-[#a75d5d] z-20" : "ring-transparent hover:ring-[#a75d5d]/50"
       )}
       onClick={(e) => {
         e.stopPropagation();
@@ -193,13 +193,17 @@ function StructureItem({ structure, stripeId }: { structure: any, stripeId: stri
       )}
 
       <div 
-        className={cn("w-full mx-auto flex")}
+        className={cn("mx-auto flex", "box-border")}
         style={{
           backgroundColor: structure.props.backgroundColor || "transparent",
           paddingTop: structure.props.paddingTop || 0,
           paddingBottom: structure.props.paddingBottom || 0,
           paddingLeft: structure.props.paddingLeft || 0,
           paddingRight: structure.props.paddingRight || 0,
+          marginTop: structure.props.marginTop || 0,
+          marginBottom: structure.props.marginBottom || 0,
+          marginLeft: structure.props.marginLeft || 0,
+          marginRight: structure.props.marginRight || 0,
           gap: structure.props.columnGap ? `${structure.props.columnGap}px` : undefined,
         }}
       >
@@ -212,7 +216,7 @@ function StructureItem({ structure, stripeId }: { structure: any, stripeId: stri
 }
 
 function StripeItem({ stripe }: { stripe: any }) {
-  const { selectedNode, selectNode, duplicateStripe, removeStripe } = useEditorStore();
+  const { selectedNode, selectNode, duplicateStripe, removeStripe, globalStyles } = useEditorStore();
   const isSelected = selectedNode?.type === 'stripe' && selectedNode.stripeId === stripe.id;
 
   const {
@@ -238,8 +242,8 @@ function StripeItem({ stripe }: { stripe: any }) {
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative group border-2 transition-colors",
-        isSelected ? "border-[#5c6e99] z-20" : "border-transparent hover:border-[#5c6e99]/50"
+        "relative group ring-2 ring-inset transition-colors",
+        isSelected ? "ring-[#5c6e99] z-20" : "ring-transparent hover:ring-[#5c6e99]/50"
       )}
       onClick={(e) => {
         e.stopPropagation();
@@ -275,7 +279,10 @@ function StripeItem({ stripe }: { stripe: any }) {
       >
         <div 
           className="mx-auto" 
-          style={{ width: stripe.props.fullWidth ? "100%" : "inherit" }}
+          style={{ 
+            width: "100%",
+            maxWidth: stripe.props.fullWidth ? "100%" : `${globalStyles.contentWidth - 40}px`
+          }}
         >
           <SortableContext items={stripe.structures.map((s:any) => s.id)} strategy={verticalListSortingStrategy}>
             <div className="flex flex-col relative w-full h-full min-h-[40px]">
@@ -307,7 +314,7 @@ export function Canvas() {
         className="shadow-2xl min-h-[800px] transition-all relative border border-border/50 my-auto"
         style={{ 
           width: "100%",
-          maxWidth: `${globalStyles.contentWidth}px`,
+          maxWidth: "100%",
           backgroundColor: globalStyles.contentBackgroundColor,
         }}
         onClick={(e) => e.stopPropagation()}

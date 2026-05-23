@@ -135,7 +135,18 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const newStructure: Structure = {
       id: crypto.randomUUID(),
       type: 'structure',
-      props: { backgroundColor: "transparent", paddingTop: 10, paddingBottom: 10, paddingLeft: 0, paddingRight: 0 },
+      props: { 
+        backgroundColor: "transparent", 
+        paddingTop: 20, 
+        paddingBottom: 20, 
+        paddingLeft: 20, 
+        paddingRight: 20,
+        marginTop: 0,
+        marginBottom: 0,
+        marginLeft: 0,
+        marginRight: 0,
+        columnGap: 35
+      },
       columns: preset.columns.map(ratio => ({
         id: crypto.randomUUID(),
         widthRatio: ratio,

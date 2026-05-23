@@ -13,7 +13,11 @@ import { BLOCK_REGISTRY } from "./registry";
 export const DEFAULT_GLOBAL_STYLES: GlobalStyles = {
   bodyBackgroundColor: "#212121",
   contentBackgroundColor: "#212121",
-  contentWidth: 600,
+  backgroundImage: "",
+  contentWidth: 900,
+  messageAlignment: 'center',
+  underlineLinks: true,
+  responsiveDesign: true,
   defaultFontFamily: "Inter, sans-serif",
   defaultFontSize: 16,
   defaultTextColor: "#e6eaf0",
