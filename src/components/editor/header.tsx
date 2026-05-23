@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,12 @@ import { Input } from "@/components/ui/input";
 import { UserNav } from "@/components/dashboard/user-nav";
 import { useTemplateStore } from "@/lib/stores/template";
 import { useEditorStore } from "@/lib/editor/store";
+import { useDebounce } from "use-debounce";
+import { PreviewModal } from "@/components/editor/preview-modal";
 import { 
   ArrowLeft, CloudUpload, ChevronDown, Undo, History, Redo, 
   Monitor, Smartphone, Code, MonitorSmartphone, ClipboardCheck, 
-  Upload, Share2, HelpCircle, Plus, Loader2
+  Upload, Share2, HelpCircle, Plus, Loader2, Check
 } from "lucide-react";
 import type { EmailTemplate } from "@/lib/db.types";
 import { CompactLogo } from "../ui/logo";
@@ -23,37 +25,103 @@ interface EditorHeaderProps {
 export function EditorHeader({ template }: EditorHeaderProps) {
   const router = useRouter();
   const { updateTemplate } = useTemplateStore();
+  const { isDirty, getDesign, clearDirty, blocks, globalStyles } = useEditorStore();
+  
   const [name, setName] = useState(template.name);
+  const [debouncedName] = useDebounce(name, 1000);
+  
   const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved" | "error">("saved");
   const [prevTemplateId, setPrevTemplateId] = useState(template.id);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // Sync state if template changes (e.g. from undefined to loaded)
-  // This approach avoids the generic useEffect set state warning.
   if (template?.id !== prevTemplateId) {
     setPrevTemplateId(template?.id);
     setName(template?.name || "");
   }
 
-  const handleSave = async () => {
-    if (!template) return;
-    setIsSaving(true);
+  // Handle autosave
+  useEffect(() => {
+    if (!template?.id) return;
     
-    // Get the latest design state from the Editor store
-    const { getDesign, clearDirty } = useEditorStore.getState();
+    // Only trigger autosave if name has changed from template or if editor blocks/styles are dirty
+    if (debouncedName !== template.name || isDirty) {
+      const timeoutId = setTimeout(async () => {
+        setSaveStatus("saving");
+        const design = getDesign();
+        
+        try {
+          await updateTemplate(template.id, { 
+            name: debouncedName,
+            body_design: { version: design.version, blocks: design.blocks },
+            global_styles: design.globalStyles 
+          });
+          
+          clearDirty();
+          setSaveStatus("saved");
+        } catch (error) {
+          console.error("Autosave failed", error);
+          setSaveStatus("error");
+        }
+      }, 3000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [debouncedName, isDirty, blocks, globalStyles, template.name, template.id, getDesign, clearDirty, updateTemplate]);
+
+  // Prevent accidental navigation if unsaved
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty || saveStatus === "saving" || saveStatus === "unsaved") {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty, saveStatus]);
+
+  // Derived state to replace redundant useEffect that triggered cascading renders
+  const currentSaveStatus = isSaving || saveStatus === "saving" ? "saving" : 
+                            saveStatus === "error" ? "error" :
+                            (isDirty || name !== template?.name) ? "unsaved" : "saved";
+
+  const handleManualSave = async () => {
+    if (!template || saveStatus === "saving") return;
+    setIsSaving(true);
+    setSaveStatus("saving");
+    
     const design = getDesign();
     
-    await updateTemplate(template.id, { 
-      name,
-      body_design: { version: design.version, blocks: design.blocks },
-      global_styles: design.globalStyles 
-    });
-    
-    clearDirty();
-    setIsSaving(false);
+    try {
+      await updateTemplate(template.id, { 
+        name,
+        body_design: { version: design.version, blocks: design.blocks },
+        global_styles: design.globalStyles 
+      });
+      
+      clearDirty();
+      setSaveStatus("saved");
+    } catch (error) {
+      console.error("Save failed", error);
+      setSaveStatus("error");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const renderSaveStatusIcon = () => {
+    if (currentSaveStatus === "saving") return <Loader2 className="w-4 h-4 animate-spin text-primary" />;
+    if (currentSaveStatus === "error") return <CloudUpload className="w-4 h-4 text-destructive" />;
+    if (currentSaveStatus === "unsaved") return <CloudUpload className="w-4 h-4 text-muted-foreground" />;
+    return <Check className="w-4 h-4 text-green-500" />;
   };
 
   return (
-    <header className="flex items-center justify-between px-4 h-18 border-b border-border bg-card relative z-50">
+    <>
+      <header className="flex items-center justify-between px-4 h-18 border-b border-border bg-card relative z-50">
       {/* Left Section */}
       <div className="flex items-center gap-1 sm:gap-2">
         <Link href="/dashboard" className="flex items-center justify-center w-8 h-8 mr-1 sm:mr-2 text-primary hover:opacity-80 transition-opacity">
@@ -78,10 +146,11 @@ export function EditorHeader({ template }: EditorHeaderProps) {
             variant="ghost" 
             size="icon" 
             className="h-7 w-8 rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground"
-            onClick={handleSave}
-            disabled={isSaving}
+            onClick={handleManualSave}
+            disabled={currentSaveStatus === "saving"}
+            title={currentSaveStatus === "unsaved" ? "Save changes" : currentSaveStatus === "saving" ? "Saving..." : currentSaveStatus === "error" ? "Save failed" : "Saved"}
           >
-            {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CloudUpload className="w-4 h-4" />}
+            {renderSaveStatusIcon()}
           </Button>
           <div className="w-px h-4 bg-border mx-0.5" />
           <Button variant="ghost" size="icon" className="h-7 w-5 rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground">
@@ -122,10 +191,17 @@ export function EditorHeader({ template }: EditorHeaderProps) {
           <Code className="w-4 h-4" />
         </Button>
 
-        <Button variant="ghost" size="sm" className="h-8 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground gap-2 px-3 hidden md:flex">
-          <MonitorSmartphone className="w-4 h-4" />
-          Preview
-        </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground gap-2 px-3 hidden md:flex"
+            onClick={() => setIsPreviewOpen(true)}
+          >
+            <MonitorSmartphone className="w-4 h-4" />
+            Preview
+          </Button>
+
+          <PreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} />
 
         <Button variant="ghost" size="icon" className="h-8 w-8 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground hidden lg:flex">
           <ClipboardCheck className="w-4 h-4" />
@@ -153,5 +229,5 @@ export function EditorHeader({ template }: EditorHeaderProps) {
         </div>
       </div>
     </header>
-  );
-}
+    </>
+)}

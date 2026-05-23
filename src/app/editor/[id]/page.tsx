@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTemplateStore } from "@/lib/stores/template";
 import { useEditorStore } from "@/lib/editor/store";
@@ -16,6 +16,7 @@ export default function EditorPage() {
   const router = useRouter();
   const id = params.id as string;
   const { templates, fetchTemplates, loading } = useTemplateStore();
+  const hasLoadedDesign = useRef(false);
   
   const template = useMemo<EmailTemplate | undefined>(() => {
     return templates.find((t) => t.id === id);
@@ -29,8 +30,9 @@ export default function EditorPage() {
 
   // Load the design into the editor store when the template is ready
   useEffect(() => {
-    if (template) {
+    if (template && !hasLoadedDesign.current) {
       useEditorStore.getState().loadDesign(template.body_design, template.global_styles);
+      hasLoadedDesign.current = true;
     }
   }, [template]);
 

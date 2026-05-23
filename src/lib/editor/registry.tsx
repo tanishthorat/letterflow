@@ -6,6 +6,7 @@ import { Type, Image as ImageIcon, MousePointerClick } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Text as EmailText, Img as EmailImg, Button as EmailButton, Section } from "@react-email/components";
 
 export interface BlockConfig<T extends EditorBlock> {
   type: BlockType;
@@ -80,7 +81,13 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
       </div>
     </div>
   ),
-  renderEmail: () => <div>{/* React Email Text Implementation Placeholder */}</div>
+  renderEmail: ({ block }) => (
+    <Section style={{ textAlign: block.props.align as any, padding: "16px" }}>
+      <EmailText style={{ fontSize: `${block.props.fontSize}px`, color: block.props.color, margin: 0 }}>
+        {block.props.content}
+      </EmailText>
+    </Section>
+  )
 };
 
 // -------------------------------------------------------------
@@ -161,7 +168,17 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
       </div>
     </div>
   ),
-  renderEmail: () => <div>{/* React Email Img Implementation Placeholder */}</div>
+  renderEmail: ({ block }) => (
+    <Section style={{ textAlign: block.props.align as any, padding: "16px" }}>
+      <EmailImg 
+        src={block.props.src} 
+        alt={block.props.alt} 
+        width={block.props.width === "auto" ? undefined : block.props.width}
+        height={block.props.height === "auto" ? undefined : block.props.height}
+        style={{ display: "inline-block", maxWidth: "100%" }}
+      />
+    </Section>
+  )
 };
 
 // -------------------------------------------------------------
@@ -274,7 +291,24 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
       </div>
     </div>
   ),
-  renderEmail: () => <div>{/* React Email Button Implementation Placeholder */}</div>
+  renderEmail: ({ block }) => (
+    <Section style={{ textAlign: block.props.align as any, padding: "16px" }}>
+      <EmailButton 
+        href={block.props.url}
+        style={{
+          backgroundColor: block.props.backgroundColor,
+          color: block.props.textColor,
+          borderRadius: `${block.props.borderRadius}px`,
+          padding: `${block.props.padding}px ${block.props.padding * 2}px`,
+          textDecoration: "none",
+          fontWeight: "bold",
+          display: "inline-block"
+        }}
+      >
+        {block.props.text}
+      </EmailButton>
+    </Section>
+  )
 };
 
 // -------------------------------------------------------------

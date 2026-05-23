@@ -22,6 +22,7 @@ interface EditorState {
   updateBlock: (id: string, props: Partial<EditorBlock["props"]>) => void;
   removeBlock: (id: string) => void;
   duplicateBlock: (id: string) => void;
+  reorderBlocks: (startIndex: number, endIndex: number) => void;
   selectBlock: (id: string | null) => void;
   updateGlobalStyles: (styles: Partial<GlobalStyles>) => void;
   
@@ -73,6 +74,15 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       const newBlocks = [...state.blocks];
       newBlocks.splice(index + 1, 0, newBlock);
       return { blocks: newBlocks, selectedBlockId: newBlock.id, isDirty: true };
+    });
+  },
+  
+  reorderBlocks: (startIndex, endIndex) => {
+    set((state) => {
+      const result = Array.from(state.blocks);
+      const [removed] = result.splice(startIndex, 1);
+      result.splice(endIndex, 0, removed);
+      return { blocks: result, isDirty: true };
     });
   },
   
