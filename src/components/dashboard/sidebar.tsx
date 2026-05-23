@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Mail , Palette, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { Mail, Palette, Settings, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo, { CompactLogo } from "../ui/logo";
 
 const navigation = [
-  { name: "Templates", href: "/dashboard/templates", icon: Mail  },
-  { name: "Components", href: "/dashboard/components", icon: Palette },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+  { name: "Templates", href: "/dashboard/templates", icon: Mail },
+  //  coming soon in future
+  // { name: "Components", href: "/dashboard/components", icon: Palette }, 
+  // { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
 interface SidebarProps {

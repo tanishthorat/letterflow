@@ -11,8 +11,7 @@ import type {
 import { BLOCK_REGISTRY } from "./registry";
 
 export const DEFAULT_GLOBAL_STYLES: GlobalStyles = {
-  bodyBackgroundColor: "#212121",
-  contentBackgroundColor: "#212121",
+  contentBackgroundColor: "#ffffff",
   backgroundImage: "",
   contentWidth: 900,
   messageAlignment: 'center',
@@ -20,7 +19,7 @@ export const DEFAULT_GLOBAL_STYLES: GlobalStyles = {
   responsiveDesign: true,
   defaultFontFamily: "Inter, sans-serif",
   defaultFontSize: 16,
-  defaultTextColor: "#e6eaf0",
+  defaultTextColor: "#333333",
   linkColor: "#33cc4a",
 };
 

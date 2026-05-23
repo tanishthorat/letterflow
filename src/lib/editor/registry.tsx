@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Text as EmailText, Img as EmailImg, Button as EmailButton, Hr as EmailHr, Section } from "@react-email/components";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 export interface BlockConfig<T extends ContentBlock> {
   type: BlockType;
@@ -52,14 +53,10 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
         </div>
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Color</Label>
-          <div className="flex h-9 w-full rounded-md border border-input bg-background px-1 py-1">
-            <input 
-              type="color" 
-              className="w-full h-full border-none bg-transparent cursor-pointer"
-              value={block.props.color || "#ffffff"} 
-              onChange={(e) => onChange({ color: e.target.value })} 
-            />
-          </div>
+          <ColorPicker 
+            value={block.props.color || "#ffffff"} 
+            onChange={(color) => onChange({ color })} 
+          />
         </div>
       </div>
       <div className="space-y-2">
@@ -227,25 +224,18 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Background</Label>
-          <div className="flex h-9 w-full rounded-md border border-input bg-background px-1 py-1">
-            <input 
-              type="color" 
-              className="w-full h-full border-none bg-transparent cursor-pointer"
-              value={block.props.backgroundColor || "#33cc4a"} 
-              onChange={(e) => onChange({ backgroundColor: e.target.value })} 
-            />
-          </div>
+          <ColorPicker 
+            value={block.props.backgroundColor || "#33cc4a"} 
+            onChange={(color) => onChange({ backgroundColor: color })} 
+            align="left"
+          />
         </div>
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Text Color</Label>
-          <div className="flex h-9 w-full rounded-md border border-input bg-background px-1 py-1">
-            <input 
-              type="color" 
-              className="w-full h-full border-none bg-transparent cursor-pointer"
-              value={block.props.textColor || "#ffffff"} 
-              onChange={(e) => onChange({ textColor: e.target.value })} 
-            />
-          </div>
+          <ColorPicker 
+            value={block.props.textColor || "#ffffff"} 
+            onChange={(color) => onChange({ textColor: color })} 
+          />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
@@ -319,14 +309,11 @@ const DividerBlockConfig: BlockConfig<DividerBlock> = {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Line Color</Label>
-          <div className="flex h-9 w-full rounded-md border border-input bg-background px-1 py-1">
-            <input 
-              type="color" 
-              className="w-full h-full border-none bg-transparent cursor-pointer"
-              value={block.props.lineColor || "#e5e7eb"} 
-              onChange={(e) => onChange({ lineColor: e.target.value })} 
-            />
-          </div>
+          <ColorPicker 
+            value={block.props.lineColor || "#e5e7eb"} 
+            onChange={(color) => onChange({ lineColor: color })} 
+            align="left"
+          />
         </div>
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Height (px)</Label>

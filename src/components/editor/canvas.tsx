@@ -22,7 +22,7 @@ function BlockDropZone({ stripeId, structureId, colId, index }: { stripeId: stri
     id: `block-drop-${stripeId}-${structureId}-${colId}-${index}`,
     data: { type: "block-drop", stripeId, structureId, colId, index }
   });
-  
+
   const { active } = useDndContext();
   const activeType = active?.data.current?.type as string | undefined;
   const isNewBlock = activeType && ["text", "image", "button", "divider"].includes(activeType);
@@ -47,7 +47,7 @@ function StructureDropZone({ stripeId, index }: { stripeId: string, index: numbe
     id: `structure-drop-${stripeId}-${index}`,
     data: { type: "structure-drop", stripeId, index }
   });
-  
+
   const { active } = useDndContext();
   const isDraggingSidebarStructure = active?.data.current?.type === "structure";
 
@@ -78,7 +78,7 @@ function EmptyDropZone() {
   const showHighlight = isOver && isValid;
 
   return (
-    <div 
+    <div
       ref={setNodeRef}
       className={cn(
         "flex flex-col items-center justify-center h-full min-h-100 text-muted-foreground text-sm border-2 border-dashed m-4 rounded-xl transition-colors",
@@ -155,7 +155,7 @@ function ColumnZone({ col, stripeId, structureId }: { col: Column, stripeId: str
             </>
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center opacity-80 pointer-events-none" style={{ color: NODE_COLORS.column.color }}>
-               <span className="text-[11px] font-medium tracking-wide">Drop content here</span>
+              <span className="text-[11px] font-medium tracking-wide">Drop content here</span>
             </div>
           )}
         </div>
@@ -165,7 +165,7 @@ function ColumnZone({ col, stripeId, structureId }: { col: Column, stripeId: str
 }
 
 function StructureItem({ structure, stripeId }: { structure: Structure, stripeId: string }) {
-  const { selectedNode, selectNode, duplicateStructure, removeStructure } = useEditorStore();
+  const { selectedNode, selectNode, duplicateStructure, removeStructure, globalStyles } = useEditorStore();
   const isSelected = selectedNode?.type === 'structure' && selectedNode.structureId === structure.id;
 
   const {
@@ -191,8 +191,8 @@ function StructureItem({ structure, stripeId }: { structure: Structure, stripeId
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative group ring-2 ring-inset transition-colors",
-        isSelected ? `${NODE_COLORS.structure.ring} z-20` : `ring-transparent ${NODE_COLORS.structure.hoverRing}`
+        "relative group transition-colors",
+        isSelected ? "z-20" : ""
       )}
       onClick={(e) => {
         e.stopPropagation();
@@ -210,10 +210,22 @@ function StructureItem({ structure, stripeId }: { structure: Structure, stripeId
         />
       )}
 
+      {/* Ring Highlight Overlay */}
       <div 
+        className={cn(
+          "absolute inset-0 pointer-events-none transition-all z-10",
+          isSelected 
+            ? "ring-2 ring-inset ring-[#a75d5d]" 
+            : "ring-transparent group-hover:ring-2 group-hover:ring-inset group-hover:ring-[#a75d5d]/40"
+        )}
+      />
+
+      <div
         className={cn("mx-auto flex", "box-border")}
         style={{
-          backgroundColor: structure.props.backgroundColor || "transparent",
+          backgroundColor: structure.props.backgroundColor && structure.props.backgroundColor !== "transparent"
+            ? structure.props.backgroundColor
+            : globalStyles.contentBackgroundColor,
           paddingTop: structure.props.paddingTop || 0,
           paddingBottom: structure.props.paddingBottom || 0,
           paddingLeft: structure.props.paddingLeft || 0,
@@ -279,7 +291,7 @@ function StripeItem({ stripe }: { stripe: Stripe }) {
         />
       )}
 
-      <div 
+      <div
         className={cn("w-full mx-auto")}
         style={{
           backgroundColor: stripe.props.backgroundColor || "transparent",
@@ -290,9 +302,9 @@ function StripeItem({ stripe }: { stripe: Stripe }) {
           paddingBottom: stripe.props.paddingBottom || 0,
         }}
       >
-        <div 
-          className="mx-auto" 
-          style={{ 
+        <div
+          className="mx-auto"
+          style={{
             width: "100%",
             maxWidth: stripe.props.fullWidth ? "100%" : `${globalStyles.contentWidth - 40}px`
           }}
@@ -315,21 +327,20 @@ function StripeItem({ stripe }: { stripe: Stripe }) {
 }
 
 export function Canvas() {
-  const { 
-    stripes, 
-    globalStyles, 
+  const {
+    stripes,
+    globalStyles,
     selectNode
   } = useEditorStore();
 
   return (
-    <div 
+    <div
       className="flex-1 overflow-y-auto p-4 md:p-8 flex justify-center relative"
-      style={{ backgroundColor: globalStyles.bodyBackgroundColor }}
       onClick={() => selectNode(null)}
     >
-      <div 
+      <div
         className="shadow-2xl min-h-200 transition-all relative border border-border/50 my-auto"
-        style={{ 
+        style={{
           width: "100%",
           maxWidth: "100%",
           backgroundColor: globalStyles.contentBackgroundColor,

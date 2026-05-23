@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { BoxSelect, Trash2, Lock, Unlock, Plus, Minus } from "lucide-react";
 import { useEditorStore } from "@/lib/editor/store";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 function SpacingControl({ 
   label, 
@@ -154,16 +155,12 @@ export function StructureInspector({ stripeId, structureId, stripes, updateStruc
           />
         </div>
 
-        <div className="pt-4 space-y-4">
+        <div className="pt-4 space-y-2">
           <Label className="text-xs font-medium text-zinc-300">Background Color</Label>
-          <div className="flex h-9 w-full rounded-md border border-zinc-800 bg-zinc-900 px-1 py-1">
-            <input 
-              type="color" 
-              className="w-full h-full border-none bg-transparent cursor-pointer"
-              value={structure.props.backgroundColor !== "transparent" ? structure.props.backgroundColor : "#ffffff"} 
-              onChange={(e) => updateStructureProps(stripeId, structureId, { backgroundColor: e.target.value })} 
-            />
-          </div>
+          <ColorPicker 
+            value={structure.props.backgroundColor} 
+            onChange={(color) => updateStructureProps(stripeId, structureId, { backgroundColor: color })} 
+          />
         </div>
 
       </div>

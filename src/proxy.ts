@@ -11,8 +11,10 @@ export const config = {
      * Match all request paths except for the ones starting with:
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
+     * - images (static assets)
+     * - icon.png, icon.svg, apple-icon.png, favicon.ico (icons)
+     * - manifest.json (app manifest)
      */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|images|icon\\.png|icon\\.svg|apple-icon\\.png|favicon\\.ico|manifest\\.json).*)",
   ],
 };

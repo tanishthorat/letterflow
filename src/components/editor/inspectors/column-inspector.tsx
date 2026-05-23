@@ -3,6 +3,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { BoxSelect } from "lucide-react";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 export function ColumnInspector({ stripeId, structureId, columnId, stripes, updateColumnProps }: any) {
   const stripe = stripes.find((s: any) => s.id === stripeId);
@@ -22,14 +23,10 @@ export function ColumnInspector({ stripeId, structureId, columnId, stripes, upda
       <div className="space-y-4">
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Background Color</Label>
-          <div className="flex h-9 w-full rounded-md border border-input bg-background px-1 py-1">
-            <input 
-              type="color" 
-              className="w-full h-full border-none bg-transparent cursor-pointer"
-              value={column.props.backgroundColor || "#ffffff"} 
-              onChange={(e) => updateColumnProps(stripeId, structureId, columnId, { backgroundColor: e.target.value })} 
-            />
-          </div>
+          <ColorPicker 
+            value={column.props.backgroundColor || "transparent"} 
+            onChange={(color) => updateColumnProps(stripeId, structureId, columnId, { backgroundColor: color })} 
+          />
         </div>
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Vertical Alignment</Label>

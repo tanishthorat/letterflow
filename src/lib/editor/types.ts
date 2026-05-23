@@ -104,7 +104,6 @@ export interface Stripe {
 }
 
 export interface GlobalStyles {
-  bodyBackgroundColor: string;
   contentBackgroundColor: string;
   backgroundImage?: string;
   contentWidth: number;

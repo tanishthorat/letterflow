@@ -3,6 +3,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Trash2, Rows } from "lucide-react";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 export function StripeInspector({ stripeId, stripes, updateStripeProps, removeStripe }: any) {
   const stripe = stripes.find((s: any) => s.id === stripeId);
@@ -27,14 +28,10 @@ export function StripeInspector({ stripeId, stripes, updateStripeProps, removeSt
         </div>
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Background Color</Label>
-          <div className="flex h-9 w-full rounded-md border border-input bg-background px-1 py-1">
-            <input 
-              type="color" 
-              className="w-full h-full border-none bg-transparent cursor-pointer"
-              value={stripe.props.backgroundColor !== "transparent" ? stripe.props.backgroundColor : "#ffffff"} 
-              onChange={(e) => updateStripeProps(stripeId, { backgroundColor: e.target.value })} 
-            />
-          </div>
+          <ColorPicker 
+            value={stripe.props.backgroundColor} 
+            onChange={(color) => updateStripeProps(stripeId, { backgroundColor: color })} 
+          />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">

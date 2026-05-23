@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Paintbrush, AlignLeft, AlignCenter, AlignRight, Plus, Minus } from "lucide-react";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 export function GlobalStylesInspector() {
   const { globalStyles, updateGlobalStyles } = useEditorStore();
@@ -18,15 +19,12 @@ export function GlobalStylesInspector() {
       
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium">General Background Color</Label>
-          <div className="flex h-9 w-[100px] rounded-md border border-input bg-background px-1 py-1">
-            <input 
-              type="color" 
-              className="w-full h-full border-none bg-transparent cursor-pointer"
-              value={globalStyles.bodyBackgroundColor || "#f6f6f6"} 
-              onChange={(e) => updateGlobalStyles({ bodyBackgroundColor: e.target.value })} 
-            />
-          </div>
+          <Label className="text-sm font-medium">Content Background</Label>
+          <ColorPicker 
+            value={globalStyles.contentBackgroundColor} 
+            onChange={(color) => updateGlobalStyles({ contentBackgroundColor: color })} 
+            className="w-[140px]"
+          />
         </div>
 
         <div className="space-y-3">
@@ -138,14 +136,10 @@ export function GlobalStylesInspector() {
             </div>
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground">Text Color</Label>
-              <div className="flex h-9 w-full rounded-md border border-input bg-background px-1 py-1">
-                <input 
-                  type="color" 
-                  className="w-full h-full border-none bg-transparent cursor-pointer"
-                  value={globalStyles.defaultTextColor} 
-                  onChange={(e) => updateGlobalStyles({ defaultTextColor: e.target.value })} 
-                />
-              </div>
+              <ColorPicker 
+                value={globalStyles.defaultTextColor} 
+                onChange={(color) => updateGlobalStyles({ defaultTextColor: color })} 
+              />
             </div>
           </div>
         </div>

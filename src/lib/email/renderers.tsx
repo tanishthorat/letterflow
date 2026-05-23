@@ -16,10 +16,10 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
 
   const emailStripes = stripes.map((stripe: Stripe) => {
     return (
-      <Section 
-        key={stripe.id} 
-        style={{ 
-          backgroundColor: stripe.props.backgroundColor || "transparent", 
+      <Section
+        key={stripe.id}
+        style={{
+          backgroundColor: stripe.props.backgroundColor || "transparent",
           backgroundImage: stripe.props.backgroundImageUrl ? `url(${stripe.props.backgroundImageUrl})` : undefined,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -36,49 +36,51 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
         >
           {stripe.structures.map((structure: Structure) => {
             const totalRatio = structure.columns.reduce((sum, col) => sum + col.widthRatio, 0);
-          return (
-          <Section
-            key={`${structure.id}-wrapper`}
-            style={{
-              padding: `${structure.props.marginTop || 0}px ${structure.props.marginRight || 0}px ${structure.props.marginBottom || 0}px ${structure.props.marginLeft || 0}px`,
-              backgroundColor: "transparent",
-            }}
-          >
-            <Section 
-              key={structure.id}
-              style={{
-                backgroundColor: structure.props.backgroundColor || "transparent",
-                padding: `${structure.props.paddingTop || 0}px ${structure.props.paddingRight || 0}px ${structure.props.paddingBottom || 0}px ${structure.props.paddingLeft || 0}px`,
-              }}
-            >
-              <EmailRow>
-              {structure.columns.map((col: Column) => (
-                <EmailColumn 
-                  key={col.id} 
-                  className="responsive-column"
-                  style={{ 
-                    width: totalRatio > 0 ? `${(col.widthRatio / totalRatio) * 100}%` : "100%",
-                    backgroundColor: col.props.backgroundColor || "transparent",
-                    padding: `${col.props.paddingTop || 0}px ${col.props.paddingRight || 0}px ${col.props.paddingBottom || 0}px ${col.props.paddingLeft || 0}px`,
-                    verticalAlign: col.props.verticalAlign || "top"
+            return (
+              <Section
+                key={`${structure.id}-wrapper`}
+                style={{
+                  padding: `${structure.props.marginTop || 0}px ${structure.props.marginRight || 0}px ${structure.props.marginBottom || 0}px ${structure.props.marginLeft || 0}px`,
+                  backgroundColor: "transparent",
+                }}
+              >
+                <Section
+                  key={structure.id}
+                  style={{
+                    backgroundColor: structure.props.backgroundColor && structure.props.backgroundColor !== "transparent"
+                      ? structure.props.backgroundColor
+                      : globalStyles.contentBackgroundColor,
+                    padding: `${structure.props.paddingTop || 0}px ${structure.props.paddingRight || 0}px ${structure.props.paddingBottom || 0}px ${structure.props.paddingLeft || 0}px`,
                   }}
                 >
-                  {col.blocks.map((block: ContentBlock) => {
-                    const config = BLOCK_REGISTRY[block.type as keyof typeof BLOCK_REGISTRY];
-                    if (!config || !config.renderEmail) return null;
-                    return (
-                      <React.Fragment key={block.id}>
-                        {config.renderEmail({ block })}
-                      </React.Fragment>
-                    );
-                  })}
-                </EmailColumn>
-              ))}
-            </EmailRow>
-            </Section>
-          </Section>
-          );
-        })}
+                  <EmailRow>
+                    {structure.columns.map((col: Column) => (
+                      <EmailColumn
+                        key={col.id}
+                        className="responsive-column"
+                        style={{
+                          width: totalRatio > 0 ? `${(col.widthRatio / totalRatio) * 100}%` : "100%",
+                          backgroundColor: col.props.backgroundColor || "transparent",
+                          padding: `${col.props.paddingTop || 0}px ${col.props.paddingRight || 0}px ${col.props.paddingBottom || 0}px ${col.props.paddingLeft || 0}px`,
+                          verticalAlign: col.props.verticalAlign || "top"
+                        }}
+                      >
+                        {col.blocks.map((block: ContentBlock) => {
+                          const config = BLOCK_REGISTRY[block.type as keyof typeof BLOCK_REGISTRY];
+                          if (!config || !config.renderEmail) return null;
+                          return (
+                            <React.Fragment key={block.id}>
+                              {config.renderEmail({ block })}
+                            </React.Fragment>
+                          );
+                        })}
+                      </EmailColumn>
+                    ))}
+                  </EmailRow>
+                </Section>
+              </Section>
+            );
+          })}
         </Container>
       </Section>
     );
@@ -108,11 +110,11 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
         )}
       </Head>
       {previewText && <Preview>{previewText}</Preview>}
-      <Body style={{ backgroundColor: globalStyles.bodyBackgroundColor, margin: 0, padding: 0 }}>
-        <Section 
-          style={{ 
-            backgroundColor: globalStyles.contentBackgroundColor, 
-            width: "100%", 
+      <Body style={{ margin: 0, padding: 0 }}>
+        <Section
+          style={{
+            backgroundColor: globalStyles.contentBackgroundColor,
+            width: "100%",
           }}
         >
           {emailStripes}
