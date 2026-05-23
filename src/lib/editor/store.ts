@@ -6,31 +6,25 @@ import type {
   BlockType, 
   Stripe, 
   Structure, 
-  Column, 
   StripeProps, 
   StructureProps, 
   ColumnProps,
-  BlockAddress
+  BlockAddress,
+  SelectedNode
 } from "./types";
-import { BLOCK_REGISTRY } from "./registry";
 import { LayoutPreset } from "./layoutPresets";
-
-const DEFAULT_GLOBAL_STYLES: GlobalStyles = {
-  bodyBackgroundColor: "#212121",
-  contentBackgroundColor: "#212121",
-  contentWidth: 600,
-  defaultFontFamily: "Inter, sans-serif",
-  defaultFontSize: 16,
-  defaultTextColor: "#e6eaf0",
-  linkColor: "#33cc4a",
-};
-
-export type SelectedNode = 
-  | { type: 'stripe', stripeId: string }
-  | { type: 'structure', stripeId: string, structureId: string }
-  | { type: 'column', stripeId: string, structureId: string, columnId: string }
-  | { type: 'block', stripeId: string, structureId: string, columnId: string, blockId: string }
-  | null;
+import {
+  DEFAULT_GLOBAL_STYLES,
+  createBlock,
+  cloneStripe,
+  cloneStructure,
+  cloneBlock,
+  updateStripeById,
+  updateStructureById,
+  updateColumnById,
+  clearSelectionIfRemoved,
+  parseDesign
+} from "./utils";
 
 interface EditorState {
   stripes: Stripe[];
@@ -58,8 +52,9 @@ interface EditorState {
   updateColumnProps: (stripeId: string, structureId: string, columnId: string, props: Partial<ColumnProps>) => void;
 
   // Block Actions
-  addBlock: (stripeId: string, structureId: string, columnId: string, blockType: BlockType, payload?: any, insertIndex?: number) => void;
-  addBlockToColumn: (type: BlockType, stripeId: string, structureId: string, columnId: string, insertIndex?: number, payload?: any) => void;
+  addBlock: (stripeId: string, structureId: string, columnId: string, blockType: BlockType, payload?: Partial<ContentBlock["props"]>, insertIndex?: number) => void;
+  addBlockToColumn: (type: BlockType, stripeId: string, structureId: string, columnId: string, insertIndex?: number, payload?: Partial<ContentBlock["props"]>) => void;
+  addBlockToCanvas: (type: BlockType, payload?: Partial<ContentBlock["props"]>) => void;
   removeBlock: (stripeId: string, structureId: string, columnId: string, blockId: string) => void;
   duplicateBlock: (stripeId: string, structureId: string, columnId: string, blockId: string) => void;
   updateBlock: (stripeId: string, structureId: string, columnId: string, blockId: string, props: Partial<ContentBlock["props"]>) => void;
@@ -68,103 +63,9 @@ interface EditorState {
   // Selection & Global
   selectNode: (node: SelectedNode) => void;
   updateGlobalStyles: (styles: Partial<GlobalStyles>) => void;
-  loadDesign: (design: any, globalStyles: any) => void;
+  loadDesign: (design: unknown, globalStyles: unknown) => void;
   getDesign: () => TemplateDesign;
   clearDirty: () => void;
-}
-
-export function migrateDesign(oldDesign: any): TemplateDesign {
-  if (!oldDesign) return { version: "2.0", stripes: [], globalStyles: DEFAULT_GLOBAL_STYLES };
-  
-  // Already v2.0
-  if (oldDesign.version === '2.0' && oldDesign.stripes) {
-    return { ...oldDesign };
-  }
-
-  // Version 1.x with rows
-  if (oldDesign.rows) {
-    const stripes: Stripe[] = oldDesign.rows.map((row: any) => {
-      const structures: Structure[] = [
-        {
-          id: crypto.randomUUID(),
-          type: 'structure',
-          props: {
-            backgroundColor: "transparent",
-            paddingTop: 10,
-            paddingBottom: 10,
-          },
-          columns: row.columns || []
-        }
-      ];
-      
-      return {
-        id: row.id,
-        type: 'stripe',
-        label: 'Migrated Stripe',
-        props: {
-          backgroundColor: row.props?.backgroundColor || "transparent",
-          paddingTop: row.props?.paddingTop || 0,
-          paddingBottom: row.props?.paddingBottom || 0,
-          fullWidth: row.props?.fullWidth || false
-        },
-        structures
-      };
-    });
-    
-    return {
-      version: "2.0",
-      stripes,
-      globalStyles: oldDesign.globalStyles || DEFAULT_GLOBAL_STYLES
-    };
-  }
-
-  // Version 1.x flat blocks
-  const oldBlocks = oldDesign.blocks || [];
-  
-  const stripes: Stripe[] = oldBlocks.map((block: any) => {
-    let columns: Column[] = [];
-    
-    if (block.type === 'columns') {
-      columns = (block.props?.columns || []).map((c: any) => ({
-        id: crypto.randomUUID(),
-        widthRatio: c.width || 1,
-        blocks: c.blocks || [],
-        props: {}
-      }));
-    } else {
-      columns = [{
-        id: crypto.randomUUID(),
-        widthRatio: 1,
-        blocks: [block],
-        props: {}
-      }];
-    }
-    
-    const structure: Structure = {
-      id: crypto.randomUUID(),
-      type: 'structure',
-      props: {
-        backgroundColor: block.props?.backgroundColor || "transparent",
-        paddingTop: block.props?.padding || 10,
-        paddingBottom: block.props?.padding || 10,
-      },
-      columns
-    };
-
-    return {
-      id: crypto.randomUUID(),
-      type: 'stripe',
-      label: 'Migrated Block',
-      props: { backgroundColor: "transparent" },
-      structures: [structure]
-    };
-  });
-
-  return {
-    version: "2.0",
-    stripes,
-    globalStyles: oldDesign.globalStyles || DEFAULT_GLOBAL_STYLES
-  };
 }
 
 export const useEditorStore = create<EditorState>((set, get) => ({
@@ -181,38 +82,28 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       props: { backgroundColor: "transparent", paddingTop: 10, paddingBottom: 10 },
       structures: []
     };
-    set((state) => ({ stripes: [...state.stripes, newStripe], selectedNode: { type: 'stripe', stripeId: newStripe.id }, isDirty: true }));
+    set((state) => ({ 
+      stripes: [...state.stripes, newStripe], 
+      selectedNode: { type: 'stripe', stripeId: newStripe.id }, 
+      isDirty: true 
+    }));
     return newStripe.id;
   },
 
-  removeStripe: (stripeId) => set((state) => {
-    const stripes = state.stripes.filter(s => s.id !== stripeId);
-    let selectedNode = state.selectedNode;
-    if (selectedNode?.type === 'stripe' && selectedNode.stripeId === stripeId) selectedNode = null;
-    return { stripes, selectedNode, isDirty: true };
-  }),
+  removeStripe: (stripeId) => set((state) => ({
+    stripes: state.stripes.filter(s => s.id !== stripeId),
+    selectedNode: clearSelectionIfRemoved(state.selectedNode, 'stripe', stripeId),
+    isDirty: true
+  })),
 
   duplicateStripe: (stripeId) => set((state) => {
     const stripeIndex = state.stripes.findIndex(s => s.id === stripeId);
     if (stripeIndex === -1) return state;
-    const stripeToCopy = state.stripes[stripeIndex];
     
-    const newStripe: Stripe = {
-      ...stripeToCopy,
-      id: crypto.randomUUID(),
-      structures: stripeToCopy.structures.map(structure => ({
-        ...structure,
-        id: crypto.randomUUID(),
-        columns: structure.columns.map(col => ({
-          ...col,
-          id: crypto.randomUUID(),
-          blocks: col.blocks.map(b => ({ ...b, id: crypto.randomUUID() }))
-        }))
-      }))
-    };
-    
+    const newStripe = cloneStripe(state.stripes[stripeIndex]);
     const stripes = [...state.stripes];
     stripes.splice(stripeIndex + 1, 0, newStripe);
+    
     return { stripes, selectedNode: { type: 'stripe', stripeId: newStripe.id }, isDirty: true };
   }),
 
@@ -229,14 +120,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   }),
 
   reorderStripes: (startIndex, endIndex) => set((state) => {
-    const stripes = Array.from(state.stripes);
+    const stripes = [...state.stripes];
     const [removed] = stripes.splice(startIndex, 1);
     stripes.splice(endIndex, 0, removed);
     return { stripes, isDirty: true };
   }),
 
   updateStripeProps: (stripeId, props) => set((state) => ({
-    stripes: state.stripes.map(s => s.id === stripeId ? { ...s, props: { ...s.props, ...props } } : s),
+    stripes: updateStripeById(state.stripes, stripeId, s => ({ ...s, props: { ...s.props, ...props } })),
     isDirty: true
   })),
 
@@ -253,133 +144,91 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       }))
     };
     return {
-      stripes: state.stripes.map(s => s.id === stripeId ? { ...s, structures: [...s.structures, newStructure] } : s),
+      stripes: updateStripeById(state.stripes, stripeId, s => ({ ...s, structures: [...s.structures, newStructure] })),
       selectedNode: { type: 'structure', stripeId, structureId: newStructure.id },
       isDirty: true
     };
   }),
 
-  removeStructure: (stripeId, structureId) => set((state) => {
-    return {
-      stripes: state.stripes.map(s => s.id === stripeId ? { ...s, structures: s.structures.filter(str => str.id !== structureId) } : s),
-      isDirty: true
-    };
-  }),
+  removeStructure: (stripeId, structureId) => set((state) => ({
+    stripes: updateStripeById(state.stripes, stripeId, s => ({
+      ...s, structures: s.structures.filter(str => str.id !== structureId)
+    })),
+    selectedNode: clearSelectionIfRemoved(state.selectedNode, 'structure', structureId),
+    isDirty: true
+  })),
 
   duplicateStructure: (stripeId, structureId) => set((state) => {
-    const stripeIndex = state.stripes.findIndex(s => s.id === stripeId);
-    if (stripeIndex === -1) return state;
-    const stripe = state.stripes[stripeIndex];
-    const structureIndex = stripe.structures.findIndex(s => s.id === structureId);
-    if (structureIndex === -1) return state;
-    
-    const structureToCopy = stripe.structures[structureIndex];
-    const newStructure: Structure = {
-      ...structureToCopy,
-      id: crypto.randomUUID(),
-      columns: structureToCopy.columns.map(col => ({
-        ...col,
-        id: crypto.randomUUID(),
-        blocks: col.blocks.map(b => ({ ...b, id: crypto.randomUUID() }))
-      }))
-    };
-    
-    const structures = [...stripe.structures];
-    structures.splice(structureIndex + 1, 0, newStructure);
-    
-    const stripes = [...state.stripes];
-    stripes[stripeIndex] = { ...stripe, structures };
-    return { stripes, selectedNode: { type: 'structure', stripeId, structureId: newStructure.id }, isDirty: true };
+    let newStructId = "";
+    const stripes = updateStripeById(state.stripes, stripeId, s => {
+      const index = s.structures.findIndex(str => str.id === structureId);
+      if (index === -1) return s;
+      
+      const newStructure = cloneStructure(s.structures[index]);
+      newStructId = newStructure.id;
+      
+      const structures = [...s.structures];
+      structures.splice(index + 1, 0, newStructure);
+      return { ...s, structures };
+    });
+
+    if (!newStructId) return state;
+    return { stripes, selectedNode: { type: 'structure', stripeId, structureId: newStructId }, isDirty: true };
   }),
 
-  moveStructure: (stripeId, structureId, direction) => set((state) => {
-    const stripeIndex = state.stripes.findIndex(s => s.id === stripeId);
-    if (stripeIndex === -1) return state;
-    const stripe = state.stripes[stripeIndex];
-    const index = stripe.structures.findIndex(s => s.id === structureId);
-    if (index === -1) return state;
-    
-    if (direction === 'up' && index === 0) return state;
-    if (direction === 'down' && index === stripe.structures.length - 1) return state;
-    
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
-    const structures = [...stripe.structures];
-    [structures[index], structures[targetIndex]] = [structures[targetIndex], structures[index]];
-    
-    const stripes = [...state.stripes];
-    stripes[stripeIndex] = { ...stripe, structures };
-    return { stripes, isDirty: true };
-  }),
+  moveStructure: (stripeId, structureId, direction) => set((state) => ({
+    stripes: updateStripeById(state.stripes, stripeId, s => {
+      const index = s.structures.findIndex(str => str.id === structureId);
+      if (index === -1) return s;
+      if (direction === 'up' && index === 0) return s;
+      if (direction === 'down' && index === s.structures.length - 1) return s;
+      
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      const structures = [...s.structures];
+      [structures[index], structures[targetIndex]] = [structures[targetIndex], structures[index]];
+      return { ...s, structures };
+    }),
+    isDirty: true
+  })),
 
-  updateStructureProps: (stripeId, structureId, props) => set((state) => {
-    return {
-      stripes: state.stripes.map(stripe => stripe.id === stripeId ? {
-        ...stripe,
-        structures: stripe.structures.map(structure => structure.id === structureId ? {
-          ...structure,
-          props: { ...structure.props, ...props }
-        } : structure)
-      } : stripe),
-      isDirty: true
-    };
-  }),
+  updateStructureProps: (stripeId, structureId, props) => set((state) => ({
+    stripes: updateStructureById(state.stripes, stripeId, structureId, str => ({
+      ...str, props: { ...str.props, ...props }
+    })),
+    isDirty: true
+  })),
 
-  reorderStructures: (stripeId, startIndex, endIndex) => set((state) => {
-    return {
-      stripes: state.stripes.map(stripe => {
-        if (stripe.id === stripeId) {
-          const structures = Array.from(stripe.structures);
-          const [removed] = structures.splice(startIndex, 1);
-          structures.splice(endIndex, 0, removed);
-          return { ...stripe, structures };
-        }
-        return stripe;
-      }),
-      isDirty: true
-    };
-  }),
+  reorderStructures: (stripeId, startIndex, endIndex) => set((state) => ({
+    stripes: updateStripeById(state.stripes, stripeId, s => {
+      const structures = [...s.structures];
+      const [removed] = structures.splice(startIndex, 1);
+      structures.splice(endIndex, 0, removed);
+      return { ...s, structures };
+    }),
+    isDirty: true
+  })),
 
-  updateColumnProps: (stripeId, structureId, columnId, props) => set((state) => {
-    return {
-      stripes: state.stripes.map(stripe => stripe.id === stripeId ? {
-        ...stripe,
-        structures: stripe.structures.map(structure => structure.id === structureId ? {
-          ...structure,
-          columns: structure.columns.map(column => column.id === columnId ? {
-            ...column,
-            props: { ...column.props, ...props }
-          } : column)
-        } : structure)
-      } : stripe),
-      isDirty: true
-    };
-  }),
+  updateColumnProps: (stripeId, structureId, columnId, props) => set((state) => ({
+    stripes: updateColumnById(state.stripes, stripeId, structureId, columnId, col => ({
+      ...col, props: { ...col.props, ...props }
+    })),
+    isDirty: true
+  })),
 
   addBlock: (stripeId, structureId, columnId, type, payload, insertIndex) => set((state) => {
-    const config = BLOCK_REGISTRY[type];
-    if (!config) return state;
-
-    const newBlock = { id: crypto.randomUUID(), type, props: { ...config.defaultProps, ...payload } } as ContentBlock;
+    const newBlock = createBlock(type, payload);
+    if (!newBlock) return state;
 
     return {
-      stripes: state.stripes.map(stripe => stripe.id === stripeId ? {
-        ...stripe,
-        structures: stripe.structures.map(structure => structure.id === structureId ? {
-          ...structure,
-          columns: structure.columns.map(column => {
-            if (column.id === columnId) {
-              const blocks = [...column.blocks];
-              if (insertIndex !== undefined) {
-                blocks.splice(insertIndex, 0, newBlock);
-              } else {
-                blocks.push(newBlock);
-              }
-              return { ...column, blocks };
-            }
-            return column;
-          })
-        } : structure)
-      } : stripe),
+      stripes: updateColumnById(state.stripes, stripeId, structureId, columnId, col => {
+        const blocks = [...col.blocks];
+        if (insertIndex !== undefined && insertIndex >= 0 && insertIndex <= blocks.length) {
+          blocks.splice(insertIndex, 0, newBlock);
+        } else {
+          blocks.push(newBlock);
+        }
+        return { ...col, blocks };
+      }),
       selectedNode: { type: 'block', stripeId, structureId, columnId, blockId: newBlock.id },
       isDirty: true
     };
@@ -389,63 +238,67 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     get().addBlock(stripeId, structureId, columnId, type, payload, insertIndex);
   },
 
-  removeBlock: (stripeId, structureId, columnId, blockId) => set((state) => {
-    return {
-      stripes: state.stripes.map(stripe => stripe.id === stripeId ? {
-        ...stripe,
-        structures: stripe.structures.map(structure => structure.id === structureId ? {
-          ...structure,
-          columns: structure.columns.map(column => column.id === columnId ? {
-            ...column,
-            blocks: column.blocks.filter(b => b.id !== blockId)
-          } : column)
-        } : structure)
-      } : stripe),
-      isDirty: true
-    };
-  }),
+  addBlockToCanvas: (type, payload) => {
+    const newBlock = createBlock(type, payload);
+    if (!newBlock) return;
+    
+    const newStripeId = crypto.randomUUID();
+    const newStructureId = crypto.randomUUID();
+    const newColumnId = crypto.randomUUID();
 
-  duplicateBlock: (stripeId, structureId, columnId, blockId) => set((state) => {
-    return {
-      stripes: state.stripes.map(stripe => stripe.id === stripeId ? {
-        ...stripe,
-        structures: stripe.structures.map(structure => structure.id === structureId ? {
-          ...structure,
-          columns: structure.columns.map(column => {
-            if (column.id === columnId) {
-              const index = column.blocks.findIndex(b => b.id === blockId);
-              if (index === -1) return column;
-              const newBlock = { ...column.blocks[index], id: crypto.randomUUID() };
-              const blocks = [...column.blocks];
-              blocks.splice(index + 1, 0, newBlock);
-              return { ...column, blocks };
-            }
-            return column;
-          })
-        } : structure)
-      } : stripe),
-      isDirty: true
+    const newStripe: Stripe = {
+      id: newStripeId,
+      type: 'stripe',
+      label: 'New Stripe',
+      props: { backgroundColor: "transparent", paddingTop: 10, paddingBottom: 10 },
+      structures: [{
+        id: newStructureId,
+        type: 'structure',
+        props: { backgroundColor: "transparent", paddingTop: 10, paddingBottom: 10, paddingLeft: 0, paddingRight: 0 },
+        columns: [{
+          id: newColumnId,
+          widthRatio: 1,
+          blocks: [newBlock],
+          props: {}
+        }]
+      }]
     };
-  }),
 
-  updateBlock: (stripeId, structureId, columnId, blockId, props) => set((state) => {
-    return {
-      stripes: state.stripes.map(stripe => stripe.id === stripeId ? {
-        ...stripe,
-        structures: stripe.structures.map(structure => structure.id === structureId ? {
-          ...structure,
-          columns: structure.columns.map(column => column.id === columnId ? {
-            ...column,
-            blocks: column.blocks.map(block => block.id === blockId ? {
-              ...block,
-              props: { ...block.props, ...props } as any
-            } : block)
-          } : column)
-        } : structure)
-      } : stripe),
+    set((state) => ({
+      stripes: [...state.stripes, newStripe],
+      selectedNode: { type: 'block', stripeId: newStripeId, structureId: newStructureId, columnId: newColumnId, blockId: newBlock.id },
       isDirty: true
-    };
-  }),
+    }));
+  },
+
+  removeBlock: (stripeId, structureId, columnId, blockId) => set((state) => ({
+    stripes: updateColumnById(state.stripes, stripeId, structureId, columnId, col => ({
+      ...col, blocks: col.blocks.filter(b => b.id !== blockId)
+    })),
+    selectedNode: clearSelectionIfRemoved(state.selectedNode, 'block', blockId),
+    isDirty: true
+  })),
+
+  duplicateBlock: (stripeId, structureId, columnId, blockId) => set((state) => ({
+    stripes: updateColumnById(state.stripes, stripeId, structureId, columnId, col => {
+      const index = col.blocks.findIndex(b => b.id === blockId);
+      if (index === -1) return col;
+      
+      const newBlock = cloneBlock(col.blocks[index]);
+      const blocks = [...col.blocks];
+      blocks.splice(index + 1, 0, newBlock);
+      return { ...col, blocks };
+    }),
+    isDirty: true
+  })),
+
+  updateBlock: (stripeId, structureId, columnId, blockId, props) => set((state) => ({
+    stripes: updateColumnById(state.stripes, stripeId, structureId, columnId, col => ({
+      ...col,
+      blocks: col.blocks.map((b): ContentBlock => b.id === blockId ? ({ ...b, props: { ...b.props, ...props } }) as ContentBlock : b)
+    })),
+    isDirty: true
+  })),
 
   moveBlock: (from, to) => set((state) => {
     const stripes = structuredClone(state.stripes);
@@ -453,7 +306,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const fromStripe = stripes.find(s => s.id === from.stripeId);
     const fromStructure = fromStripe?.structures.find(s => s.id === from.structureId);
     const fromColumn = fromStructure?.columns.find(c => c.id === from.columnId);
-    
     if (!fromColumn) return state;
 
     const blockToMove = fromColumn.blocks[from.index];
@@ -462,7 +314,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const toStripe = stripes.find(s => s.id === to.stripeId);
     const toStructure = toStripe?.structures.find(s => s.id === to.structureId);
     const toColumn = toStructure?.columns.find(c => c.id === to.columnId);
-    
     if (!toColumn) return state;
     
     toColumn.blocks.splice(to.index, 0, blockToMove);
@@ -477,10 +328,17 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     isDirty: true 
   })),
 
-  loadDesign: (design, globalStyles) => set({ 
-    ...migrateDesign({ ...design, globalStyles }),
-    isDirty: false 
-  }),
+  loadDesign: (design, globalStyles) => {
+    const parsed = parseDesign(design);
+    if (globalStyles && typeof globalStyles === 'object') {
+        parsed.globalStyles = { ...parsed.globalStyles, ...globalStyles };
+    }
+    set({
+      stripes: parsed.stripes,
+      globalStyles: parsed.globalStyles,
+      isDirty: false 
+    });
+  },
 
   getDesign: () => {
     const state = get();

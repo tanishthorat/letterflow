@@ -36,7 +36,7 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Content</Label>
         <Textarea 
-          value={block.props.content} 
+          value={block.props.content || ""} 
           onChange={(e) => onChange({ content: e.target.value })} 
           className="min-h-[100px]"
         />
@@ -46,7 +46,7 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
           <Label className="text-xs text-muted-foreground">Font Size (px)</Label>
           <Input 
             type="number" 
-            value={block.props.fontSize} 
+            value={block.props.fontSize || 16} 
             onChange={(e) => onChange({ fontSize: Number(e.target.value) })} 
           />
         </div>
@@ -56,7 +56,7 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
             <input 
               type="color" 
               className="w-full h-full border-none bg-transparent cursor-pointer"
-              value={block.props.color} 
+              value={block.props.color || "#ffffff"} 
               onChange={(e) => onChange({ color: e.target.value })} 
             />
           </div>
@@ -66,7 +66,7 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
         <Label className="text-xs text-muted-foreground">Alignment</Label>
         <select 
           className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
-          value={block.props.align} 
+          value={block.props.align || "left"} 
           onChange={(e) => onChange({ align: e.target.value as "left" | "center" | "right" })}
         >
           <option value="left">Left</option>
@@ -116,7 +116,7 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
         <Label className="text-xs text-muted-foreground">Image URL</Label>
         <Input 
           type="text" 
-          value={block.props.src} 
+          value={block.props.src || ""} 
           onChange={(e) => onChange({ src: e.target.value })} 
         />
       </div>
@@ -124,7 +124,7 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
         <Label className="text-xs text-muted-foreground">Alt Text</Label>
         <Input 
           type="text" 
-          value={block.props.alt} 
+          value={block.props.alt || ""} 
           onChange={(e) => onChange({ alt: e.target.value })} 
         />
       </div>
@@ -133,7 +133,7 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
           <Label className="text-xs text-muted-foreground">Width</Label>
           <Input 
             type="text" 
-            value={block.props.width} 
+            value={block.props.width || "auto"} 
             onChange={(e) => onChange({ width: e.target.value === "auto" ? "auto" : Number(e.target.value) })} 
           />
         </div>
@@ -141,7 +141,7 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
           <Label className="text-xs text-muted-foreground">Height</Label>
           <Input 
             type="text" 
-            value={block.props.height} 
+            value={block.props.height || "auto"} 
             onChange={(e) => onChange({ height: e.target.value === "auto" ? "auto" : Number(e.target.value) })} 
           />
         </div>
@@ -150,7 +150,7 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
         <Label className="text-xs text-muted-foreground">Alignment</Label>
         <select 
           className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
-          value={block.props.align} 
+          value={block.props.align || "center"} 
           onChange={(e) => onChange({ align: e.target.value as "left" | "center" | "right" })}
         >
           <option value="left">Left</option>
@@ -212,7 +212,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
         <Label className="text-xs text-muted-foreground">Button Text</Label>
         <Input 
           type="text" 
-          value={block.props.text} 
+          value={block.props.text || ""} 
           onChange={(e) => onChange({ text: e.target.value })} 
         />
       </div>
@@ -220,7 +220,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
         <Label className="text-xs text-muted-foreground">URL</Label>
         <Input 
           type="text" 
-          value={block.props.url} 
+          value={block.props.url || ""} 
           onChange={(e) => onChange({ url: e.target.value })} 
         />
       </div>
@@ -231,7 +231,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
             <input 
               type="color" 
               className="w-full h-full border-none bg-transparent cursor-pointer"
-              value={block.props.backgroundColor} 
+              value={block.props.backgroundColor || "#33cc4a"} 
               onChange={(e) => onChange({ backgroundColor: e.target.value })} 
             />
           </div>
@@ -242,7 +242,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
             <input 
               type="color" 
               className="w-full h-full border-none bg-transparent cursor-pointer"
-              value={block.props.textColor} 
+              value={block.props.textColor || "#ffffff"} 
               onChange={(e) => onChange({ textColor: e.target.value })} 
             />
           </div>
@@ -253,7 +253,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
           <Label className="text-xs text-muted-foreground">Radius (px)</Label>
           <Input 
             type="number" 
-            value={block.props.borderRadius} 
+            value={block.props.borderRadius || 0} 
             onChange={(e) => onChange({ borderRadius: Number(e.target.value) })} 
           />
         </div>
@@ -261,7 +261,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
           <Label className="text-xs text-muted-foreground">Padding (px)</Label>
           <Input 
             type="number" 
-            value={block.props.padding} 
+            value={block.props.padding || 0} 
             onChange={(e) => onChange({ padding: Number(e.target.value) })} 
           />
         </div>
@@ -270,7 +270,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
         <Label className="text-xs text-muted-foreground">Alignment</Label>
         <select 
           className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
-          value={block.props.align} 
+          value={block.props.align || "center"} 
           onChange={(e) => onChange({ align: e.target.value as "left" | "center" | "right" })}
         >
           <option value="left">Left</option>
@@ -323,7 +323,7 @@ const DividerBlockConfig: BlockConfig<DividerBlock> = {
             <input 
               type="color" 
               className="w-full h-full border-none bg-transparent cursor-pointer"
-              value={block.props.lineColor} 
+              value={block.props.lineColor || "#e5e7eb"} 
               onChange={(e) => onChange({ lineColor: e.target.value })} 
             />
           </div>
@@ -332,7 +332,7 @@ const DividerBlockConfig: BlockConfig<DividerBlock> = {
           <Label className="text-xs text-muted-foreground">Height (px)</Label>
           <Input 
             type="number" 
-            value={block.props.lineWidth} 
+            value={block.props.lineWidth || 1} 
             onChange={(e) => onChange({ lineWidth: Number(e.target.value) })} 
           />
         </div>
@@ -341,7 +341,7 @@ const DividerBlockConfig: BlockConfig<DividerBlock> = {
         <Label className="text-xs text-muted-foreground">Vertical Padding (px)</Label>
         <Input 
           type="number" 
-          value={block.props.padding} 
+          value={block.props.padding || 20} 
           onChange={(e) => onChange({ padding: Number(e.target.value) })} 
         />
       </div>

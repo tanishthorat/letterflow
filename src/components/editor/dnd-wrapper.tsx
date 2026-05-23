@@ -7,24 +7,22 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  DragStartEvent,
   DragEndEvent,
   DragOverlay,
-  pointerWithin
+  pointerWithin,
+  Active,
+  Over,
+  CollisionDetection
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useEditorStore } from "@/lib/editor/store";
 import React, { useState } from "react";
+import type { BlockType } from "@/lib/editor/types";
 
 export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
-  const { 
-    stripes, 
-    reorderStripes, 
-    reorderStructures,
-    addStripe,
-    addStructure,
-    addBlockToColumn, 
-    moveBlock 
-  } = useEditorStore();
+  const store = useEditorStore();
+  const { stripes } = store;
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -32,11 +30,11 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const handleDragStart = (event: any) => {
-    setActiveId(event.active.id);
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
   };
 
-  const customCollisionDetection = (args: any) => {
+  const customCollisionDetection: CollisionDetection = (args) => {
     const pointerIntersections = pointerWithin(args);
     
     if (pointerIntersections.length > 0) {
@@ -49,10 +47,10 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
       };
 
       const sorted = [...pointerIntersections].sort((a, b) => {
-        const aContainer = args.droppableContainers.find((c: any) => c.id === a.id);
-        const bContainer = args.droppableContainers.find((c: any) => c.id === b.id);
-        const aType = aContainer?.data?.current?.type;
-        const bType = bContainer?.data?.current?.type;
+        const aContainer = args.droppableContainers.find((c) => c.id === a.id);
+        const bContainer = args.droppableContainers.find((c) => c.id === b.id);
+        const aType = aContainer?.data?.current?.type as string | undefined;
+        const bType = bContainer?.data?.current?.type as string | undefined;
         const aScore = aType ? typePriority[aType] || 0 : 0;
         const bScore = bType ? typePriority[bType] || 0 : 0;
         return bScore - aScore;
@@ -64,162 +62,167 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
     return closestCenter(args);
   };
 
+  const handleSidebarDrop = (active: Active, over: Over, activeType: string, targetType: string) => {
+    const payload = active.data.current?.payload;
+
+    if (activeType === "structure") {
+      let targetStripeId = over.data.current?.stripeId as string | undefined;
+      if (!targetStripeId && stripes.length > 0) {
+        targetStripeId = stripes[stripes.length - 1].id;
+      }
+      if (!targetStripeId) {
+        targetStripeId = store.addStripe();
+      }
+      store.addStructure(targetStripeId, payload);
+      return;
+    }
+
+    // Dropping a block from sidebar
+    const blockType = activeType as BlockType;
+
+    if (targetType === "column" || targetType === "block") {
+      const targetStripeId = over.data.current?.stripeId as string;
+      const targetStructureId = over.data.current?.structureId as string;
+      const targetColId = over.data.current?.colId as string;
+      
+      let insertIndex: number | undefined = undefined;
+      if (targetType === "block") {
+        const stripe = stripes.find(s => s.id === targetStripeId);
+        const struct = stripe?.structures.find(s => s.id === targetStructureId);
+        const col = struct?.columns.find(c => c.id === targetColId);
+        const index = col?.blocks.findIndex(b => b.id === over.id);
+        if (index !== undefined && index !== -1) {
+          insertIndex = index;
+        }
+      }
+      store.addBlockToColumn(blockType, targetStripeId, targetStructureId, targetColId, insertIndex, payload);
+    } else if (targetType === "structure") {
+      const targetStripeId = over.data.current?.stripeId as string;
+      const targetStructureId = over.data.current?.structureId as string;
+      const stripe = stripes.find(s => s.id === targetStripeId);
+      const struct = stripe?.structures.find(s => s.id === targetStructureId);
+      if (struct && struct.columns.length > 0) {
+        store.addBlockToColumn(blockType, targetStripeId, targetStructureId, struct.columns[0].id, undefined, payload);
+      }
+    } else if (targetType === "stripe") {
+      const targetStripeId = over.data.current?.stripeId as string;
+      const stripe = stripes.find(s => s.id === targetStripeId);
+      if (stripe && stripe.structures.length > 0 && stripe.structures[0].columns.length > 0) {
+        store.addBlockToColumn(blockType, targetStripeId, stripe.structures[0].id, stripe.structures[0].columns[0].id, undefined, payload);
+      }
+    } else if (targetType === "canvas") {
+      store.addBlockToCanvas(blockType, payload);
+    }
+  };
+
+  const handleStripeReorder = (active: Active, over: Over) => {
+    const oldIndex = stripes.findIndex((s) => s.id === active.id);
+    const newIndex = stripes.findIndex((s) => s.id === over.id);
+    if (oldIndex !== -1 && newIndex !== -1) {
+      store.reorderStripes(oldIndex, newIndex);
+    }
+  };
+
+  const handleStructureReorder = (active: Active, over: Over) => {
+    const stripeId = active.data.current?.stripeId as string;
+    if (stripeId === over.data.current?.stripeId) {
+      const stripe = stripes.find(s => s.id === stripeId);
+      if (stripe) {
+        const oldIndex = stripe.structures.findIndex(s => s.id === active.id);
+        const newIndex = stripe.structures.findIndex(s => s.id === over.id);
+        if (oldIndex !== -1 && newIndex !== -1) {
+          store.reorderStructures(stripeId, oldIndex, newIndex);
+        }
+      }
+    }
+  };
+
+  const handleBlockMove = (active: Active, over: Over, targetType: string) => {
+    const sourceStripeId = active.data.current?.stripeId as string;
+    const sourceStructureId = active.data.current?.structureId as string;
+    const sourceColId = active.data.current?.colId as string;
+
+    const sourceStripe = stripes.find(s => s.id === sourceStripeId);
+    const sourceStruct = sourceStripe?.structures.find(s => s.id === sourceStructureId);
+    const sourceCol = sourceStruct?.columns.find(c => c.id === sourceColId);
+    const sourceIndex = sourceCol?.blocks.findIndex(b => b.id === active.id);
+
+    if (sourceIndex === undefined || sourceIndex === -1) return;
+
+    if (targetType === "column" || targetType === "block") {
+      const targetStripeId = over.data.current?.stripeId as string;
+      const targetStructureId = over.data.current?.structureId as string;
+      const targetColId = over.data.current?.colId as string;
+
+      const targetStripe = stripes.find(s => s.id === targetStripeId);
+      const targetStruct = targetStripe?.structures.find(s => s.id === targetStructureId);
+      const targetCol = targetStruct?.columns.find(c => c.id === targetColId);
+
+      let targetIndex = targetCol?.blocks.length ?? 0;
+      if (targetType === "block") {
+        const idx = targetCol?.blocks.findIndex(b => b.id === over.id);
+        if (idx !== undefined && idx !== -1) {
+          targetIndex = idx;
+        }
+      }
+
+      store.moveBlock(
+        { stripeId: sourceStripeId, structureId: sourceStructureId, columnId: sourceColId, index: sourceIndex },
+        { stripeId: targetStripeId, structureId: targetStructureId, columnId: targetColId, index: targetIndex }
+      );
+    } else if (targetType === "structure") {
+      const targetStripeId = over.data.current?.stripeId as string;
+      const targetStructureId = over.data.current?.structureId as string;
+      const targetStripe = stripes.find(s => s.id === targetStripeId);
+      const targetStruct = targetStripe?.structures.find(s => s.id === targetStructureId);
+      
+      if (targetStruct && targetStruct.columns.length > 0) {
+        store.moveBlock(
+          { stripeId: sourceStripeId, structureId: sourceStructureId, columnId: sourceColId, index: sourceIndex },
+          { stripeId: targetStripeId, structureId: targetStructureId, columnId: targetStruct.columns[0].id, index: targetStruct.columns[0].blocks.length }
+        );
+      }
+    } else if (targetType === "stripe") {
+      const targetStripeId = over.data.current?.stripeId as string;
+      const targetStripe = stripes.find(s => s.id === targetStripeId);
+      
+      if (targetStripe && targetStripe.structures.length > 0 && targetStripe.structures[0].columns.length > 0) {
+        store.moveBlock(
+          { stripeId: sourceStripeId, structureId: sourceStructureId, columnId: sourceColId, index: sourceIndex },
+          { stripeId: targetStripeId, structureId: targetStripe.structures[0].id, columnId: targetStripe.structures[0].columns[0].id, index: targetStripe.structures[0].columns[0].blocks.length }
+        );
+      }
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveId(null);
     const { active, over } = event;
     if (!over) return;
 
-    const isSidebarItem = active.data.current?.isNew;
-    const activeType = active.data.current?.type;
+    const isSidebarItem = active.data.current?.isNew as boolean | undefined;
+    const activeType = active.data.current?.type as string | undefined;
+    const targetType = over.data.current?.type as string | undefined;
 
-    // 1. Dropping from Sidebar
+    if (!activeType || !targetType) return;
+
     if (isSidebarItem) {
-      if (activeType === "structure") {
-        let targetStripeId = over.data.current?.stripeId;
-        if (!targetStripeId && stripes.length > 0) {
-          targetStripeId = stripes[stripes.length - 1].id;
-        }
-        if (!targetStripeId) {
-          targetStripeId = addStripe();
-        }
-        addStructure(targetStripeId, active.data.current?.payload);
-      } else {
-        // Dropping a content block
-        const targetType = over.data.current?.type;
-        if (targetType === "column" || targetType === "block") {
-          const targetStripeId = over.data.current?.stripeId;
-          const targetStructureId = over.data.current?.structureId;
-          const targetColId = over.data.current?.colId;
-          
-          let insertIndex = undefined;
-          if (targetType === "block") {
-            const stripe = stripes.find(s => s.id === targetStripeId);
-            const struct = stripe?.structures.find(s => s.id === targetStructureId);
-            const col = struct?.columns.find(c => c.id === targetColId);
-            const index = col?.blocks.findIndex(b => b.id === over.id);
-            if (index !== undefined && index !== -1) {
-              insertIndex = index;
-            }
-          }
-          addBlockToColumn(activeType as any, targetStripeId, targetStructureId, targetColId, insertIndex, active.data.current?.payload);
-        } else if (targetType === "structure") {
-          const targetStripeId = over.data.current?.stripeId;
-          const targetStructureId = over.data.current?.structureId;
-          const stripe = stripes.find(s => s.id === targetStripeId);
-          const struct = stripe?.structures.find(s => s.id === targetStructureId);
-          if (struct && struct.columns.length > 0) {
-            addBlockToColumn(activeType as any, targetStripeId, targetStructureId, struct.columns[0].id, undefined, active.data.current?.payload);
-          }
-        } else if (targetType === "stripe") {
-          const targetStripeId = over.data.current?.stripeId;
-          const stripe = stripes.find(s => s.id === targetStripeId);
-          if (stripe && stripe.structures.length > 0 && stripe.structures[0].columns.length > 0) {
-            addBlockToColumn(activeType as any, targetStripeId, stripe.structures[0].id, stripe.structures[0].columns[0].id, undefined, active.data.current?.payload);
-          }
-        }
-      }
+      handleSidebarDrop(active, over, activeType, targetType);
       return;
     }
 
-    // 2. Stripe Reordering
-    if (active.data.current?.type === "stripe" && over.data.current?.type === "stripe" && active.id !== over.id) {
-      const oldIndex = stripes.findIndex((s) => s.id === active.id);
-      const newIndex = stripes.findIndex((s) => s.id === over.id);
-      reorderStripes(oldIndex, newIndex);
+    if (activeType === "stripe" && targetType === "stripe" && active.id !== over.id) {
+      handleStripeReorder(active, over);
       return;
     }
 
-    // 3. Structure Reordering
-    if (active.data.current?.type === "structure" && over.data.current?.type === "structure" && active.id !== over.id) {
-      const stripeId = active.data.current?.stripeId;
-      if (stripeId === over.data.current?.stripeId) {
-        const stripe = stripes.find(s => s.id === stripeId);
-        if (stripe) {
-          const oldIndex = stripe.structures.findIndex(s => s.id === active.id);
-          const newIndex = stripe.structures.findIndex(s => s.id === over.id);
-          reorderStructures(stripeId, oldIndex, newIndex);
-        }
-      }
+    if (activeType === "structure" && targetType === "structure" && active.id !== over.id) {
+      handleStructureReorder(active, over);
       return;
     }
 
-    // 4. Block Reordering / Cross-Column Moving
-    if (active.data.current?.type === "block") {
-      const targetType = over.data.current?.type;
-      if (targetType === "column" || targetType === "block") {
-        const sourceStripeId = active.data.current?.stripeId;
-        const sourceStructureId = active.data.current?.structureId;
-        const sourceColId = active.data.current?.colId;
-        
-        const targetStripeId = over.data.current?.stripeId;
-        const targetStructureId = over.data.current?.structureId;
-        const targetColId = over.data.current?.colId;
-        
-        // Find insert index
-        const sourceStripe = stripes.find(s => s.id === sourceStripeId);
-        const sourceStruct = sourceStripe?.structures.find(s => s.id === sourceStructureId);
-        const sourceCol = sourceStruct?.columns.find(c => c.id === sourceColId);
-        const sourceIndex = sourceCol?.blocks.findIndex(b => b.id === active.id);
-        
-        const targetStripe = stripes.find(s => s.id === targetStripeId);
-        const targetStruct = targetStripe?.structures.find(s => s.id === targetStructureId);
-        const targetCol = targetStruct?.columns.find(c => c.id === targetColId);
-        
-        if (sourceIndex === undefined || sourceIndex === -1) return;
-
-        let targetIndex = targetCol?.blocks.length || 0;
-        
-        if (targetType === "block") {
-          targetIndex = targetCol?.blocks.findIndex(b => b.id === over.id) ?? targetIndex;
-        }
-
-        moveBlock(
-          { stripeId: sourceStripeId, structureId: sourceStructureId, columnId: sourceColId, index: sourceIndex },
-          { stripeId: targetStripeId, structureId: targetStructureId, columnId: targetColId, index: targetIndex }
-        );
-      } else if (targetType === "structure") {
-        const sourceStripeId = active.data.current?.stripeId;
-        const sourceStructureId = active.data.current?.structureId;
-        const sourceColId = active.data.current?.colId;
-        
-        const targetStripeId = over.data.current?.stripeId;
-        const targetStructureId = over.data.current?.structureId;
-        
-        const sourceStripe = stripes.find(s => s.id === sourceStripeId);
-        const sourceStruct = sourceStripe?.structures.find(s => s.id === sourceStructureId);
-        const sourceCol = sourceStruct?.columns.find(c => c.id === sourceColId);
-        const sourceIndex = sourceCol?.blocks.findIndex(b => b.id === active.id);
-        
-        const targetStripe = stripes.find(s => s.id === targetStripeId);
-        const targetStruct = targetStripe?.structures.find(s => s.id === targetStructureId);
-        
-        if (sourceIndex !== undefined && sourceIndex !== -1 && targetStruct && targetStruct.columns.length > 0) {
-          moveBlock(
-            { stripeId: sourceStripeId, structureId: sourceStructureId, columnId: sourceColId, index: sourceIndex },
-            { stripeId: targetStripeId, structureId: targetStructureId, columnId: targetStruct.columns[0].id, index: targetStruct.columns[0].blocks.length }
-          );
-        }
-      } else if (targetType === "stripe") {
-        const sourceStripeId = active.data.current?.stripeId;
-        const sourceStructureId = active.data.current?.structureId;
-        const sourceColId = active.data.current?.colId;
-        
-        const targetStripeId = over.data.current?.stripeId;
-        
-        const sourceStripe = stripes.find(s => s.id === sourceStripeId);
-        const sourceStruct = sourceStripe?.structures.find(s => s.id === sourceStructureId);
-        const sourceCol = sourceStruct?.columns.find(c => c.id === sourceColId);
-        const sourceIndex = sourceCol?.blocks.findIndex(b => b.id === active.id);
-        
-        const targetStripe = stripes.find(s => s.id === targetStripeId);
-        
-        if (sourceIndex !== undefined && sourceIndex !== -1 && targetStripe && targetStripe.structures.length > 0 && targetStripe.structures[0].columns.length > 0) {
-          moveBlock(
-            { stripeId: sourceStripeId, structureId: sourceStructureId, columnId: sourceColId, index: sourceIndex },
-            { stripeId: targetStripeId, structureId: targetStripe.structures[0].id, columnId: targetStripe.structures[0].columns[0].id, index: targetStripe.structures[0].columns[0].blocks.length }
-          );
-        }
-      }
+    if (activeType === "block") {
+      handleBlockMove(active, over, targetType);
     }
   };
 

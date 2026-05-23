@@ -1,8 +1,8 @@
 import * as React from "react";
 import { Html, Head, Body, Container, Font, Preview, Section, Row as EmailRow, Column as EmailColumn } from "@react-email/components";
-import type { GlobalStyles, TemplateDesign } from "@/lib/editor/types";
+import type { GlobalStyles, TemplateDesign, Stripe, Structure } from "@/lib/editor/types";
 import { BLOCK_REGISTRY } from "@/lib/editor/registry";
-import { migrateDesign } from "@/lib/editor/store";
+import { parseDesign } from "@/lib/editor/utils";
 
 interface RenderEmailProps {
   design: any;
@@ -11,10 +11,10 @@ interface RenderEmailProps {
 
 export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
   // Always migrate to ensure we have version 2.0 structure
-  const migratedDesign = migrateDesign(design);
+  const migratedDesign = parseDesign(design);
   const { globalStyles, stripes } = migratedDesign;
 
-  const emailStripes = stripes.map((stripe) => {
+  const emailStripes = stripes.map((stripe: Stripe) => {
     return (
       <Section 
         key={stripe.id} 
@@ -24,7 +24,9 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
           width: stripe.props.fullWidth ? "100%" : "inherit"
         }}
       >
-        {stripe.structures.map((structure) => (
+        {stripe.structures.map((structure: Structure) => {
+          const totalRatio = structure.columns.reduce((sum, col) => sum + col.widthRatio, 0);
+          return (
           <Section 
             key={structure.id}
             style={{
@@ -36,8 +38,9 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
               {structure.columns.map((col: any) => (
                 <EmailColumn 
                   key={col.id} 
+                  className="responsive-column"
                   style={{ 
-                    width: `${col.widthRatio * 100}%`,
+                    width: totalRatio > 0 ? `${(col.widthRatio / totalRatio) * 100}%` : "100%",
                     backgroundColor: col.props.backgroundColor || "transparent",
                     padding: `${col.props.paddingTop || 0}px ${col.props.paddingRight || 0}px ${col.props.paddingBottom || 0}px ${col.props.paddingLeft || 0}px`,
                     verticalAlign: col.props.verticalAlign || "top"
@@ -56,7 +59,8 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
               ))}
             </EmailRow>
           </Section>
-        ))}
+          );
+        })}
       </Section>
     );
   });
@@ -70,6 +74,17 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
           fontWeight={400}
           fontStyle="normal"
         />
+        <style>
+          {`
+            @media only screen and (max-width: 600px) {
+              .responsive-column {
+                width: 100% !important;
+                display: block !important;
+                box-sizing: border-box !important;
+              }
+            }
+          `}
+        </style>
       </Head>
       {previewText && <Preview>{previewText}</Preview>}
       <Body style={{ backgroundColor: globalStyles.bodyBackgroundColor, margin: 0, padding: 0 }}>

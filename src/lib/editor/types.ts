@@ -122,3 +122,10 @@ export type BlockAddress = {
   index: number;
 };
 
+export type SelectedNode = 
+  | { type: 'stripe', stripeId: string }
+  | { type: 'structure', stripeId: string, structureId: string }
+  | { type: 'column', stripeId: string, structureId: string, columnId: string }
+  | { type: 'block', stripeId: string, structureId: string, columnId: string, blockId: string }
+  | null;
+
