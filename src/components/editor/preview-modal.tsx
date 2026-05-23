@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useEditorStore } from "@/lib/editor/store";
 import { X, Loader2, Monitor, Smartphone } from "lucide-react";
+import { PreviewDeviceWrapper } from "./preview-wrappers";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -16,7 +17,9 @@ export function PreviewModal({ isOpen, onClose }: PreviewModalProps) {
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const { getDesign } = useEditorStore();
+  const { getDesign, metadata } = useEditorStore();
+
+  const fileSizeKB = html ? new Blob([html]).size / 1024 : 0;
 
   useEffect(() => {
     if (isOpen) {
@@ -109,20 +112,20 @@ export function PreviewModal({ isOpen, onClose }: PreviewModalProps) {
         </div>
       </div>
       
-      <div className="flex-1 bg-muted/30 overflow-y-auto p-4 flex justify-center py-8">
-        <div 
-          className={cn(
-            "bg-white shadow-2xl transition-all duration-300 rounded-md overflow-hidden flex flex-col border border-border/50",
-            viewMode === "mobile" ? "w-[375px]" : "w-full max-w-[800px]"
-          )}
+      <div className="flex-1 bg-zinc-950/95 dark:bg-muted/30 overflow-hidden flex justify-center items-start">
+        <PreviewDeviceWrapper 
+          viewMode={viewMode} 
+          fileSizeKB={fileSizeKB}
+          subject={metadata?.subject || "Subject line"}
+          workspaceName="MH 27squad's workspace"
         >
           <iframe 
             ref={iframeRef} 
             srcDoc={html || ""}
-            className="w-full h-full min-h-[600px] flex-1 bg-white" 
+            className="w-full h-full border-none bg-white" 
             title="Email Preview"
           />
-        </div>
+        </PreviewDeviceWrapper>
       </div>
     </div>
   );

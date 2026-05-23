@@ -3,8 +3,8 @@ import type { EditorBlock, GlobalStyles, TemplateDesign, BlockType } from "./typ
 import { BLOCK_REGISTRY } from "./registry";
 
 const DEFAULT_GLOBAL_STYLES: GlobalStyles = {
-  bodyBackgroundColor: "#0b0d0f",
-  contentBackgroundColor: "#111418",
+  bodyBackgroundColor: "#212121",
+  contentBackgroundColor: "#212121",
   contentWidth: 600,
   defaultFontFamily: "Inter, sans-serif",
   defaultFontSize: 16,
