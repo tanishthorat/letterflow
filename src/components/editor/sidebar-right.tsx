@@ -59,11 +59,11 @@ export function SidebarRight() {
   return (
     <div className="w-80 border-l border-border bg-card h-full flex flex-col z-10 shrink-0 hidden lg:flex">
       <Tabs defaultValue="inspector" className="flex-1 flex flex-col">
-        <TabsList className="w-full justify-start rounded-none border-b border-border h-12 px-4 bg-transparent">
+        {/* <TabsList className="w-full justify-start rounded-none border-b border-border h-12 px-4 bg-transparent">
           <TabsTrigger value="inspector" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4">
             Inspector
           </TabsTrigger>
-        </TabsList>
+        </TabsList> */}
         <TabsContent value="inspector" className="flex-1 overflow-y-auto m-0">
           {content}
         </TabsContent>

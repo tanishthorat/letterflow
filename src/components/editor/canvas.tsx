@@ -25,6 +25,9 @@ import React, { useState } from "react";
 import { Copy, Trash2, Rows, BoxSelect } from "lucide-react";
 import { useDndContext } from "@dnd-kit/core";
 import { DropZoneHint } from "./drop-zone-hint";
+import { EditorBlockWrapper } from "./editor-block-wrapper";
+import { NODE_COLORS } from "@/lib/editor/config";
+import { SelectionToolbar } from "./selection-toolbar";
 
 function BlockDropZone({ stripeId, structureId, colId, index }: { stripeId: string, structureId: string, colId: string, index: number }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -46,7 +49,7 @@ function BlockDropZone({ stripeId, structureId, colId, index }: { stripeId: stri
         isOver ? "h-8 -my-4 opacity-100" : "h-4 -my-2 opacity-0"
       )}
     >
-      <DropZoneHint isOver={isOver} label="Drop block here" colorClass="bg-[#7faeef]" />
+      <DropZoneHint isOver={isOver} label="Drop block here" colorClass={NODE_COLORS.block.bg} />
     </div>
   );
 }
@@ -70,7 +73,7 @@ function StructureDropZone({ stripeId, index }: { stripeId: string, index: numbe
         isOver ? "h-12 -my-6 opacity-100" : "h-6 -my-3 opacity-0"
       )}
     >
-      <DropZoneHint isOver={isOver} label="Drop layout here" colorClass="bg-[#a75d5d]" />
+      <DropZoneHint isOver={isOver} label="Drop layout here" colorClass={NODE_COLORS.structure.bg} />
     </div>
   );
 }
@@ -100,50 +103,6 @@ function EmptyDropZone() {
   );
 }
 
-function BlockItem({ block, stripeId, structureId, colId }: { block: any, stripeId: string, structureId: string, colId: string }) {
-  const { selectedNode, selectNode } = useEditorStore();
-  const config = BLOCK_REGISTRY[block.type as keyof typeof BLOCK_REGISTRY];
-  const isSelected = selectedNode?.type === 'block' && selectedNode.blockId === block.id;
-
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({
-    id: block.id,
-    data: { type: "block", stripeId, structureId, colId, blockId: block.id }
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.4 : 1,
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={cn(
-        "relative cursor-grab active:cursor-grabbing ring-2 ring-inset ring-transparent transition-colors",
-        isSelected && "ring-blue-500 z-10",
-        "hover:ring-blue-300"
-      )}
-      onClick={(e) => {
-        e.stopPropagation();
-        selectNode({ type: 'block', stripeId, structureId, columnId: colId, blockId: block.id });
-      }}
-      {...attributes}
-      {...listeners}
-    >
-      {config?.renderCanvas({ block })}
-    </div>
-  );
-}
-
 function ColumnZone({ col, stripeId, structureId }: { col: any, stripeId: string, structureId: string }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `col-${col.id}`,
@@ -155,7 +114,7 @@ function ColumnZone({ col, stripeId, structureId }: { col: any, stripeId: string
   const isBlock = activeType && ["block", "text", "image", "button", "divider"].includes(activeType);
   const showHighlight = isOver && isBlock;
 
-  const { selectedNode, selectNode } = useEditorStore();
+  const { selectedNode, selectNode, removeColumn } = useEditorStore();
   const isSelected = selectedNode?.type === 'column' && selectedNode.columnId === col.id;
 
   return (
@@ -167,8 +126,8 @@ function ColumnZone({ col, stripeId, structureId }: { col: any, stripeId: string
       }}
       className={cn(
         "flex flex-col relative transition-colors min-h-[60px] ring-2 ring-inset",
-        isSelected ? "ring-[#7faeef] z-10" : "ring-transparent hover:ring-[#7faeef]/50",
-        showHighlight && "bg-[#7faeef]/10 ring-[#7faeef]"
+        isSelected ? `${NODE_COLORS.column.ring} z-10` : `ring-transparent ${NODE_COLORS.column.hoverRing}`,
+        showHighlight && `${NODE_COLORS.column.lightBg} ${NODE_COLORS.column.ring}`
       )}
       style={{
         flex: col.widthRatio,
@@ -181,13 +140,15 @@ function ColumnZone({ col, stripeId, structureId }: { col: any, stripeId: string
       }}
     >
       {isSelected && (
-        <div className="absolute -bottom-7 left-0 bg-[#7faeef] text-white rounded-b-md px-2 py-1 flex items-center gap-1 z-30 text-xs font-medium">
-          Container
-        </div>
+        <SelectionToolbar
+          type="column"
+          label="Column"
+          onRemove={() => removeColumn(stripeId, structureId, col.id)}
+        />
       )}
       {showHighlight && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-40">
-          <div className="bg-[#7faeef] text-white text-[11px] font-medium px-3 py-1 rounded-full shadow-md whitespace-nowrap">
+          <div className={cn("text-white text-[11px] font-medium px-3 py-1 rounded-full shadow-md whitespace-nowrap", NODE_COLORS.block.bg)}>
             Drop block here
           </div>
         </div>
@@ -199,13 +160,13 @@ function ColumnZone({ col, stripeId, structureId }: { col: any, stripeId: string
               <BlockDropZone stripeId={stripeId} structureId={structureId} colId={col.id} index={0} />
               {col.blocks.map((block: any, index: number) => (
                 <React.Fragment key={block.id}>
-                  <BlockItem block={block} stripeId={stripeId} structureId={structureId} colId={col.id} />
+                  <EditorBlockWrapper block={block} stripeId={stripeId} structureId={structureId} colId={col.id} />
                   <BlockDropZone stripeId={stripeId} structureId={structureId} colId={col.id} index={index + 1} />
                 </React.Fragment>
               ))}
             </>
           ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-[#7faeef] opacity-80 pointer-events-none">
+            <div className="absolute inset-0 flex flex-col items-center justify-center opacity-80 pointer-events-none" style={{ color: NODE_COLORS.column.color }}>
                <span className="text-[11px] font-medium tracking-wide">Drop content here</span>
             </div>
           )}
@@ -243,7 +204,7 @@ function StructureItem({ structure, stripeId }: { structure: any, stripeId: stri
       style={style}
       className={cn(
         "relative group ring-2 ring-inset transition-colors",
-        isSelected ? "ring-[#a75d5d] z-20" : "ring-transparent hover:ring-[#a75d5d]/50"
+        isSelected ? `${NODE_COLORS.structure.ring} z-20` : `ring-transparent ${NODE_COLORS.structure.hoverRing}`
       )}
       onClick={(e) => {
         e.stopPropagation();
@@ -251,19 +212,14 @@ function StructureItem({ structure, stripeId }: { structure: any, stripeId: stri
       }}
     >
       {isSelected && (
-        <div className="absolute -bottom-7 left-0 bg-[#a75d5d] text-white rounded-b-md px-2 py-1 flex items-center gap-1 z-30 text-xs font-medium">
-          Structure
-          <div className="w-px h-3 bg-white/30 mx-1" />
-          <div {...attributes} {...listeners} className="cursor-grab p-0.5 hover:bg-white/20 rounded">
-            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 9h8M8 15h8"/></svg>
-          </div>
-          <button onClick={(e) => { e.stopPropagation(); duplicateStructure(stripeId, structure.id); }} className="p-0.5 hover:bg-white/20 rounded">
-            <Copy className="w-3 h-3" />
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); removeStructure(stripeId, structure.id); }} className="p-0.5 hover:bg-white/20 rounded">
-            <Trash2 className="w-3 h-3" />
-          </button>
-        </div>
+        <SelectionToolbar
+          type="structure"
+          label="Structure"
+          attributes={attributes}
+          listeners={listeners}
+          onDuplicate={() => duplicateStructure(stripeId, structure.id)}
+          onRemove={() => removeStructure(stripeId, structure.id)}
+        />
       )}
 
       <div 
@@ -317,7 +273,7 @@ function StripeItem({ stripe }: { stripe: any }) {
       style={style}
       className={cn(
         "relative group ring-2 ring-inset transition-colors",
-        isSelected ? "ring-[#5c6e99] z-20" : "ring-transparent hover:ring-[#5c6e99]/50"
+        isSelected ? `${NODE_COLORS.stripe.ring} z-20` : `ring-transparent ${NODE_COLORS.stripe.hoverRing}`
       )}
       onClick={(e) => {
         e.stopPropagation();
@@ -325,19 +281,14 @@ function StripeItem({ stripe }: { stripe: any }) {
       }}
     >
       {isSelected && (
-        <div className="absolute -bottom-7 left-0 bg-[#5c6e99] text-white rounded-b-md px-2 py-1 flex items-center gap-1 z-30 text-xs font-medium">
-          Stripe
-          <div className="w-px h-3 bg-white/30 mx-1" />
-          <div {...attributes} {...listeners} className="cursor-grab p-0.5 hover:bg-white/20 rounded">
-            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 9h8M8 15h8"/></svg>
-          </div>
-          <button onClick={(e) => { e.stopPropagation(); duplicateStripe(stripe.id); }} className="p-0.5 hover:bg-white/20 rounded">
-            <Copy className="w-3 h-3" />
-          </button>
-          <button onClick={(e) => { e.stopPropagation(); removeStripe(stripe.id); }} className="p-0.5 hover:bg-white/20 rounded">
-            <Trash2 className="w-3 h-3" />
-          </button>
-        </div>
+        <SelectionToolbar
+          type="stripe"
+          label="Stripe"
+          attributes={attributes}
+          listeners={listeners}
+          onDuplicate={() => duplicateStripe(stripe.id)}
+          onRemove={() => removeStripe(stripe.id)}
+        />
       )}
 
       <div 

@@ -50,6 +50,7 @@ interface EditorState {
   reorderStructures: (stripeId: string, startIndex: number, endIndex: number) => void;
 
   // Column Actions
+  removeColumn: (stripeId: string, structureId: string, columnId: string) => void;
   updateColumnProps: (stripeId: string, structureId: string, columnId: string, props: Partial<ColumnProps>) => void;
 
   // Block Actions
@@ -167,13 +168,29 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     };
   }),
 
-  removeStructure: (stripeId, structureId) => set((state) => ({
-    stripes: updateStripeById(state.stripes, stripeId, s => ({
-      ...s, structures: s.structures.filter(str => str.id !== structureId)
-    })),
-    selectedNode: clearSelectionIfRemoved(state.selectedNode, 'structure', structureId),
-    isDirty: true
-  })),
+  removeStructure: (stripeId, structureId) => set((state) => {
+    const stripe = state.stripes.find(s => s.id === stripeId);
+    if (!stripe) return state;
+
+    const remainingStructures = stripe.structures.filter(str => str.id !== structureId);
+    
+    if (remainingStructures.length === 0) {
+      // Cascade delete: remove stripe
+      return {
+        stripes: state.stripes.filter(s => s.id !== stripeId),
+        selectedNode: clearSelectionIfRemoved(state.selectedNode, 'structure', structureId),
+        isDirty: true
+      };
+    }
+
+    return {
+      stripes: updateStripeById(state.stripes, stripeId, s => ({
+        ...s, structures: remainingStructures
+      })),
+      selectedNode: clearSelectionIfRemoved(state.selectedNode, 'structure', structureId),
+      isDirty: true
+    };
+  }),
 
   duplicateStructure: (stripeId, structureId) => set((state) => {
     let newStructId = "";
@@ -224,6 +241,33 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     }),
     isDirty: true
   })),
+
+  removeColumn: (stripeId, structureId, columnId) => {
+    const state = get();
+    const stripe = state.stripes.find(s => s.id === stripeId);
+    const structure = stripe?.structures.find(str => str.id === structureId);
+    if (!structure) return;
+
+    const remainingColumns = structure.columns.filter(col => col.id !== columnId);
+    
+    if (remainingColumns.length === 0) {
+      // Cascade delete: remove structure (which might cascade to remove stripe)
+      state.removeStructure(stripeId, structureId);
+      // We also need to make sure selectedNode clears properly for column
+      set((s) => ({
+        selectedNode: clearSelectionIfRemoved(s.selectedNode, 'column', columnId),
+      }));
+      return;
+    }
+
+    set((s) => ({
+      stripes: updateStructureById(s.stripes, stripeId, structureId, str => ({
+        ...str, columns: remainingColumns
+      })),
+      selectedNode: clearSelectionIfRemoved(s.selectedNode, 'column', columnId),
+      isDirty: true
+    }));
+  },
 
   updateColumnProps: (stripeId, structureId, columnId, props) => set((state) => ({
     stripes: updateColumnById(state.stripes, stripeId, structureId, columnId, col => ({
