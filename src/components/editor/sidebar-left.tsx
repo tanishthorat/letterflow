@@ -46,7 +46,7 @@ function DraggableSidebarItem({ id, type, label, icon: Icon, payload, children }
       onClick={handleClick}
       className={cn(
         "flex flex-col items-center justify-center p-3 md:p-4 border border-border rounded-lg bg-background hover:bg-muted transition-colors group aspect-square md:aspect-auto cursor-grab active:cursor-grabbing w-full",
-        isDragging && "opacity-50 ring-2 ring-primary"
+        isDragging && "opacity ring-2 ring-primary"
       )}
       title={`Add ${label}`}
     >
@@ -96,7 +96,7 @@ export function SidebarLeft() {
         </button>
       </div>
 
-      <div className="p-2 md:p-4 grid grid-cols-1 md:grid-cols-2 gap-2 overflow-y-auto flex-1">
+      <div className="p-2 md:p-4 grid grid-cols-1 md:grid-cols-2 gap-2 overflow-y-auto">
         {activeTab === "blocks" && BLOCK_LIST.map((block) => (
           <DraggableSidebarItem
             key={block.type}

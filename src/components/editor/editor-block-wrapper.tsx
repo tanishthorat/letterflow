@@ -6,8 +6,9 @@ import { BLOCK_REGISTRY } from "@/lib/editor/registry";
 import { NODE_COLORS } from "@/lib/editor/config";
 import { cn } from "@/lib/utils";
 import { SelectionToolbar } from "./selection-toolbar";
+import { EditorBlock } from "@/lib/editor/types";
 
-export function EditorBlockWrapper({ block, stripeId, structureId, colId }: { block: any, stripeId: string, structureId: string, colId: string }) {
+export function EditorBlockWrapper({ block, stripeId, structureId, colId }: { block: EditorBlock, stripeId: string, structureId: string, colId: string }) {
   const { selectedNode, selectNode, duplicateBlock, removeBlock } = useEditorStore();
   const config = BLOCK_REGISTRY[block.type as keyof typeof BLOCK_REGISTRY];
   const isSelected = selectedNode?.type === 'block' && selectedNode.blockId === block.id;

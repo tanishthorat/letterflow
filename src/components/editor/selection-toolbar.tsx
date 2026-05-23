@@ -2,6 +2,8 @@ import React from "react";
 import { Grip, Copy, Trash2 } from "lucide-react";
 import { NODE_COLORS } from "@/lib/editor/config";
 import { cn } from "@/lib/utils";
+import { DraggableAttributes } from "@dnd-kit/core";
+import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 
 export function SelectionToolbar({
   type,
@@ -13,8 +15,8 @@ export function SelectionToolbar({
 }: {
   type: keyof typeof NODE_COLORS;
   label?: string;
-  attributes?: any;
-  listeners?: any;
+  attributes?: DraggableAttributes;
+  listeners?: SyntheticListenerMap;
   onDuplicate?: () => void;
   onRemove: () => void;
 }) {

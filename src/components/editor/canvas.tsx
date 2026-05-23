@@ -1,33 +1,21 @@
 "use client";
 
-import { 
-  DndContext, 
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-  useDroppable,
-  DragOverlay
-} from "@dnd-kit/core";
+import { useDroppable } from "@dnd-kit/core";
 import {
   SortableContext,
-  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useEditorStore } from "@/lib/editor/store";
-import { BLOCK_REGISTRY } from "@/lib/editor/registry";
 import { cn } from "@/lib/utils";
-import React, { useState } from "react";
-import { Copy, Trash2, Rows, BoxSelect } from "lucide-react";
+import React from "react";
 import { useDndContext } from "@dnd-kit/core";
 import { DropZoneHint } from "./drop-zone-hint";
 import { EditorBlockWrapper } from "./editor-block-wrapper";
 import { NODE_COLORS } from "@/lib/editor/config";
 import { SelectionToolbar } from "./selection-toolbar";
+import { Stripe, Structure, Column, EditorBlock } from "@/lib/editor/types";
 
 function BlockDropZone({ stripeId, structureId, colId, index }: { stripeId: string, structureId: string, colId: string, index: number }) {
   const { setNodeRef, isOver } = useDroppable({
@@ -93,7 +81,7 @@ function EmptyDropZone() {
     <div 
       ref={setNodeRef}
       className={cn(
-        "flex flex-col items-center justify-center h-full min-h-[400px] text-muted-foreground text-sm border-2 border-dashed m-4 rounded-xl transition-colors",
+        "flex flex-col items-center justify-center h-full min-h-100 text-muted-foreground text-sm border-2 border-dashed m-4 rounded-xl transition-colors",
         showHighlight ? "border-primary bg-primary/5 text-primary" : "border-transparent opacity-60"
       )}
     >
@@ -103,7 +91,7 @@ function EmptyDropZone() {
   );
 }
 
-function ColumnZone({ col, stripeId, structureId }: { col: any, stripeId: string, structureId: string }) {
+function ColumnZone({ col, stripeId, structureId }: { col: Column, stripeId: string, structureId: string }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `col-${col.id}`,
     data: { type: "column", stripeId, structureId, colId: col.id }
@@ -125,7 +113,7 @@ function ColumnZone({ col, stripeId, structureId }: { col: any, stripeId: string
         selectNode({ type: 'column', stripeId, structureId, columnId: col.id });
       }}
       className={cn(
-        "flex flex-col relative transition-colors min-h-[60px] ring-2 ring-inset",
+        "flex flex-col relative transition-colors min-h-15 ring-2 ring-inset",
         isSelected ? `${NODE_COLORS.column.ring} z-10` : `ring-transparent ${NODE_COLORS.column.hoverRing}`,
         showHighlight && `${NODE_COLORS.column.lightBg} ${NODE_COLORS.column.ring}`
       )}
@@ -153,12 +141,12 @@ function ColumnZone({ col, stripeId, structureId }: { col: any, stripeId: string
           </div>
         </div>
       )}
-      <SortableContext items={col.blocks.map((b:any) => b.id)} strategy={verticalListSortingStrategy}>
+      <SortableContext items={col.blocks.map((b: EditorBlock) => b.id)} strategy={verticalListSortingStrategy}>
         <div className="flex flex-col min-h-full">
           {col.blocks.length > 0 ? (
             <>
               <BlockDropZone stripeId={stripeId} structureId={structureId} colId={col.id} index={0} />
-              {col.blocks.map((block: any, index: number) => (
+              {col.blocks.map((block: EditorBlock, index: number) => (
                 <React.Fragment key={block.id}>
                   <EditorBlockWrapper block={block} stripeId={stripeId} structureId={structureId} colId={col.id} />
                   <BlockDropZone stripeId={stripeId} structureId={structureId} colId={col.id} index={index + 1} />
@@ -176,7 +164,7 @@ function ColumnZone({ col, stripeId, structureId }: { col: any, stripeId: string
   );
 }
 
-function StructureItem({ structure, stripeId }: { structure: any, stripeId: string }) {
+function StructureItem({ structure, stripeId }: { structure: Structure, stripeId: string }) {
   const { selectedNode, selectNode, duplicateStructure, removeStructure } = useEditorStore();
   const isSelected = selectedNode?.type === 'structure' && selectedNode.structureId === structure.id;
 
@@ -237,7 +225,7 @@ function StructureItem({ structure, stripeId }: { structure: any, stripeId: stri
           gap: structure.props.columnGap ? `${structure.props.columnGap}px` : undefined,
         }}
       >
-        {structure.columns.map((col: any) => (
+        {structure.columns.map((col: Column) => (
           <ColumnZone key={col.id} col={col} stripeId={stripeId} structureId={structure.id} />
         ))}
       </div>
@@ -245,7 +233,7 @@ function StructureItem({ structure, stripeId }: { structure: any, stripeId: stri
   );
 }
 
-function StripeItem({ stripe }: { stripe: any }) {
+function StripeItem({ stripe }: { stripe: Stripe }) {
   const { selectedNode, selectNode, duplicateStripe, removeStripe, globalStyles } = useEditorStore();
   const isSelected = selectedNode?.type === 'stripe' && selectedNode.stripeId === stripe.id;
 
@@ -309,10 +297,10 @@ function StripeItem({ stripe }: { stripe: any }) {
             maxWidth: stripe.props.fullWidth ? "100%" : `${globalStyles.contentWidth - 40}px`
           }}
         >
-          <SortableContext items={stripe.structures.map((s:any) => s.id)} strategy={verticalListSortingStrategy}>
-            <div className="flex flex-col relative w-full h-full min-h-[40px]">
+          <SortableContext items={stripe.structures.map((s: Structure) => s.id)} strategy={verticalListSortingStrategy}>
+            <div className="flex flex-col relative w-full h-full min-h-10">
               <StructureDropZone stripeId={stripe.id} index={0} />
-              {stripe.structures.map((structure: any, index: number) => (
+              {stripe.structures.map((structure: Structure, index: number) => (
                 <React.Fragment key={structure.id}>
                   <StructureItem structure={structure} stripeId={stripe.id} />
                   <StructureDropZone stripeId={stripe.id} index={index + 1} />
@@ -340,7 +328,7 @@ export function Canvas() {
       onClick={() => selectNode(null)}
     >
       <div 
-        className="shadow-2xl min-h-[800px] transition-all relative border border-border/50 my-auto"
+        className="shadow-2xl min-h-200 transition-all relative border border-border/50 my-auto"
         style={{ 
           width: "100%",
           maxWidth: "100%",

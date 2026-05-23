@@ -2,7 +2,6 @@
 
 import { 
   DndContext, 
-  closestCenter,
   KeyboardSensor,
   PointerSensor,
   useSensor,
@@ -18,13 +17,13 @@ import {
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useEditorStore } from "@/lib/editor/store";
+import { BLOCK_REGISTRY } from "@/lib/editor/registry";
 import React, { useState } from "react";
 import type { BlockType } from "@/lib/editor/types";
 
 export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
   const store = useEditorStore();
   const { stripes } = store;
-  const [activeId, setActiveId] = useState<string | null>(null);
 
   const [activeNode, setActiveNode] = useState<Active | null>(null);
 
@@ -34,8 +33,35 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
   );
 
   const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(event.active.id as string);
     setActiveNode(event.active);
+  };
+
+  const getOverlayIcon = (active: Active | null) => {
+    if (!active) return null;
+    const isNew = active.data.current?.isNew as boolean | undefined;
+    const declaredType = active.data.current?.type as string | undefined;
+
+    // If dragging from the sidebar (new block), the `type` is the block type
+    if (isNew && declaredType) {
+      return BLOCK_REGISTRY[declaredType as keyof typeof BLOCK_REGISTRY]?.icon ?? null;
+    }
+
+    // If dragging an existing block from the canvas, find the block by id
+    const blockId = active.data.current?.blockId as string | undefined;
+    if (blockId) {
+      for (const s of stripes) {
+        for (const struct of s.structures) {
+          for (const col of struct.columns) {
+            const b = col.blocks.find((b) => b.id === blockId);
+            if (b) {
+              return BLOCK_REGISTRY[b.type as keyof typeof BLOCK_REGISTRY]?.icon ?? null;
+            }
+          }
+        }
+      }
+    }
+
+    return null;
   };
 
   const customCollisionDetection: CollisionDetection = (args) => {
@@ -235,7 +261,6 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveId(null);
     setActiveNode(null);
     const { active, over } = event;
     if (!over) return;
@@ -276,11 +301,19 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
       {children}
       <DragOverlay dropAnimation={{ duration: 250, easing: 'ease' }} modifiers={[snapCenterToCursor]}>
         {activeNode ? (
-          <div className="bg-zinc-900 border border-zinc-700 shadow-2xl rounded-lg flex items-center justify-center p-3 opacity-90 scale-105 pointer-events-none w-20 h-20">
+          <div className="bg-zinc-900 border-2 border-primary shadow-2xl rounded-lg flex items-center justify-center p-3 opacity-100 scale-105 pointer-events-none w-20 h-20">
              <div className="w-12 h-12 border border-dashed border-zinc-500 rounded bg-zinc-800 flex items-center justify-center text-zinc-400">
-               <span className="text-[10px] font-medium uppercase tracking-wider">
-                 {(activeNode.data.current?.type as string)?.replace('-drop', '') || 'Move'}
-               </span>
+               {(() => {
+                 const Icon = getOverlayIcon(activeNode) as React.ElementType | null;
+                 if (Icon) {
+                   return <Icon className="w-6 h-6 text-white" />;
+                 }
+                 return (
+                   <span className="text-[10px] font-medium uppercase tracking-wider">
+                     {(activeNode.data.current?.type as string)?.replace('-drop', '') || 'Move'}
+                   </span>
+                 );
+               })()}
              </div>
           </div>
         ) : null}
