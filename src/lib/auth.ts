@@ -16,8 +16,6 @@ interface AuthStore {
 }
 
 export const useAuth = create<AuthStore>((set) => {
-  const supabase = createClient();
-
   return {
     user: null,
     loading: true,
@@ -25,6 +23,7 @@ export const useAuth = create<AuthStore>((set) => {
     setLoading: (loading) => set({ loading }),
 
     signUp: async (email: string, password: string, name: string) => {
+      const supabase = createClient();
       set({ loading: true });
       try {
         const { data, error } = await supabase.auth.signUp({
@@ -44,6 +43,7 @@ export const useAuth = create<AuthStore>((set) => {
     },
 
     signIn: async (email: string, password: string) => {
+      const supabase = createClient();
       set({ loading: true });
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -58,6 +58,7 @@ export const useAuth = create<AuthStore>((set) => {
     },
 
     signInWithGoogle: async (redirectTo?: string) => {
+      const supabase = createClient();
       set({ loading: true });
       try {
         const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -80,6 +81,7 @@ export const useAuth = create<AuthStore>((set) => {
     },
 
     signInWithGitHub: async (redirectTo?: string) => {
+      const supabase = createClient();
       set({ loading: true });
       try {
         const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -102,6 +104,7 @@ export const useAuth = create<AuthStore>((set) => {
     },
 
     signOut: async () => {
+      const supabase = createClient();
       set({ loading: true });
       try {
         const { error } = await supabase.auth.signOut();
@@ -113,6 +116,7 @@ export const useAuth = create<AuthStore>((set) => {
     },
 
     getSession: async () => {
+      const supabase = createClient();
       try {
         const { data, error } = await supabase.auth.getSession();
         if (error) throw error;
