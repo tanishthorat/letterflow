@@ -89,13 +89,15 @@ export function Header({ collapsed }: HeaderProps) {
         </Button>
       </div>
 
-      {/* Middle section: Search */}
+      {/* Middle section: Search — only on /dashboard/templates */}
       <div className="flex-1 max-w-2xl px-4 lg:px-8 hidden md:block">
-        <SearchBar 
-          placeholder="Search by name, subject or ID" 
-          value={searchQuery}
-          onChange={handleSearch}
-        />
+        {pathname === "/dashboard/templates" && (
+          <SearchBar
+            placeholder="Search by name, subject or ID"
+            value={searchQuery}
+            onChange={handleSearch}
+          />
+        )}
       </div>
 
       {/* Right section: User & notifications */}

@@ -44,20 +44,28 @@ export function EditorHeader({ template }: EditorHeaderProps) {
     setName(template?.name || "");
   }
 
+  // Client-side name validation (mirrors DB constraint: 2–120 chars)
+  const isNameTooShort = name.trim().length > 0 && name.trim().length < 2;
+  const isNameEmpty = name.trim().length === 0;
+  const isNameInvalid = isNameEmpty || isNameTooShort;
+
   // Handle autosave
   useEffect(() => {
     if (!template?.id) return;
 
     // Only trigger autosave if name has changed from template or if editor blocks/styles are dirty
     if (debouncedName !== template.name || isDirty) {
+      // Skip autosave if name doesn't meet DB constraint (2–120 chars)
+      if (debouncedName.trim().length < 2) return;
+
       const timeoutId = setTimeout(async () => {
         setSaveStatus("saving");
         const design = getDesign();
 
         try {
           await updateTemplate(template.id, {
-            name: debouncedName,
-            body_design: design, // We can just pass the design, which now has .rows
+            name: debouncedName.trim(),
+            body_design: design,
             global_styles: design.globalStyles
           });
 
@@ -96,6 +104,15 @@ export function EditorHeader({ template }: EditorHeaderProps) {
 
   const handleManualSave = async () => {
     if (!template || saveStatus === "saving") return;
+
+    // Guard: don't send invalid name to Supabase
+    if (name.trim().length < 2) {
+      toast.error("Name too short", {
+        description: "Template name must be at least 2 characters.",
+      });
+      return;
+    }
+
     setIsSaving(true);
     setSaveStatus("saving");
 
@@ -103,7 +120,7 @@ export function EditorHeader({ template }: EditorHeaderProps) {
 
     try {
       await updateTemplate(template.id, {
-        name,
+        name: name.trim(),
         body_design: { version: design.version, stripes: design.stripes },
         global_styles: design.globalStyles
       });
@@ -147,7 +164,19 @@ export function EditorHeader({ template }: EditorHeaderProps) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter email message name"
-              className="h-8 w-37.5 sm:w-55 border-transparent bg-transparent hover:border-border focus-visible:bg-background focus-visible:border-primary focus-visible:ring-1 px-2 shadow-none font-medium"
+              maxLength={120}
+              errorAsPop
+              error={
+                isNameEmpty
+                  ? "Name cannot be empty"
+                  : isNameTooShort
+                    ? "Name must be at least 2 characters"
+                    : undefined
+              }
+              className={`h-8 w-37.5 sm:w-55 border-transparent bg-transparent hover:border-border focus-visible:bg-background focus-visible:ring-1 px-2 shadow-none font-medium ${isNameInvalid
+                  ? "focus-visible:border-destructive focus-visible:ring-destructive/30"
+                  : "focus-visible:border-primary"
+                }`}
             />
           </div>
 

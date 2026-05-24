@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Mail, Palette, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { Mail, Home, Palette, Settings, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo, { CompactLogo } from "../ui/logo";
 
 const navigation = [
+  { name: "Home", href: "/dashboard", icon: Home },
   { name: "Templates", href: "/dashboard/templates", icon: Mail },
   //  coming soon in future
   // { name: "Components", href: "/dashboard/components", icon: Palette }, 
@@ -66,7 +67,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Navigation */}
       <nav className={cn("flex-1 p-4 space-y-2 transition-all duration-300 ease-in-out")}>
         {navigation.map((item) => {
-          const isActive = pathname === item.href;
+          // For Home, only exact match; for others, prefix match is fine
+          const isActive =
+            item.href === "/dashboard"
+              ? pathname === "/dashboard"
+              : pathname.startsWith(item.href);
           const Icon = item.icon;
 
           return (

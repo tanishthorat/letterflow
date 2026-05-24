@@ -44,7 +44,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           collapsed ? "ml-18" : "ml-64"
         )}
       >
-        <div className="p-8">{children}</div>
+        <div className="p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto">{children}</div>
+        </div>
       </main>
     </div>
   );
