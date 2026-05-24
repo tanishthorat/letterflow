@@ -4,8 +4,9 @@ import { useEditorStore } from "@/lib/editor/store";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Paintbrush, AlignLeft, AlignCenter, AlignRight, Plus, Minus } from "lucide-react";
+import { Paintbrush, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { NumberStepper } from "@/components/ui/number-stepper";
 
 export function GlobalStylesInspector() {
   const { globalStyles, updateGlobalStyles } = useEditorStore();
@@ -47,21 +48,13 @@ export function GlobalStylesInspector() {
 
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Message Content Width</Label>
-          <div className="flex items-center bg-muted/50 rounded-md border border-border">
-            <button 
-              className="p-2 hover:bg-muted text-muted-foreground transition-colors"
-              onClick={() => updateGlobalStyles({ contentWidth: Math.max(300, globalStyles.contentWidth - 10) })}
-            >
-              <Minus className="w-4 h-4" />
-            </button>
-            <span className="w-12 text-center text-sm font-medium">{globalStyles.contentWidth}</span>
-            <button 
-              className="p-2 hover:bg-muted text-muted-foreground transition-colors"
-              onClick={() => updateGlobalStyles({ contentWidth: Math.min(1200, globalStyles.contentWidth + 10) })}
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
+          <NumberStepper 
+            value={globalStyles.contentWidth}
+            onChange={(val) => updateGlobalStyles({ contentWidth: val })}
+            min={320}
+            max={900}
+            step={10}
+          />
         </div>
 
         <div className="flex items-center justify-between">

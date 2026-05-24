@@ -104,7 +104,9 @@ export function normalizeGlobalStyles(styles: unknown): GlobalStyles {
   if (!styles || typeof styles !== 'object') {
     return DEFAULT_GLOBAL_STYLES;
   }
-  return { ...DEFAULT_GLOBAL_STYLES, ...styles };
+  const parsed = { ...DEFAULT_GLOBAL_STYLES, ...styles };
+  parsed.contentWidth = Math.max(320, Math.min(900, parsed.contentWidth));
+  return parsed;
 }
 
 export function parseDesign(design: unknown): TemplateDesign {
