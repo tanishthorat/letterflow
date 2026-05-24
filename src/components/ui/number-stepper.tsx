@@ -61,16 +61,16 @@ export function NumberStepper({
   };
 
   return (
-    <div className={cn("flex items-center bg-muted/50 rounded-md border border-border h-9 select-none", className)}>
+    <div className={cn("flex items-center bg-muted/50 rounded-md border border-border h-9 select-none overflow-hidden w-28", className)}>
       <button
         type="button"
         disabled={value <= min}
         onClick={handleMinus}
-        className="h-full px-2.5 hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer shrink-0 rounded-l-md"
+        className="h-full w-8 shrink-0 flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer rounded-l-md"
       >
         <Minus className="w-3.5 h-3.5" />
       </button>
-      
+
       <input
         type="number"
         min={min}
@@ -79,14 +79,14 @@ export function NumberStepper({
         onChange={handleInputChange}
         onBlur={handleBlurOrEnter}
         onKeyDown={handleKeyDown}
-        className="w-16 h-full text-center text-sm font-medium bg-transparent border-0 outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-foreground shrink-0 font-mono"
+        className="flex-1 w-0 min-w-0 h-full text-center text-sm font-medium bg-transparent border-0 p-0 px-1 outline-none focus:ring-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-foreground font-mono"
       />
 
       <button
         type="button"
         disabled={value >= max}
         onClick={handlePlus}
-        className="h-full px-2.5 hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer shrink-0 rounded-r-md"
+        className="h-full w-8 shrink-0 flex items-center justify-center hover:bg-muted text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:hover:bg-transparent transition-colors cursor-pointer rounded-r-md"
       >
         <Plus className="w-3.5 h-3.5" />
       </button>
