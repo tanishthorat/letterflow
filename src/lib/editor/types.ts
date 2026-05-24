@@ -13,7 +13,7 @@ export interface TextBlock extends BaseBlock {
     fontSize?: number; // legacy
     color?: string;
     align?: "left" | "center" | "right" | "justify"; // legacy
-    
+
     // New Rich Text Properties
     fontFamily?: string;
     fontSizeDesktop?: number;
@@ -49,11 +49,35 @@ export interface TextBlock extends BaseBlock {
 export interface ImageBlock extends BaseBlock {
   type: "image";
   props: {
+    // Legacy / Shared Fallbacks
     src: string;
     alt: string;
     width: number | "auto";
     height: number | "auto";
     align: "left" | "center" | "right";
+    
+    // New Desktop-Focused Properties
+    addAltToTitle?: boolean;
+    title?: string;
+    fileName?: string;
+    originalWidth?: number;
+    originalHeight?: number;
+    linkType?: "url" | "email" | "phone" | "sms";
+    href?: string;
+    fixedHeight?: boolean;
+    imageFit?: "cover" | "contain" | "fill";
+    imagePosition?: "top" | "center" | "bottom";
+    borderRadius?: number;
+    radiusMode?: "uniform" | "individual";
+    margin?: {
+      top: number;
+      right: number;
+      bottom: number;
+      left: number;
+      linked: boolean;
+    };
+    includeIn?: "both" | "html" | "amp";
+    anchorLink?: string;
   };
 }
 
@@ -160,7 +184,7 @@ export type BlockAddress = {
   index: number;
 };
 
-export type SelectedNode = 
+export type SelectedNode =
   | { type: 'stripe', stripeId: string }
   | { type: 'structure', stripeId: string, structureId: string }
   | { type: 'column', stripeId: string, structureId: string, columnId: string }

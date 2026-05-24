@@ -1,15 +1,17 @@
 import React from "react";
 import { BlockType, ContentBlock, TextBlock, ImageBlock, ButtonBlock, DividerBlock } from "./types";
-import { Type, Image as ImageIcon, MousePointerClick, Minus } from "lucide-react";
+import { Type, Image as ImageIcon, MousePointerClick, Minus, AlignStartVertical, AlignCenterVertical, AlignEndVertical } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Heading as EmailHeading, Text as EmailText, Img as EmailImg, Button as EmailButton, Hr as EmailHr, Section } from "@react-email/components";
+import { Heading as EmailHeading, Text as EmailText, Img as EmailImg, Button as EmailButton, Hr as EmailHr, Section, Link as EmailLink } from "@react-email/components";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { AlignmentSelector } from "@/components/ui/alignment-selector";
 import { NumberStepper } from "@/components/ui/number-stepper";
 import { SpacingControl } from "@/components/ui/spacing-control";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { ImageUpload } from "@/components/editor/ImageUpload";
 
 export interface BlockConfig<T extends ContentBlock> {
   type: BlockType;
@@ -20,6 +22,10 @@ export interface BlockConfig<T extends ContentBlock> {
   renderInspector: (props: { block: T; onChange: (newProps: Partial<T["props"]>) => void }) => React.ReactNode;
   renderEmail: (props: { block: T }) => React.ReactNode;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// TEXT BLOCK
+// ─────────────────────────────────────────────────────────────────────────────
 
 const TextBlockConfig: BlockConfig<TextBlock> = {
   type: "text",
@@ -326,88 +332,511 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// IMAGE BLOCK — Canvas
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ImageCanvas({ block }: { block: ImageBlock }) {
+  const p = block.props;
+
+  const imgStyle: React.CSSProperties = {
+    display: "block",
+    maxWidth: "100%",
+    width: p.width === "auto" ? "100%" : `${p.width}px`,
+    height: p.fixedHeight && typeof p.height === "number" ? `${p.height}px` : "auto",
+    objectFit: p.fixedHeight ? (p.imageFit ?? "cover") : undefined,
+    objectPosition: p.fixedHeight ? (p.imagePosition ?? "center") : undefined,
+    borderRadius: p.borderRadius ? `${p.borderRadius}px` : undefined,
+  };
+
+  const outerStyle: React.CSSProperties = {
+    textAlign: p.align,
+    marginTop: `${p.margin?.top ?? 0}px`,
+    marginRight: `${p.margin?.right ?? 0}px`,
+    marginBottom: `${p.margin?.bottom ?? 0}px`,
+    marginLeft: `${p.margin?.left ?? 0}px`,
+  };
+
+  const img = (
+    <img
+      src={p.src}
+      alt={p.alt}
+      title={p.addAltToTitle ? p.alt : p.title}
+      style={imgStyle}
+      id={p.anchorLink ? p.anchorLink.replace(/^#/, "") : undefined}
+    />
+  );
+
+  return (
+    <div style={outerStyle}>
+      {p.href ? (
+        <a href={p.href} onClick={(e) => e.preventDefault()} style={{ display: "inline-block" }}>
+          {img}
+        </a>
+      ) : (
+        <span style={{ display: "inline-block" }}>{img}</span>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IMAGE BLOCK — Inspector
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ImageInspector({
+  block,
+  onChange,
+}: {
+  block: ImageBlock;
+  onChange: (newProps: Partial<ImageBlock["props"]>) => void;
+}) {
+  const p = block.props;
+  const margin = p.margin ?? { top: 0, right: 0, bottom: 0, left: 0, linked: true };
+
+  const linkPrefixMap: Record<string, string> = {
+    url: "",
+    email: "mailto:",
+    phone: "tel:",
+    sms: "sms:",
+  };
+
+  const stripPrefix = (href: string, type?: string) => {
+    if (!type || type === "url") return href;
+    const prefix = linkPrefixMap[type] ?? "";
+    return prefix && href.startsWith(prefix) ? href.slice(prefix.length) : href;
+  };
+
+  const buildHref = (val: string, type?: string) => {
+    if (!type || type === "url") return val;
+    const prefix = linkPrefixMap[type] ?? "";
+    return prefix && !val.startsWith(prefix) ? `${prefix}${val}` : val;
+  };
+
+  const PLACEHOLDER_SRC = "https://placehold.co/600x200/2a2a2a/ffffff?text=Image+Placeholder";
+
+  return (
+    <div className="space-y-5">
+
+      {/* ── Image Source & Upload ── */}
+      <section className="space-y-3">
+        <Label className="text-sm font-semibold text-foreground">Image</Label>
+
+        <ImageUpload
+          currentSrc={p.src}
+          onUploadSuccess={(url, fileName, w, h) =>
+            onChange({
+              src: url,
+              fileName,
+              originalWidth: w,
+              originalHeight: h,
+              width: w > 600 ? 600 : w,
+            })
+          }
+          onRemove={() =>
+            onChange({
+              src: PLACEHOLDER_SRC,
+              fileName: undefined,
+              originalWidth: undefined,
+              originalHeight: undefined,
+            })
+          }
+        />
+
+        {/* File info badge */}
+        {p.fileName && (
+          <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-muted/40 border border-border/50">
+            <ImageIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium truncate">{p.fileName}</p>
+              {p.originalWidth && p.originalHeight && (
+                <p className="text-[10px] text-muted-foreground">
+                  {p.originalWidth} × {p.originalHeight} px
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Manual URL */}
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Image URL</Label>
+          <Input
+            type="text"
+            placeholder="https://..."
+            value={p.src || ""}
+            onChange={(e) => onChange({ src: e.target.value })}
+          />
+        </div>
+      </section>
+
+      {/* ── Accessibility ── */}
+      <section className="space-y-3 border-t border-border/50 pt-4">
+        <Label className="text-sm font-semibold text-foreground">Accessibility</Label>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Alt Text</Label>
+          <Input
+            type="text"
+            placeholder="Describe the image..."
+            value={p.alt || ""}
+            onChange={(e) => onChange({ alt: e.target.value })}
+          />
+        </div>
+
+        <div className="flex items-center justify-between py-0.5">
+          <Label className="text-xs text-muted-foreground">Use alt as title attribute</Label>
+          <Switch
+            checked={p.addAltToTitle ?? false}
+            onCheckedChange={(v) => onChange({ addAltToTitle: v })}
+            size="sm"
+          />
+        </div>
+
+        {!p.addAltToTitle && (
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Title Attribute</Label>
+            <Input
+              type="text"
+              placeholder="Optional tooltip"
+              value={p.title || ""}
+              onChange={(e) => onChange({ title: e.target.value })}
+            />
+          </div>
+        )}
+      </section>
+
+      {/* ── Link / Action ── */}
+      <section className="space-y-3 border-t border-border/50 pt-4">
+        <Label className="text-sm font-semibold text-foreground">Link</Label>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">Link Type</Label>
+          <Select
+            value={p.linkType ?? "url"}
+            onValueChange={(val: any) => onChange({ linkType: val, href: "" })}
+          >
+            <SelectTrigger className="h-9 w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="url">Web URL</SelectItem>
+              <SelectItem value="email">Email Address</SelectItem>
+              <SelectItem value="phone">Phone Number</SelectItem>
+              <SelectItem value="sms">SMS</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground">
+            {p.linkType === "email"
+              ? "Email Address"
+              : p.linkType === "phone"
+                ? "Phone Number"
+                : p.linkType === "sms"
+                  ? "SMS Number"
+                  : "URL"}
+          </Label>
+          <div className="flex rounded-md border border-input overflow-hidden focus-within:ring-1 focus-within:ring-ring">
+            {p.linkType && p.linkType !== "url" && (
+              <span className="flex items-center px-2 text-[11px] text-muted-foreground bg-muted border-r border-input whitespace-nowrap">
+                {linkPrefixMap[p.linkType]}
+              </span>
+            )}
+            <Input
+              type="text"
+              placeholder={
+                p.linkType === "email"
+                  ? "name@example.com"
+                  : p.linkType === "phone"
+                    ? "+1234567890"
+                    : "https://example.com"
+              }
+              value={stripPrefix(p.href || "", p.linkType)}
+              onChange={(e) => onChange({ href: buildHref(e.target.value, p.linkType) })}
+              className="border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0 flex-1"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Size on Desktop ── */}
+      <section className="space-y-3 border-t border-border/50 pt-4">
+        <Label className="text-sm font-semibold text-foreground">Size on Desktop</Label>
+
+        <div className="flex items-center justify-between">
+          <Label className="text-xs text-muted-foreground">Width</Label>
+          <div className="flex items-center gap-2">
+            <NumberStepper
+              value={p.width === "auto" ? 600 : (p.width as number)}
+              onChange={(v) => onChange({ width: v })}
+              min={20}
+              max={1200}
+              step={1}
+              className="w-28 h-8"
+            />
+            <button
+              type="button"
+              onClick={() => onChange({ width: "auto" })}
+              className={`px-2 py-1 text-xs rounded border transition-colors ${p.width === "auto"
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-input text-muted-foreground hover:bg-muted"
+                }`}
+            >
+              Auto
+            </button>
+          </div>
+        </div>
+
+        {/* Fixed Height toggle */}
+        <div className="flex items-center justify-between py-0.5">
+          <Label className="text-xs text-muted-foreground">Fixed Height</Label>
+          <Switch
+            checked={p.fixedHeight ?? false}
+            onCheckedChange={(v) => onChange({ fixedHeight: v, height: v ? 200 : "auto" })}
+            size="sm"
+          />
+        </div>
+
+        {p.fixedHeight && (
+          <div className="space-y-3 pl-3 border-l-2 border-primary/30">
+            <div className="flex items-center justify-between">
+              <Label className="text-xs text-muted-foreground">Height (px)</Label>
+              <NumberStepper
+                value={typeof p.height === "number" ? p.height : 200}
+                onChange={(v) => onChange({ height: v })}
+                min={20}
+                max={1200}
+                step={1}
+                className="w-28 h-8"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Image Fit</Label>
+              <div className="flex border rounded-md overflow-hidden border-input">
+                {(["cover", "contain", "fill"] as const).map((fit) => (
+                  <button
+                    key={fit}
+                    type="button"
+                    onClick={() => onChange({ imageFit: fit })}
+                    className={`flex-1 py-1.5 text-xs capitalize border-r border-input last:border-r-0 transition-colors ${(p.imageFit ?? "cover") === fit
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-background text-muted-foreground hover:bg-muted"
+                      }`}
+                  >
+                    {fit}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Vertical Position</Label>
+              <div className="flex border rounded-md overflow-hidden border-input">
+                {([
+                  { val: "top" as const, Icon: AlignStartVertical },
+                  { val: "center" as const, Icon: AlignCenterVertical },
+                  { val: "bottom" as const, Icon: AlignEndVertical },
+                ]).map(({ val, Icon }) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => onChange({ imagePosition: val })}
+                    className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs border-r border-input last:border-r-0 transition-colors ${(p.imagePosition ?? "center") === val
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-background text-muted-foreground hover:bg-muted"
+                      }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span className="capitalize">{val}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* ── Alignment ── */}
+      <section className="space-y-3 border-t border-border/50 pt-4">
+        <Label className="text-sm font-semibold text-foreground">Alignment</Label>
+        <div className="flex items-center justify-between">
+          <Label className="text-xs text-muted-foreground">Desktop</Label>
+          <AlignmentSelector
+            value={(p.align ?? "center") as "left" | "center" | "right"}
+            onChange={(val) => onChange({ align: val })}
+          />
+        </div>
+      </section>
+
+      {/* ── Border Radius ── */}
+      <section className="space-y-3 border-t border-border/50 pt-4">
+        <Label className="text-sm font-semibold text-foreground">Radius on Desktop</Label>
+        <div className="flex items-center justify-between">
+          <Label className="text-xs text-muted-foreground">Corner Radius (px)</Label>
+          <NumberStepper
+            value={p.borderRadius ?? 0}
+            onChange={(v) => onChange({ borderRadius: v })}
+            min={0}
+            max={200}
+            step={1}
+            className="w-28 h-8"
+          />
+        </div>
+      </section>
+
+      {/* ── Margins ── */}
+      <section className="space-y-3 border-t border-border/50 pt-4">
+        <SpacingControl
+          label="Margin on Desktop"
+          top={margin.top}
+          right={margin.right}
+          bottom={margin.bottom}
+          left={margin.left}
+          linked={margin.linked}
+          onChangeTop={(v) => onChange({ margin: { ...margin, top: v } })}
+          onChangeRight={(v) => onChange({ margin: { ...margin, right: v } })}
+          onChangeBottom={(v) => onChange({ margin: { ...margin, bottom: v } })}
+          onChangeLeft={(v) => onChange({ margin: { ...margin, left: v } })}
+          onChangeAll={(v) => onChange({ margin: { ...margin, top: v, right: v, bottom: v, left: v } })}
+          onToggleLink={(linked) => onChange({ margin: { ...margin, linked } })}
+        />
+      </section>
+
+      {/* ── Anchor Link ── */}
+      <section className="space-y-3 border-t border-border/50 pt-4 pb-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-semibold text-foreground">Anchor Link</Label>
+          <Switch
+            checked={!!p.anchorLink}
+            onCheckedChange={(v) => onChange({ anchorLink: v ? "section-name" : "" })}
+            size="sm"
+          />
+        </div>
+        {!!p.anchorLink && (
+          <div className="flex rounded-md border border-input overflow-hidden">
+            <span className="flex items-center px-2 text-xs text-muted-foreground bg-muted border-r border-input">
+              #
+            </span>
+            <Input
+              type="text"
+              placeholder="section-name"
+              value={p.anchorLink.replace(/^#/, "")}
+              onChange={(e) =>
+                onChange({ anchorLink: e.target.value ? `#${e.target.value}` : "" })
+              }
+              className="border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IMAGE BLOCK — Email Renderer
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ImageEmailRenderer({ block }: { block: ImageBlock }) {
+  const p = block.props;
+  const computedWidth = p.width === "auto" ? undefined : (p.width as number);
+  const computedHeight =
+    p.fixedHeight && typeof p.height === "number" ? p.height : undefined;
+
+  const imgStyle: React.CSSProperties = {
+    display: "block",
+    maxWidth: "100%",
+    borderRadius: p.borderRadius ? `${p.borderRadius}px` : undefined,
+    ...(p.fixedHeight && {
+      objectFit: p.imageFit ?? "cover",
+      objectPosition: p.imagePosition ?? "center",
+      height: computedHeight ? `${computedHeight}px` : undefined,
+    }),
+  };
+
+  const wrapperStyle: React.CSSProperties = {
+    textAlign: p.align as any,
+    marginTop: `${p.margin?.top ?? 0}px`,
+    marginRight: `${p.margin?.right ?? 0}px`,
+    marginBottom: `${p.margin?.bottom ?? 0}px`,
+    marginLeft: `${p.margin?.left ?? 0}px`,
+  };
+
+  const img = (
+    <EmailImg
+      src={p.src}
+      alt={p.alt}
+      title={p.addAltToTitle ? p.alt : p.title}
+      width={computedWidth}
+      height={computedHeight}
+      style={imgStyle}
+    />
+  );
+
+  const inner = p.href ? (
+    <EmailLink href={p.href} style={{ display: "inline-block" }}>
+      {img}
+    </EmailLink>
+  ) : (
+    img
+  );
+
+  return (
+    <div
+      id={p.anchorLink ? p.anchorLink.replace(/^#/, "") : undefined}
+      data-include-in={p.includeIn ?? "both"}
+      style={wrapperStyle}
+    >
+      {inner}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IMAGE BLOCK CONFIG
+// ─────────────────────────────────────────────────────────────────────────────
+
 const ImageBlockConfig: BlockConfig<ImageBlock> = {
   type: "image",
   label: "Image",
   icon: ImageIcon,
   defaultProps: {
+    // Legacy / backward-compat (kept as-is)
     src: "https://placehold.co/600x200/2a2a2a/ffffff?text=Image+Placeholder",
-    alt: "Placeholder",
+    alt: "",
     width: "auto",
     height: "auto",
     align: "center",
+    // New desktop-focused
+    addAltToTitle: false,
+    title: "",
+    fileName: undefined,
+    originalWidth: undefined,
+    originalHeight: undefined,
+    linkType: "url",
+    href: "",
+    fixedHeight: false,
+    imageFit: "cover",
+    imagePosition: "center",
+    borderRadius: 0,
+    radiusMode: "uniform",
+    margin: { top: 0, right: 0, bottom: 0, left: 0, linked: true },
+    includeIn: "both",
+    anchorLink: "",
   },
-  renderCanvas: ({ block }) => (
-    <div style={{ textAlign: block.props.align, width: "100%" }}>
-      <img
-        src={block.props.src}
-        alt={block.props.alt}
-        style={{
-          maxWidth: "100%",
-          width: block.props.width === "auto" ? "auto" : `${block.props.width}px`,
-          height: block.props.height === "auto" ? "auto" : `${block.props.height}px`,
-          display: "inline-block"
-        }}
-      />
-    </div>
-  ),
+  renderCanvas: ({ block }) => <ImageCanvas block={block} />,
   renderInspector: ({ block, onChange }) => (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Image URL</Label>
-        <Input
-          type="text"
-          value={block.props.src || ""}
-          onChange={(e) => onChange({ src: e.target.value })}
-        />
-      </div>
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Alt Text</Label>
-        <Input
-          type="text"
-          value={block.props.alt || ""}
-          onChange={(e) => onChange({ alt: e.target.value })}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Width</Label>
-          <Input
-            type="text"
-            value={block.props.width || "auto"}
-            onChange={(e) => onChange({ width: e.target.value === "auto" ? "auto" : Number(e.target.value) })}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Height</Label>
-          <Input
-            type="text"
-            value={block.props.height || "auto"}
-            onChange={(e) => onChange({ height: e.target.value === "auto" ? "auto" : Number(e.target.value) })}
-          />
-        </div>
-      </div>
-      <div className="flex items-center justify-between">
-        <Label className="text-xs text-muted-foreground">Alignment</Label>
-        <AlignmentSelector
-          value={(block.props.align || "center") as "left" | "center" | "right"}
-          onChange={(val) => onChange({ align: val })}
-        />
-      </div>
-    </div>
+    <ImageInspector block={block} onChange={onChange} />
   ),
-  renderEmail: ({ block }) => (
-    <div style={{ textAlign: block.props.align as any, padding: "16px" }}>
-      <EmailImg
-        src={block.props.src}
-        alt={block.props.alt}
-        width={block.props.width === "auto" ? undefined : block.props.width}
-        height={block.props.height === "auto" ? undefined : block.props.height}
-        style={{ display: "inline-block", maxWidth: "100%" }}
-      />
-    </div>
-  )
+  renderEmail: ({ block }) => <ImageEmailRenderer block={block} />,
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BUTTON BLOCK
+// ─────────────────────────────────────────────────────────────────────────────
 
 const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
   type: "button",
@@ -496,7 +925,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
         </div>
       </div>
       <div className="flex items-center justify-between">
-        <Label className="text-xs text-muted-foreground">TextAlignment</Label>
+        <Label className="text-xs text-muted-foreground">Text Alignment</Label>
         <AlignmentSelector
           value={(block.props.align || "center") as "left" | "center" | "right"}
           onChange={(val) => onChange({ align: val })}
@@ -523,6 +952,10 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
     </div>
   )
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DIVIDER BLOCK
+// ─────────────────────────────────────────────────────────────────────────────
 
 const DividerBlockConfig: BlockConfig<DividerBlock> = {
   type: "divider",
@@ -574,6 +1007,10 @@ const DividerBlockConfig: BlockConfig<DividerBlock> = {
     </div>
   )
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// REGISTRY EXPORTS
+// ─────────────────────────────────────────────────────────────────────────────
 
 export const BLOCK_REGISTRY: Record<BlockType, BlockConfig<any>> = {
   text: TextBlockConfig,
