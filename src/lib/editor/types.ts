@@ -8,10 +8,41 @@ export interface BaseBlock {
 export interface TextBlock extends BaseBlock {
   type: "text";
   props: {
+    // Legacy / Shared Fallbacks
     content: string;
-    fontSize: number;
-    color: string;
-    align: "left" | "center" | "right";
+    fontSize?: number; // legacy
+    color?: string;
+    align?: "left" | "center" | "right" | "justify"; // legacy
+    
+    // New Rich Text Properties
+    fontFamily?: string;
+    fontSizeDesktop?: number;
+    fontSizeMobile?: number;
+    fontWeight?: "normal" | "bold" | number;
+    italic?: boolean;
+    underline?: boolean;
+    strikethrough?: boolean;
+    subscript?: boolean;
+    superscript?: boolean;
+    backgroundColor?: string;
+    blockBackgroundColor?: string;
+    lineHeightDesktop?: number | string;
+    lineHeightMobile?: number | string;
+    paragraphStyle?: "p" | "h1" | "h2" | "h3" | "h4";
+    alignDesktop?: "left" | "center" | "right" | "justify";
+    alignMobile?: "left" | "center" | "right" | "justify";
+    indent?: number;
+    direction?: "ltr" | "rtl";
+    fixedHeight?: boolean;
+    fixedHeightValue?: number;
+    padding?: {
+      top: number;
+      right: number;
+      bottom: number;
+      left: number;
+      linked: boolean;
+    };
+    anchorLink?: string;
   };
 }
 

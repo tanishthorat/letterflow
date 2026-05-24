@@ -7,6 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Text as EmailText, Img as EmailImg, Button as EmailButton, Hr as EmailHr, Section } from "@react-email/components";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { AlignmentSelector } from "@/components/ui/alignment-selector";
+import { NumberStepper } from "@/components/ui/number-stepper";
+import { SpacingControl } from "@/components/ui/spacing-control";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export interface BlockConfig<T extends ContentBlock> {
   type: BlockType;
@@ -27,69 +30,241 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
     fontSize: 16,
     color: "#111111",
     align: "left",
+    fontFamily: "Arial, sans-serif",
+    fontSizeDesktop: 16,
+    fontWeight: "normal",
+    italic: false,
+    underline: false,
+    strikethrough: false,
+    paragraphStyle: "p",
+    alignDesktop: "left",
+    padding: { top: 10, right: 10, bottom: 10, left: 10, linked: true },
   },
-  renderCanvas: ({ block, onChange }) => (
-    <div style={{ textAlign: block.props.align, fontSize: `${block.props.fontSize}px`, color: block.props.color }}>
-      <Textarea
-        value={block.props.content || ""}
-        onChange={(e) => {
-          e.target.style.height = 'inherit';
-          e.target.style.height = `${e.target.scrollHeight}px`;
-          onChange?.({ content: e.target.value });
-        }}
-        onFocus={(e) => {
-          e.target.style.height = 'inherit';
-          e.target.style.height = `${e.target.scrollHeight}px`;
-        }}
-        className="w-full !bg-transparent !border-none !shadow-none !ring-0 !outline-none focus-visible:!ring-0 focus-visible:!ring-offset-0 focus-visible:!outline-none hover:!bg-transparent focus:!bg-transparent resize-none overflow-hidden m-0 p-1"
-        style={{ minHeight: '40px', color: 'inherit', textAlign: 'inherit', fontSize: 'inherit' }}
-        placeholder="Enter text here..."
-      />
-    </div>
-  ),
-  renderInspector: ({ block, onChange }) => (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Content</Label>
+  renderCanvas: ({ block, onChange }) => {
+    const p = block.props;
+    const activeFontSize = p.fontSizeDesktop ?? p.fontSize ?? 16;
+    const activeAlign = p.alignDesktop ?? p.align ?? "left";
+    const textDecoration = [
+      p.underline ? "underline" : "",
+      p.strikethrough ? "line-through" : ""
+    ].filter(Boolean).join(" ");
+
+    return (
+      <div style={{
+        textAlign: activeAlign as any,
+        backgroundColor: p.blockBackgroundColor || "transparent",
+        paddingTop: `${p.padding?.top ?? 10}px`,
+        paddingRight: `${p.padding?.right ?? 10}px`,
+        paddingBottom: `${p.padding?.bottom ?? 10}px`,
+        paddingLeft: `${p.padding?.left ?? 10}px`,
+      }}>
         <Textarea
-          value={block.props.content || ""}
-          onChange={(e) => onChange({ content: e.target.value })}
-          className="min-h-[100px]"
+          ref={(node) => {
+            if (node) {
+              node.style.height = 'inherit';
+              node.style.height = `${node.scrollHeight}px`;
+            }
+          }}
+          value={p.content || ""}
+          onChange={(e) => {
+            e.target.style.height = 'inherit';
+            e.target.style.height = `${e.target.scrollHeight}px`;
+            onChange?.({ content: e.target.value });
+          }}
+          onFocus={(e) => {
+            e.target.style.height = 'inherit';
+            e.target.style.height = `${e.target.scrollHeight}px`;
+          }}
+          className="w-full !bg-transparent !border-none !shadow-none !ring-0 !outline-none focus-visible:!ring-0 focus-visible:!ring-offset-0 focus-visible:!outline-none hover:!bg-transparent focus:!bg-transparent resize-none overflow-hidden m-0 p-1"
+          style={{
+            minHeight: '40px',
+            color: p.color || "inherit",
+            textAlign: 'inherit',
+            fontSize: `${activeFontSize}px`,
+            fontFamily: p.fontFamily || "inherit",
+            fontWeight: p.fontWeight || "normal",
+            fontStyle: p.italic ? "italic" : "normal",
+            textDecoration: textDecoration || "none",
+            lineHeight: p.lineHeightDesktop || "normal",
+          }}
+          placeholder="Enter text here..."
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+    );
+  },
+  renderInspector: ({ block, onChange }) => {
+    const p = block.props;
+    const padding = p.padding || { top: 10, right: 10, bottom: 10, left: 10, linked: true };
+
+    return (
+      <div className="space-y-4">
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Font Size (px)</Label>
-          <Input
-            type="number"
-            value={block.props.fontSize || 16}
-            onChange={(e) => onChange({ fontSize: Number(e.target.value) })}
+          <Label className="text-xs text-muted-foreground">Content</Label>
+          <Textarea
+            value={p.content || ""}
+            onChange={(e) => onChange({ content: e.target.value })}
+            className="min-h-[100px]"
           />
         </div>
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Color</Label>
-          <ColorPicker
-            value={block.props.color || "#ffffff"}
-            onChange={(color) => onChange({ color })}
-          />
+
+        {/* Typography */}
+        <div className="space-y-3 border-t pt-3">
+          <Label className="text-sm font-medium">Typography</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Font Family</Label>
+              <Select
+                value={p.fontFamily || "Arial, sans-serif"}
+                onValueChange={(val) => onChange({ fontFamily: val })}
+              >
+                <SelectTrigger className="w-full h-9">
+                  <SelectValue placeholder="Select font" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Arial, sans-serif">Arial</SelectItem>
+                  <SelectItem value="'Helvetica Neue', Helvetica, Arial, sans-serif">Helvetica</SelectItem>
+                  <SelectItem value="'Times New Roman', Times, serif">Times New Roman</SelectItem>
+                  <SelectItem value="'Courier New', Courier, monospace">Courier New</SelectItem>
+                  <SelectItem value="Georgia, serif">Georgia</SelectItem>
+                  <SelectItem value="Verdana, Geneva, sans-serif">Verdana</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Font Size (px)</Label>
+              <NumberStepper
+                value={p.fontSizeDesktop ?? p.fontSize ?? 16}
+                onChange={(val) => onChange({ fontSizeDesktop: val })}
+                min={8}
+                max={120}
+                step={1}
+                className="w-full h-9"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Font Weight</Label>
+              <Select
+                value={String(p.fontWeight || "normal")}
+                onValueChange={(val) => onChange({ fontWeight: val as typeof TextBlockConfig.defaultProps.fontWeight })}
+              >
+                <SelectTrigger className="w-full h-9">
+                  <SelectValue placeholder="Weight" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="bold">Bold</SelectItem>
+                  <SelectItem value="300">Light</SelectItem>
+                  <SelectItem value="600">Semi Bold</SelectItem>
+                  <SelectItem value="800">Extra Bold</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Line Height</Label>
+              <Input
+                type="text"
+                placeholder="normal"
+                value={p.lineHeightDesktop ?? ""}
+                onChange={(e) => onChange({ lineHeightDesktop: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <button onClick={() => onChange({ italic: !p.italic })} className={`px-3 py-1 text-sm border rounded font-serif italic ${p.italic ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>I</button>
+            <button onClick={() => onChange({ underline: !p.underline })} className={`px-3 py-1 text-sm border rounded underline ${p.underline ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>U</button>
+            <button onClick={() => onChange({ strikethrough: !p.strikethrough })} className={`px-3 py-1 text-sm border rounded line-through ${p.strikethrough ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>S</button>
+          </div>
+        </div>
+
+        {/* Colors */}
+        <div className="space-y-3 border-t pt-3">
+          <Label className="text-sm font-medium">Colors</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Text Color</Label>
+              <ColorPicker
+                value={p.color || "#111111"}
+                onChange={(color) => onChange({ color })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Background</Label>
+              <ColorPicker
+                value={p.blockBackgroundColor || "transparent"}
+                onChange={(color) => onChange({ blockBackgroundColor: color })}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Alignment & Padding */}
+        <div className="space-y-3 border-t pt-3">
+          <Label className="text-sm font-medium">Layout</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs text-muted-foreground">Alignment</Label>
+            <AlignmentSelector
+              value={(p.alignDesktop ?? p.align ?? "left") as "left" | "center" | "right"}
+              onChange={(val) => onChange({ alignDesktop: val })}
+            />
+          </div>
+
+          <div className="pt-2">
+            <SpacingControl
+              label="Padding on Desktop"
+              top={padding.top}
+              right={padding.right}
+              bottom={padding.bottom}
+              left={padding.left}
+              linked={padding.linked}
+              onChangeTop={(v) => onChange({ padding: { ...padding, top: v } })}
+              onChangeRight={(v) => onChange({ padding: { ...padding, right: v } })}
+              onChangeBottom={(v) => onChange({ padding: { ...padding, bottom: v } })}
+              onChangeLeft={(v) => onChange({ padding: { ...padding, left: v } })}
+              onChangeAll={(v) => onChange({ padding: { ...padding, top: v, right: v, bottom: v, left: v } })}
+              onToggleLink={(linked) => onChange({ padding: { ...padding, linked } })}
+            />
+          </div>
         </div>
       </div>
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Alignment</Label>
-        <AlignmentSelector
-          value={(block.props.align || "left") as "left" | "center" | "right"}
-          onChange={(val) => onChange({ align: val })}
-        />
+    );
+  },
+  renderEmail: ({ block }) => {
+    const p = block.props;
+    const activeFontSize = p.fontSizeDesktop ?? p.fontSize ?? 16;
+    const activeAlign = p.alignDesktop ?? p.align ?? "left";
+    const textDecoration = [
+      p.underline ? "underline" : "",
+      p.strikethrough ? "line-through" : ""
+    ].filter(Boolean).join(" ");
+
+    return (
+      <div style={{
+        textAlign: activeAlign as any,
+        backgroundColor: p.blockBackgroundColor || "transparent",
+        paddingTop: `${p.padding?.top ?? 10}px`,
+        paddingRight: `${p.padding?.right ?? 10}px`,
+        paddingBottom: `${p.padding?.bottom ?? 10}px`,
+        paddingLeft: `${p.padding?.left ?? 10}px`,
+      }}>
+        <EmailText style={{
+          fontSize: `${activeFontSize}px`,
+          color: p.color || "#111111",
+          margin: 0,
+          fontFamily: p.fontFamily || "inherit",
+          fontWeight: p.fontWeight || "normal",
+          fontStyle: p.italic ? "italic" : "normal",
+          textDecoration: textDecoration || "none",
+          lineHeight: p.lineHeightDesktop || "normal",
+        }}>
+          {p.content}
+        </EmailText>
       </div>
-    </div>
-  ),
-  renderEmail: ({ block }) => (
-    <div style={{ textAlign: block.props.align as any, padding: "16px" }}>
-      <EmailText style={{ fontSize: `${block.props.fontSize}px`, color: block.props.color, margin: 0 }}>
-        {block.props.content}
-      </EmailText>
-    </div>
-  )
+    );
+  }
 };
 
 const ImageBlockConfig: BlockConfig<ImageBlock> = {
@@ -153,7 +328,7 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
           />
         </div>
       </div>
-      <div className="space-y-2">
+      <div className="flex items-center justify-between">
         <Label className="text-xs text-muted-foreground">Alignment</Label>
         <AlignmentSelector
           value={(block.props.align || "center") as "left" | "center" | "right"}
@@ -261,8 +436,8 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
           />
         </div>
       </div>
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Alignment</Label>
+      <div className="flex items-center justify-between">
+        <Label className="text-xs text-muted-foreground">TextAlignment</Label>
         <AlignmentSelector
           value={(block.props.align || "center") as "left" | "center" | "right"}
           onChange={(val) => onChange({ align: val })}

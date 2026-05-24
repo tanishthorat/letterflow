@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { BoxSelect } from "lucide-react";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { VerticalAlignmentSelector } from "@/components/ui/vertical-alignment-selector";
 
 export function ColumnInspector({ stripeId, structureId, columnId, stripes, updateColumnProps }: any) {
   const stripe = stripes.find((s: any) => s.id === stripeId);
@@ -19,26 +20,21 @@ export function ColumnInspector({ stripeId, structureId, columnId, stripes, upda
           Column Settings
         </h3>
       </div>
-      
+
       <div className="space-y-4">
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Background Color</Label>
-          <ColorPicker 
-            value={column.props.backgroundColor || "transparent"} 
-            onChange={(color) => updateColumnProps(stripeId, structureId, columnId, { backgroundColor: color })} 
+          <ColorPicker
+            value={column.props.backgroundColor || "transparent"}
+            onChange={(color) => updateColumnProps(stripeId, structureId, columnId, { backgroundColor: color })}
           />
         </div>
-        <div className="space-y-2">
+        <div className="flex items-center justify-between">
           <Label className="text-xs text-muted-foreground">Vertical Alignment</Label>
-          <select 
-            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
-            value={column.props.verticalAlign || 'top'} 
-            onChange={(e) => updateColumnProps(stripeId, structureId, columnId, { verticalAlign: e.target.value })}
-          >
-            <option value="top">Top</option>
-            <option value="middle">Middle</option>
-            <option value="bottom">Bottom</option>
-          </select>
+          <VerticalAlignmentSelector
+            value={(column.props.verticalAlign || "top") as "top" | "middle" | "bottom"}
+            onChange={(val) => updateColumnProps(stripeId, structureId, columnId, { verticalAlign: val })}
+          />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">

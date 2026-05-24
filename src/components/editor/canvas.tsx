@@ -123,8 +123,7 @@ function ColumnZone({ col, stripeId, structureId }: { col: Column, stripeId: str
         paddingTop: col.props.paddingTop || 0,
         paddingBottom: col.props.paddingBottom || 0,
         paddingLeft: col.props.paddingLeft || 0,
-        paddingRight: col.props.paddingRight || 0,
-        justifyContent: col.props.verticalAlign === 'middle' ? 'center' : col.props.verticalAlign === 'bottom' ? 'flex-end' : 'flex-start'
+        paddingRight: col.props.paddingRight || 0
       }}
     >
       {isSelected && (
@@ -142,7 +141,12 @@ function ColumnZone({ col, stripeId, structureId }: { col: Column, stripeId: str
         </div>
       )}
       <SortableContext items={col.blocks.map((b: EditorBlock) => b.id)} strategy={verticalListSortingStrategy}>
-        <div className="flex flex-col min-h-full">
+        <div 
+          className="flex flex-col flex-1"
+          style={{
+            justifyContent: col.props.verticalAlign === 'middle' ? 'center' : col.props.verticalAlign === 'bottom' ? 'flex-end' : 'flex-start'
+          }}
+        >
           {col.blocks.length > 0 ? (
             <>
               <BlockDropZone stripeId={stripeId} structureId={structureId} colId={col.id} index={0} />
