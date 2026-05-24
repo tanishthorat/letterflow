@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatDistanceToNow } from "date-fns";
-import { Copy, Edit2, MoreVertical, Trash2, Check, Loader2 } from "lucide-react";
+import { Copy, Edit2, MoreVertical, Trash2, Check, Loader2, X, FolderPen } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { EmailTemplate } from "@/lib/db.types";
@@ -27,16 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
 
 interface TemplateCardProps {
   template: EmailTemplate;
@@ -70,12 +61,21 @@ export function TemplateCard({ template }: TemplateCardProps) {
   const handleDelete = () => {
     setIsDeleteDialogOpen(false);
     const undoAction = deleteTemplates([template.id]);
-    toast.success("Template deleted", {
+    const toastId = toast.success("Template deleted", {
+      duration: 4000,
       action: {
         label: "Undo",
-        onClick: undoAction,
+        onClick: () => {
+          undoAction();
+          toast.dismiss(toastId);
+        },
       },
     });
+
+    // Force dismiss after 4s so hover doesn't keep the undo button alive
+    setTimeout(() => {
+      toast.dismiss(toastId);
+    }, 4000);
   };
 
   const handleDuplicate = async () => {
@@ -112,34 +112,11 @@ export function TemplateCard({ template }: TemplateCardProps) {
         <Edit2 className="w-4 h-4 mr-2" />
         Edit
       </ContextMenuItem>
-      
-      <Popover open={isRenaming} onOpenChange={setIsRenaming}>
-        <PopoverTrigger asChild>
-          <ContextMenuItem onSelect={(e) => {
-            e.preventDefault();
-            setIsRenaming(true);
-          }}>
-            <Edit2 className="w-4 h-4 mr-2" />
-            Rename
-          </ContextMenuItem>
-        </PopoverTrigger>
-        <PopoverContent className="w-64 p-2" side="right" align="start">
-          <div className="flex items-center gap-2">
-            <Input 
-              value={renameValue} 
-              onChange={(e) => setRenameValue(e.target.value)} 
-              className="h-8"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleRenameSave();
-              }}
-            />
-            <Button size="icon" className="h-8 w-8" onClick={handleRenameSave}>
-              <Check className="w-4 h-4" />
-            </Button>
-          </div>
-        </PopoverContent>
-      </Popover>
+
+      <ContextMenuItem onSelect={() => setIsRenaming(true)}>
+        <FolderPen className="w-4 h-4 mr-2" />
+        Rename
+      </ContextMenuItem>
 
       <ContextMenuItem onClick={handleDuplicate} disabled={isDuplicating}>
         {isDuplicating ? (
@@ -149,10 +126,10 @@ export function TemplateCard({ template }: TemplateCardProps) {
         )}
         Duplicate
       </ContextMenuItem>
-      
+
       <ContextMenuSeparator />
-      
-      <ContextMenuItem 
+
+      <ContextMenuItem
         className="text-destructive focus:bg-destructive/10 focus:text-destructive"
         onSelect={() => setIsDeleteDialogOpen(true)}
       >
@@ -168,34 +145,11 @@ export function TemplateCard({ template }: TemplateCardProps) {
         <Edit2 className="w-4 h-4 mr-2" />
         Edit
       </DropdownMenuItem>
-      
-      <Popover open={isRenaming} onOpenChange={setIsRenaming}>
-        <PopoverTrigger asChild>
-          <DropdownMenuItem onSelect={(e) => {
-            e.preventDefault();
-            setIsRenaming(true);
-          }}>
-            <Edit2 className="w-4 h-4 mr-2" />
-            Rename
-          </DropdownMenuItem>
-        </PopoverTrigger>
-        <PopoverContent className="w-64 p-2" side="right" align="start">
-          <div className="flex items-center gap-2">
-            <Input 
-              value={renameValue} 
-              onChange={(e) => setRenameValue(e.target.value)} 
-              className="h-8"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleRenameSave();
-              }}
-            />
-            <Button size="icon" className="h-8 w-8" onClick={handleRenameSave}>
-              <Check className="w-4 h-4" />
-            </Button>
-          </div>
-        </PopoverContent>
-      </Popover>
+
+      <DropdownMenuItem onSelect={() => setIsRenaming(true)}>
+        <FolderPen className="w-4 h-4 mr-2" />
+        Rename
+      </DropdownMenuItem>
 
       <DropdownMenuItem onClick={handleDuplicate} disabled={isDuplicating}>
         {isDuplicating ? (
@@ -205,10 +159,10 @@ export function TemplateCard({ template }: TemplateCardProps) {
         )}
         Duplicate
       </DropdownMenuItem>
-      
+
       <DropdownMenuSeparator />
-      
-      <DropdownMenuItem 
+
+      <DropdownMenuItem
         className="text-destructive focus:bg-destructive/10 focus:text-destructive"
         onSelect={() => setIsDeleteDialogOpen(true)}
       >
@@ -222,9 +176,9 @@ export function TemplateCard({ template }: TemplateCardProps) {
     <>
       <ContextMenu>
         <ContextMenuTrigger asChild>
-          <div 
+          <div
             className={cn(
-              "group relative w-full aspect-[2/3] max-h-[400px] flex flex-col rounded-xl overflow-hidden cursor-pointer transition-all duration-200 border-2",
+              "group relative w-full aspect-2/3 max-h-80 flex flex-col rounded-xl overflow-hidden cursor-pointer transition-all duration-200 border-2",
               isSelected ? "border-primary shadow-md" : "border-transparent bg-muted/20 hover:border-accent/50"
             )}
             onClick={handleEdit}
@@ -232,28 +186,69 @@ export function TemplateCard({ template }: TemplateCardProps) {
             {/* Visual Preview Section (Top) */}
             <div className="flex-1 bg-white flex flex-col relative overflow-hidden items-center justify-center pointer-events-none p-4">
               {template.body_html ? (
-                <div 
-                  className="w-full h-full text-[4px] leading-tight origin-top overflow-hidden opacity-80"
-                  dangerouslySetInnerHTML={{ __html: template.body_html }}
-                />
+                <div className="w-full h-full absolute inset-0 flex items-start justify-center overflow-hidden opacity-80 pointer-events-none p-4">
+                  <iframe
+                    srcDoc={template.body_html}
+                    sandbox=""
+                    scrolling="no"
+                    tabIndex={-1}
+                    className="origin-top border-none bg-transparent"
+                    style={{ width: "600px", height: "800px", transform: "scale(0.35)" }}
+                  />
+                </div>
               ) : (
                 <div className="w-16 h-4 bg-muted rounded animate-pulse" />
               )}
             </div>
 
             {/* Dark Details Section (Bottom) */}
-            <div className="h-[80px] bg-[#2A2A2A] text-white flex flex-col items-center justify-center p-3 relative z-10 m-2 rounded-lg">
-              <span className="text-sm font-medium truncate w-full text-center">
-                {template.name}
-              </span>
+            <div className="absolute w-full max-w-11/12 bottom-0 left-1/2 -translate-x-1/2 bg-background text-white flex flex-col items-center justify-center p-2 z-10 my-2 rounded-lg">
+              <Popover open={isRenaming} onOpenChange={setIsRenaming}>
+                <PopoverTrigger asChild>
+                  <span
+                    className="text-sm font-medium truncate w-full text-center cursor-text"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsRenaming(true);
+                    }}
+                  >
+                    {template.name}
+                  </span>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-64 p-2"
+                  side="top"
+                  align="center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={renameValue}
+                      onChange={(e) => setRenameValue(e.target.value)}
+                      className="h-8"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === 'Enter') handleRenameSave();
+                      }}
+                    />
+                    <Button size="icon" className="h-8 w-8" onClick={(e) => {
+                      e.stopPropagation();
+                      handleRenameSave();
+                    }}>
+                      <Check className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
               <span className="text-xs text-zinc-400 mt-1">
                 {template.created_at ? formatDistanceToNow(new Date(template.created_at), { addSuffix: true }) : "Unknown date"}
               </span>
             </div>
 
             {/* Absolute positioning overlays */}
-            
-            <div 
+
+            <div
               className={cn(
                 "absolute top-3 left-3 z-20 transition-opacity flex items-center justify-center cursor-pointer p-1 rounded-sm",
                 isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
@@ -263,14 +258,14 @@ export function TemplateCard({ template }: TemplateCardProps) {
                 handleToggleSelection();
               }}
             >
-              <Checkbox 
+              <Checkbox
                 checked={isSelected}
                 className="w-5 h-5 bg-white/50 backdrop-blur-md border-zinc-300 data-[state=checked]:bg-primary pointer-events-none"
               />
             </div>
 
             {/* Top Right Dropdown Trigger */}
-            <div 
+            <div
               className={cn(
                 "absolute top-2 right-2 z-20 transition-opacity",
                 isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
@@ -288,10 +283,10 @@ export function TemplateCard({ template }: TemplateCardProps) {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-            
+
           </div>
         </ContextMenuTrigger>
-        
+
         {/* Context Menu (Right Click) */}
         <ContextMenuContent className="w-48">
           <ContextMenuItems />
@@ -299,22 +294,17 @@ export function TemplateCard({ template }: TemplateCardProps) {
       </ContextMenu>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will delete "{template.name}". This action can be undone within 4 seconds.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Confirm removal"
+        description={
+          <>
+            Are you sure you want to remove “<b className="text-white font-medium">{template.name}</b>”?
+          </>
+        }
+        onConfirm={handleDelete}
+      />
     </>
   );
 }

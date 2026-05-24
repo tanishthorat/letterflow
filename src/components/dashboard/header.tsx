@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useDebounce } from "use-debounce";
-import { Mail, FolderPlus, HelpCircle, Plus, Loader2 } from "lucide-react";
+import { Mail, FolderPlus, HelpCircle, Plus, Loader2, Trash2 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -11,16 +11,7 @@ import { UserNav } from "@/components/dashboard/user-nav";
 import { useAuth } from "@/lib/auth";
 import { useTemplateStore } from "@/lib/stores/template";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
 
 interface HeaderProps {
   collapsed: boolean;
@@ -90,103 +81,106 @@ export function Header({ collapsed }: HeaderProps) {
     setIsBatchDeleteDialogOpen(false);
     const count = selectedIds.length;
     const undoAction = deleteTemplates(selectedIds);
-    toast.success(`${count} template${count > 1 ? 's' : ''} deleted`, {
+    const toastId = toast.success(`${count} template${count > 1 ? 's' : ''} deleted`, {
+      duration: 4000,
       action: {
         label: "Undo",
-        onClick: undoAction
+        onClick: () => {
+          undoAction();
+          toast.dismiss(toastId);
+        }
       }
     });
+
+    setTimeout(() => {
+      toast.dismiss(toastId);
+    }, 4000);
   };
 
   return (
     <>
-    <header
-      suppressHydrationWarning
-      className={cn(
-        "fixed top-0 right-0 h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6 transition-all duration-300 ease-in-out z-30",
-        collapsed ? "left-18" : "left-64"
-      )}
-    >
-      {/* Left section: Actions */}
-      <div className="flex items-center gap-3">
-        {/* Split Button for New Message */}
-        <div className="flex items-center shadow-sm rounded-md">
-          <Button 
-            onClick={handleCreateNew} 
-            disabled={isCreating}
-            className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground border border-primary"
-          >
-            {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
-            <span className="hidden sm:inline-block font-medium">New Message</span>
-          </Button>
-        </div>
-
-        {/* New Folder */}
-        <Button variant="outline" size="icon" className="text-muted-foreground hover:text-foreground shadow-sm">
-          <FolderPlus className="w-4 h-4" />
-        </Button>
-      </div>
-
-      {/* Middle section: Search or Batch Actions */}
-      <div className="flex-1 max-w-2xl px-4 lg:px-8 hidden md:block">
-        {pathname === "/dashboard/templates" && (
-          selectedIds.length > 0 ? (
-            <div className="flex items-center justify-between bg-muted/50 rounded-md border px-3 py-1.5 h-10 w-full">
-              <span className="text-sm font-medium text-muted-foreground">
-                {selectedIds.length} template{selectedIds.length > 1 ? 's' : ''} selected
-              </span>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={() => clearSelection()}>Cancel</Button>
-                <Button variant="destructive" size="sm" onClick={() => setIsBatchDeleteDialogOpen(true)}>Delete</Button>
-              </div>
-            </div>
-          ) : (
-            <SearchBar
-              placeholder="Search by name, subject or ID"
-              value={inputValue}
-              onChange={handleSearch}
-              isLoading={loading}
-            />
-          )
+      <header
+        suppressHydrationWarning
+        className={cn(
+          "fixed top-0 right-0 h-16 bg-card border-b border-border flex items-center justify-between px-4 lg:px-6 transition-all duration-300 ease-in-out z-30",
+          collapsed ? "left-18" : "left-64"
         )}
-      </div>
+      >
+        {/* Left section: Actions */}
+        <div className="flex items-center gap-3">
+          {/* Split Button for New Message */}
+          <div className="flex items-center shadow-sm rounded-md">
+            <Button
+              onClick={handleCreateNew}
+              disabled={isCreating}
+              className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground border border-primary"
+            >
+              {isCreating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+              <span className="hidden sm:inline-block font-medium">New Message</span>
+            </Button>
+          </div>
 
-      {/* Right section: User & notifications */}
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" className="hidden lg:flex gap-2 text-muted-foreground hover:text-foreground">
-          <HelpCircle className="w-5 h-5" />
-          <span className="font-medium">Help Center</span>
-        </Button>
-        
-       
+          {/* New Folder */}
+          <Button variant="outline" size="icon" className="text-muted-foreground hover:text-foreground shadow-sm">
+            <FolderPlus className="w-4 h-4" />
+          </Button>
+        </div>
 
-        <div className="flex items-center ml-2 pl-4 border-l border-border gap-3">
-          <Button variant="outline" size="icon" className="w-8 h-8 rounded-full border-dashed border-muted-foreground/50 text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">
-            <Plus className="w-4 h-4" />
+        {/* Middle section: Search or Batch Actions */}
+        <div className="flex-1 max-w-2xl px-4 lg:px-8 hidden md:block">
+          {pathname === "/dashboard/templates" && (
+            selectedIds.length > 0 ? (
+              <div className="flex items-center justify-between bg-muted/50 rounded-md border px-3 py-1.5 h-10 w-full">
+                <span className="text-sm font-medium text-muted-foreground">
+                  {selectedIds.length} template{selectedIds.length > 1 ? 's' : ''} selected
+                </span>
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => clearSelection()}>Cancel</Button>
+                  <Button variant="destructive" size="sm" onClick={() => setIsBatchDeleteDialogOpen(true)}>Delete</Button>
+                </div>
+              </div>
+            ) : (
+              <SearchBar
+                placeholder="Search by name, subject or ID"
+                value={inputValue}
+                onChange={handleSearch}
+                isLoading={loading}
+              />
+            )
+          )}
+        </div>
+
+        {/* Right section: User & notifications */}
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" className="hidden lg:flex gap-2 text-muted-foreground hover:text-foreground">
+            <HelpCircle className="w-5 h-5" />
+            <span className="font-medium">Help Center</span>
           </Button>
 
-          <UserNav />
-        </div>
-      </div>
-    </header>
 
-    {/* Batch Delete Confirmation Dialog */}
-    <AlertDialog open={isBatchDeleteDialogOpen} onOpenChange={setIsBatchDeleteDialogOpen}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete {selectedIds.length} template{selectedIds.length > 1 ? 's' : ''}?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action can be undone within 4 seconds.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleBatchDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+
+          <div className="flex items-center ml-2 pl-4 border-l border-border gap-3">
+            <Button variant="outline" size="icon" className="w-8 h-8 rounded-full border-dashed border-muted-foreground/50 text-muted-foreground hover:text-foreground hover:border-foreground transition-colors">
+              <Plus className="w-4 h-4" />
+            </Button>
+
+            <UserNav />
+          </div>
+        </div>
+      </header>
+
+      {/* Batch Delete Confirmation Dialog */}
+      <DeleteDialog
+        open={isBatchDeleteDialogOpen}
+        onOpenChange={setIsBatchDeleteDialogOpen}
+        title="Confirm removal"
+        description={
+          <>
+            Are you sure you want to remove <b className="text-white font-medium">{selectedIds.length}</b> template{selectedIds.length > 1 ? 's' : ''}?
+          </>
+        }
+        onConfirm={handleBatchDelete}
+      />
     </>
   );
 }
