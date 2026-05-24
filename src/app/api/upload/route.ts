@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 import crypto from "crypto";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 const bucketName = process.env.NEXT_PUBLIC_SUPABASE_BUCKET || "images";
 
 const ALLOWED_MIME_TYPES = new Set([
@@ -17,7 +15,14 @@ const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
 
 export async function POST(req: NextRequest) {
   try {
-    // Accept multipart/form-data so the file never leaves the server boundary
+    // Use the SSR client so the user's session cookie is read automatically
+    const supabase = await createClient();
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized. Please sign in." }, { status: 401 });
+    }
+
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
@@ -27,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     if (!ALLOWED_MIME_TYPES.has(file.type)) {
       return NextResponse.json(
-        { error: `File type "${file.type}" is not allowed. Use JPEG, PNG, GIF, WEBP, or AVIF.` },
+        { error: `File type "${file.type}" is not allowed.` },
         { status: 400 }
       );
     }
@@ -39,13 +44,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Build a randomised, safe storage path
+    // Path scoped to the authenticated user: email-builder/uploads/{userId}/{uuid}.ext
     const rawExt = file.name.split(".").pop()?.toLowerCase() ?? "bin";
     const safeExt = /^[a-z0-9]+$/.test(rawExt) ? rawExt : "bin";
     const uuid = crypto.randomUUID();
-    const filePath = `email-builder/uploads/${uuid}.${safeExt}`;
-
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    const filePath = `email-builder/uploads/${user.id}/${uuid}.${safeExt}`;
 
     const arrayBuffer = await file.arrayBuffer();
     const { data, error } = await supabase.storage
@@ -71,9 +74,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (err: any) {
     console.error("[upload] Unexpected error:", err?.message ?? err);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
