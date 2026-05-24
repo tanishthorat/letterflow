@@ -13,9 +13,9 @@ export interface BlockConfig<T extends ContentBlock> {
   label: string;
   icon: React.ElementType;
   defaultProps: T["props"];
-  renderCanvas: (props: { block: T }) => React.ReactNode;
+  renderCanvas: (props: { block: T; onChange?: (newProps: Partial<T["props"]>) => void }) => React.ReactNode;
   renderInspector: (props: { block: T; onChange: (newProps: Partial<T["props"]>) => void }) => React.ReactNode;
-  renderEmail: (props: { block: T }) => React.ReactNode; 
+  renderEmail: (props: { block: T }) => React.ReactNode;
 }
 
 const TextBlockConfig: BlockConfig<TextBlock> = {
@@ -23,40 +23,54 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
   label: "Text",
   icon: Type,
   defaultProps: {
-    content: "Enter your text here",
+    content: "",
     fontSize: 16,
-    color: "#ffffff",
+    color: "#111111",
     align: "left",
   },
-  renderCanvas: ({ block }) => (
+  renderCanvas: ({ block, onChange }) => (
     <div style={{ textAlign: block.props.align, fontSize: `${block.props.fontSize}px`, color: block.props.color }}>
-      {block.props.content}
+      <Textarea
+        value={block.props.content || ""}
+        onChange={(e) => {
+          e.target.style.height = 'inherit';
+          e.target.style.height = `${e.target.scrollHeight}px`;
+          onChange?.({ content: e.target.value });
+        }}
+        onFocus={(e) => {
+          e.target.style.height = 'inherit';
+          e.target.style.height = `${e.target.scrollHeight}px`;
+        }}
+        className="w-full !bg-transparent !border-none !shadow-none !ring-0 !outline-none focus-visible:!ring-0 focus-visible:!ring-offset-0 focus-visible:!outline-none hover:!bg-transparent focus:!bg-transparent resize-none overflow-hidden m-0 p-1"
+        style={{ minHeight: '40px', color: 'inherit', textAlign: 'inherit', fontSize: 'inherit' }}
+        placeholder="Enter text here..."
+      />
     </div>
   ),
   renderInspector: ({ block, onChange }) => (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Content</Label>
-        <Textarea 
-          value={block.props.content || ""} 
-          onChange={(e) => onChange({ content: e.target.value })} 
+        <Textarea
+          value={block.props.content || ""}
+          onChange={(e) => onChange({ content: e.target.value })}
           className="min-h-[100px]"
         />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Font Size (px)</Label>
-          <Input 
-            type="number" 
-            value={block.props.fontSize || 16} 
-            onChange={(e) => onChange({ fontSize: Number(e.target.value) })} 
+          <Input
+            type="number"
+            value={block.props.fontSize || 16}
+            onChange={(e) => onChange({ fontSize: Number(e.target.value) })}
           />
         </div>
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Color</Label>
-          <ColorPicker 
-            value={block.props.color || "#ffffff"} 
-            onChange={(color) => onChange({ color })} 
+          <ColorPicker
+            value={block.props.color || "#ffffff"}
+            onChange={(color) => onChange({ color })}
           />
         </div>
       </div>
@@ -91,15 +105,15 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
   },
   renderCanvas: ({ block }) => (
     <div style={{ textAlign: block.props.align, width: "100%" }}>
-      <img 
-        src={block.props.src} 
-        alt={block.props.alt} 
-        style={{ 
-          maxWidth: "100%", 
+      <img
+        src={block.props.src}
+        alt={block.props.alt}
+        style={{
+          maxWidth: "100%",
           width: block.props.width === "auto" ? "auto" : `${block.props.width}px`,
           height: block.props.height === "auto" ? "auto" : `${block.props.height}px`,
           display: "inline-block"
-        }} 
+        }}
       />
     </div>
   ),
@@ -107,35 +121,35 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Image URL</Label>
-        <Input 
-          type="text" 
-          value={block.props.src || ""} 
-          onChange={(e) => onChange({ src: e.target.value })} 
+        <Input
+          type="text"
+          value={block.props.src || ""}
+          onChange={(e) => onChange({ src: e.target.value })}
         />
       </div>
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Alt Text</Label>
-        <Input 
-          type="text" 
-          value={block.props.alt || ""} 
-          onChange={(e) => onChange({ alt: e.target.value })} 
+        <Input
+          type="text"
+          value={block.props.alt || ""}
+          onChange={(e) => onChange({ alt: e.target.value })}
         />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Width</Label>
-          <Input 
-            type="text" 
-            value={block.props.width || "auto"} 
-            onChange={(e) => onChange({ width: e.target.value === "auto" ? "auto" : Number(e.target.value) })} 
+          <Input
+            type="text"
+            value={block.props.width || "auto"}
+            onChange={(e) => onChange({ width: e.target.value === "auto" ? "auto" : Number(e.target.value) })}
           />
         </div>
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Height</Label>
-          <Input 
-            type="text" 
-            value={block.props.height || "auto"} 
-            onChange={(e) => onChange({ height: e.target.value === "auto" ? "auto" : Number(e.target.value) })} 
+          <Input
+            type="text"
+            value={block.props.height || "auto"}
+            onChange={(e) => onChange({ height: e.target.value === "auto" ? "auto" : Number(e.target.value) })}
           />
         </div>
       </div>
@@ -150,9 +164,9 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
   ),
   renderEmail: ({ block }) => (
     <div style={{ textAlign: block.props.align as any, padding: "16px" }}>
-      <EmailImg 
-        src={block.props.src} 
-        alt={block.props.alt} 
+      <EmailImg
+        src={block.props.src}
+        alt={block.props.alt}
         width={block.props.width === "auto" ? undefined : block.props.width}
         height={block.props.height === "auto" ? undefined : block.props.height}
         style={{ display: "inline-block", maxWidth: "100%" }}
@@ -176,7 +190,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
   },
   renderCanvas: ({ block }) => (
     <div style={{ textAlign: block.props.align }}>
-      <a 
+      <a
         href={block.props.url}
         onClick={(e) => e.preventDefault()}
         style={{
@@ -198,52 +212,52 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
     <div className="space-y-4">
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Button Text</Label>
-        <Input 
-          type="text" 
-          value={block.props.text || ""} 
-          onChange={(e) => onChange({ text: e.target.value })} 
+        <Input
+          type="text"
+          value={block.props.text || ""}
+          onChange={(e) => onChange({ text: e.target.value })}
         />
       </div>
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">URL</Label>
-        <Input 
-          type="text" 
-          value={block.props.url || ""} 
-          onChange={(e) => onChange({ url: e.target.value })} 
+        <Input
+          type="text"
+          value={block.props.url || ""}
+          onChange={(e) => onChange({ url: e.target.value })}
         />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Background</Label>
-          <ColorPicker 
-            value={block.props.backgroundColor || "#33cc4a"} 
-            onChange={(color) => onChange({ backgroundColor: color })} 
+          <ColorPicker
+            value={block.props.backgroundColor || "#33cc4a"}
+            onChange={(color) => onChange({ backgroundColor: color })}
             align="left"
           />
         </div>
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Text Color</Label>
-          <ColorPicker 
-            value={block.props.textColor || "#ffffff"} 
-            onChange={(color) => onChange({ textColor: color })} 
+          <ColorPicker
+            value={block.props.textColor || "#ffffff"}
+            onChange={(color) => onChange({ textColor: color })}
           />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Radius (px)</Label>
-          <Input 
-            type="number" 
-            value={block.props.borderRadius || 0} 
-            onChange={(e) => onChange({ borderRadius: Number(e.target.value) })} 
+          <Input
+            type="number"
+            value={block.props.borderRadius || 0}
+            onChange={(e) => onChange({ borderRadius: Number(e.target.value) })}
           />
         </div>
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Padding (px)</Label>
-          <Input 
-            type="number" 
-            value={block.props.padding || 0} 
-            onChange={(e) => onChange({ padding: Number(e.target.value) })} 
+          <Input
+            type="number"
+            value={block.props.padding || 0}
+            onChange={(e) => onChange({ padding: Number(e.target.value) })}
           />
         </div>
       </div>
@@ -258,7 +272,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
   ),
   renderEmail: ({ block }) => (
     <div style={{ textAlign: block.props.align as any, padding: "16px" }}>
-      <EmailButton 
+      <EmailButton
         href={block.props.url}
         style={{
           backgroundColor: block.props.backgroundColor,
@@ -295,27 +309,27 @@ const DividerBlockConfig: BlockConfig<DividerBlock> = {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Line Color</Label>
-          <ColorPicker 
-            value={block.props.lineColor || "#e5e7eb"} 
-            onChange={(color) => onChange({ lineColor: color })} 
+          <ColorPicker
+            value={block.props.lineColor || "#e5e7eb"}
+            onChange={(color) => onChange({ lineColor: color })}
             align="left"
           />
         </div>
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Height (px)</Label>
-          <Input 
-            type="number" 
-            value={block.props.lineWidth || 1} 
-            onChange={(e) => onChange({ lineWidth: Number(e.target.value) })} 
+          <Input
+            type="number"
+            value={block.props.lineWidth || 1}
+            onChange={(e) => onChange({ lineWidth: Number(e.target.value) })}
           />
         </div>
       </div>
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Vertical Padding (px)</Label>
-        <Input 
-          type="number" 
-          value={block.props.padding || 20} 
-          onChange={(e) => onChange({ padding: Number(e.target.value) })} 
+        <Input
+          type="number"
+          value={block.props.padding || 20}
+          onChange={(e) => onChange({ padding: Number(e.target.value) })}
         />
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDebounce } from "use-debounce";
 import { Mail, FolderPlus, HelpCircle, Plus, Loader2 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -19,14 +20,29 @@ export function Header({ collapsed }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { signOut } = useAuth();
-  const { searchQuery, setSearchQuery, createTemplate } = useTemplateStore();
+  const { searchQuery, setSearchQuery, createTemplate, loading } = useTemplateStore();
   const [isCreating, setIsCreating] = useState(false);
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    if (pathname !== "/dashboard/templates" && e.target.value.trim() !== "") {
-      router.push("/dashboard/templates");
+  const [inputValue, setInputValue] = useState(searchQuery);
+  const [debouncedValue] = useDebounce(inputValue, 400);
+
+  // Keep input in sync with store (e.g. if cleared from elsewhere)
+  useEffect(() => {
+    setInputValue(searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    // Only trigger if debouncedValue is different from what's currently in the store
+    if (debouncedValue !== searchQuery) {
+      setSearchQuery(debouncedValue);
+      if (pathname !== "/dashboard/templates" && debouncedValue.trim() !== "") {
+        router.push("/dashboard/templates");
+      }
     }
+  }, [debouncedValue, pathname, router, searchQuery, setSearchQuery]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
   };
 
   const handleCreateNew = async () => {
@@ -94,8 +110,9 @@ export function Header({ collapsed }: HeaderProps) {
         {pathname === "/dashboard/templates" && (
           <SearchBar
             placeholder="Search by name, subject or ID"
-            value={searchQuery}
+            value={inputValue}
             onChange={handleSearch}
+            isLoading={loading}
           />
         )}
       </div>

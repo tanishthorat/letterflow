@@ -1,16 +1,17 @@
 "use client"
 
 import * as React from "react"
-import { Delete, Search, X } from "lucide-react"
+import { Delete, Search, X, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 export interface SearchBarProps extends React.InputHTMLAttributes<HTMLInputElement> {
   containerClassName?: string;
+  isLoading?: boolean;
 }
 
 export const SearchBar = React.forwardRef<HTMLInputElement, SearchBarProps>(
-  ({ className, containerClassName, value, defaultValue, onChange, ...props }, ref) => {
+  ({ className, containerClassName, isLoading, value, defaultValue, onChange, ...props }, ref) => {
     const inputRef = React.useRef<HTMLInputElement>(null)
     const [hasValue, setHasValue] = React.useState(
       Boolean(value || defaultValue)
@@ -59,7 +60,11 @@ export const SearchBar = React.forwardRef<HTMLInputElement, SearchBarProps>(
 
     return (
       <div className={cn("relative w-full group", containerClassName)}>
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
+        {isLoading ? (
+          <Loader2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+        ) : (
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none" />
+        )}
         <Input
           type="search"
           ref={mergedRef}

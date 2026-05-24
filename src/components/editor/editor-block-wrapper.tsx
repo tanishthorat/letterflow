@@ -9,7 +9,7 @@ import { SelectionToolbar } from "./selection-toolbar";
 import { EditorBlock } from "@/lib/editor/types";
 
 export function EditorBlockWrapper({ block, stripeId, structureId, colId }: { block: EditorBlock, stripeId: string, structureId: string, colId: string }) {
-  const { selectedNode, selectNode, duplicateBlock, removeBlock } = useEditorStore();
+  const { selectedNode, selectNode, duplicateBlock, removeBlock, updateBlock } = useEditorStore();
   const config = BLOCK_REGISTRY[block.type as keyof typeof BLOCK_REGISTRY];
   const isSelected = selectedNode?.type === 'block' && selectedNode.blockId === block.id;
 
@@ -54,7 +54,10 @@ export function EditorBlockWrapper({ block, stripeId, structureId, colId }: { bl
           onRemove={() => removeBlock(stripeId, structureId, colId, block.id)}
         />
       )}
-      {config?.renderCanvas({ block })}
+      {config?.renderCanvas({ 
+        block: block as any, 
+        onChange: (newProps) => updateBlock(stripeId, structureId, colId, block.id, newProps) 
+      })}
     </div>
   );
 }

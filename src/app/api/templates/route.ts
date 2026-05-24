@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const supabase = await createClient();
     
@@ -11,17 +11,56 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // RLS will automatically restrict results to the authenticated user
-    const { data, error } = await supabase
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "12");
+    const search = searchParams.get("search") || "";
+    const category = searchParams.get("category") || "all";
+    const sort = searchParams.get("sort") || "date_desc";
+
+    const offset = (page - 1) * limit;
+
+    let query = supabase
       .from("email_templates")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select("*", { count: "exact" });
+
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,subject.ilike.%${search}%`);
+    }
+
+    if (category !== "all") {
+      query = query.eq("category", category);
+    }
+
+    switch (sort) {
+      case "name_asc":
+        query = query.order("name", { ascending: true });
+        break;
+      case "name_desc":
+        query = query.order("name", { ascending: false });
+        break;
+      case "modified_desc":
+        query = query.order("updated_at", { ascending: false });
+        break;
+      case "date_asc":
+        query = query.order("created_at", { ascending: true });
+        break;
+      case "date_desc":
+      default:
+        query = query.order("created_at", { ascending: false });
+    }
+
+    query = query.range(offset, offset + limit - 1);
+
+    const { data, count, error } = await query;
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ templates: data });
+    const hasMore = count !== null ? offset + limit < count : false;
+
+    return NextResponse.json({ templates: data, hasMore, total: count });
   } catch (error: unknown) {
     const err = error instanceof Error ? error.message : "Internal Server Error";
     return NextResponse.json({ error: err }, { status: 500 });

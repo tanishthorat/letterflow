@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { useDebounce } from "use-debounce";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Loader2, 
@@ -10,7 +9,8 @@ import {
   Tag, 
   LayoutGrid, 
   ArrowDown, 
-  ChevronDown 
+  ChevronDown,
+  List
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,15 +25,65 @@ import { EmptyTemplatesState } from "@/components/dashboard/templates/empty-stat
 import { useTemplateStore } from "@/lib/stores/template";
 import type { EmailTemplate } from "@/lib/db.types";
 
+const SORT_LABELS: Record<string, string> = {
+  name_asc: "Name (A-Z)",
+  name_desc: "Name (Z-A)",
+  date_desc: "Date Created",
+  date_asc: "Oldest First",
+  modified_desc: "Last Modified",
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  all: "All Tags",
+  marketing: "Marketing",
+  transactional: "Transactional",
+  support: "Support",
+  billing: "Billing",
+  system: "System",
+  other: "Other",
+};
+
 export default function TemplatesPage() {
   const router = useRouter();
-  const { templates, fetchTemplates, createTemplate, loading, searchQuery } = useTemplateStore();
-  const [debouncedSearch] = useDebounce(searchQuery, 300);
+  const { 
+    templates, 
+    fetchTemplates, 
+    createTemplate, 
+    loading, 
+    searchQuery,
+    sort, setSort,
+    category, setCategory,
+    viewMode, setViewMode,
+    hasMore
+  } = useTemplateStore();
   const [isCreating, setIsCreating] = useState(false);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchTemplates();
   }, [fetchTemplates]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          fetchTemplates(true);
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    const currentTarget = observerTarget.current;
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [observerTarget, hasMore, loading, fetchTemplates]);
 
   const handleCreateNew = async () => {
     setIsCreating(true);
@@ -51,16 +101,6 @@ export default function TemplatesPage() {
       setIsCreating(false);
     }
   };
-
-  const filteredTemplates = useMemo(() => {
-    return templates.filter((template) => {
-      const matchesSearch =
-        template.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-        template.subject.toLowerCase().includes(debouncedSearch.toLowerCase());
-      
-      return matchesSearch;
-    });
-  }, [templates, debouncedSearch]);
 
   const statusBadgeColor = (status: EmailTemplate["status"]) => {
     switch (status) {
@@ -81,7 +121,7 @@ export default function TemplatesPage() {
     );
   }
 
-  if (templates.length === 0 && !searchQuery) {
+  if (templates.length === 0 && !searchQuery && category === "all") {
     return <EmptyTemplatesState />;
   }
 
@@ -92,7 +132,7 @@ export default function TemplatesPage() {
         <div className="flex items-center gap-2">
           <h1 className="text-lg font-semibold">Emails</h1>
           <span className="flex items-center justify-center bg-muted text-muted-foreground text-[10px] font-medium rounded-full w-5 h-5">
-            {filteredTemplates.length}
+            {templates.length}
           </span>
         </div>
         
@@ -110,26 +150,33 @@ export default function TemplatesPage() {
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
                 <Tag className="w-4 h-4" />
+                {CATEGORY_LABELS[category] || "All Tags"}
                 <ChevronDown className="w-3 h-3 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              <DropdownMenuItem>All Tags</DropdownMenuItem>
-              <DropdownMenuItem>Marketing</DropdownMenuItem>
-              <DropdownMenuItem>Transactional</DropdownMenuItem>
+              {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
+                <DropdownMenuItem key={key} onClick={() => setCategory(key)}>
+                  {label} {category === key && "✓"}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
-                <LayoutGrid className="w-4 h-4" />
+                {viewMode === "grid" ? <LayoutGrid className="w-4 h-4" /> : <List className="w-4 h-4" />}
                 <ChevronDown className="w-3 h-3 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              <DropdownMenuItem>Grid View</DropdownMenuItem>
-              <DropdownMenuItem>List View</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setViewMode("grid")}>
+                Grid View {viewMode === "grid" && "✓"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setViewMode("list")}>
+                List View {viewMode === "list" && "✓"}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
@@ -137,21 +184,23 @@ export default function TemplatesPage() {
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
                 <ArrowDown className="w-4 h-4" />
-                Name
+                {SORT_LABELS[sort] || "Sort"}
                 <ChevronDown className="w-3 h-3 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              <DropdownMenuItem>Name (A-Z)</DropdownMenuItem>
-              <DropdownMenuItem>Date Created</DropdownMenuItem>
-              <DropdownMenuItem>Last Modified</DropdownMenuItem>
+              {Object.entries(SORT_LABELS).map(([key, label]) => (
+                <DropdownMenuItem key={key} onClick={() => setSort(key)}>
+                  {label} {sort === key && "✓"}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
 
-      {/* Templates Grid */}
-      {filteredTemplates.length === 0 ? (
+      {/* Templates Grid/List */}
+      {templates.length === 0 ? (
         <Card>
           <CardContent className="pt-6 text-center">
             <p className="text-muted-foreground mb-4">No templates found</p>
@@ -166,38 +215,45 @@ export default function TemplatesPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {filteredTemplates.map((template) => (
-            <Card key={template.id} className="hover:border-accent/50 transition-colors cursor-pointer">
-              <CardHeader>
-                <div className="flex justify-between items-start gap-2 mb-2">
-                  <CardTitle className="text-base">{template.name}</CardTitle>
-                  <Badge className={statusBadgeColor(template.status)} variant="secondary">
-                    {template.status}
-                  </Badge>
-                </div>
-                <CardDescription className="line-clamp-2">
-                  {template.subject}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between items-center text-xs text-muted-foreground">
-                  <Badge variant="outline">
-                    {template.category}
-                  </Badge>
-                  <span>{template.placeholders.length} vars</span>
-                </div>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => router.push(`/editor/${template.id}`)}
-                >
-                  Edit
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <>
+          <div className={`grid gap-4 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}>
+            {templates.map((template) => (
+              <Card key={template.id} className="hover:border-accent/50 transition-colors cursor-pointer">
+                <CardHeader>
+                  <div className="flex justify-between items-start gap-2 mb-2">
+                    <CardTitle className="text-base">{template.name}</CardTitle>
+                    <Badge className={statusBadgeColor(template.status)} variant="secondary">
+                      {template.status}
+                    </Badge>
+                  </div>
+                  <CardDescription className="line-clamp-2">
+                    {template.subject || "No subject set"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between items-center text-xs text-muted-foreground">
+                    <Badge variant="outline">
+                      {template.category}
+                    </Badge>
+                    <span>{template.placeholders?.length || 0} vars</span>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => router.push(`/editor/${template.id}`)}
+                  >
+                    Edit
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
+          {/* Infinite scroll trigger */}
+          <div ref={observerTarget} className="flex justify-center py-4">
+            {hasMore && loading && <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />}
+          </div>
+        </>
       )}
     </div>
   );

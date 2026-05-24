@@ -211,11 +211,11 @@ function StructureItem({ structure, stripeId }: { structure: Structure, stripeId
       )}
 
       {/* Ring Highlight Overlay */}
-      <div 
+      <div
         className={cn(
           "absolute inset-0 pointer-events-none transition-all z-10",
-          isSelected 
-            ? "ring-2 ring-inset ring-[#a75d5d]" 
+          isSelected
+            ? "ring-2 ring-inset ring-[#a75d5d]"
             : "ring-transparent group-hover:ring-2 group-hover:ring-inset group-hover:ring-[#a75d5d]/40"
         )}
       />

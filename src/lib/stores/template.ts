@@ -7,30 +7,79 @@ interface TemplateState {
   error: string | null;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  fetchTemplates: () => Promise<void>;
+  page: number;
+  hasMore: boolean;
+  sort: string;
+  category: string;
+  viewMode: "grid" | "list";
+  setSort: (sort: string) => void;
+  setCategory: (category: string) => void;
+  setViewMode: (viewMode: "grid" | "list") => void;
+  fetchTemplates: (loadMore?: boolean) => Promise<void>;
   createTemplate: (templateData: Partial<EmailTemplate>) => Promise<EmailTemplate | null>;
   updateTemplate: (id: string, templateData: Partial<EmailTemplate>) => Promise<EmailTemplate | null>;
 }
 
-export const useTemplateStore = create<TemplateState>((set) => ({
+export const useTemplateStore = create<TemplateState>((set, get) => ({
   templates: [],
   loading: false,
   error: null,
   searchQuery: "",
-  setSearchQuery: (query) => set({ searchQuery: query }),
+  page: 1,
+  hasMore: false,
+  sort: "date_desc",
+  category: "all",
+  viewMode: "grid",
 
-  fetchTemplates: async () => {
-    set({ loading: true, error: null });
+  setSearchQuery: (query) => {
+    set({ searchQuery: query });
+    get().fetchTemplates(false);
+  },
+  
+  setSort: (sort) => {
+    set({ sort });
+    get().fetchTemplates(false);
+  },
+  
+  setCategory: (category) => {
+    set({ category });
+    get().fetchTemplates(false);
+  },
+
+  setViewMode: (viewMode) => set({ viewMode }),
+
+  fetchTemplates: async (loadMore = false) => {
+    const state = get();
+    // Prevent fetching if we are already loading or if there's no more data and we're trying to load more
+    if (state.loading) return;
+    if (loadMore && !state.hasMore) return;
+
+    const newPage = loadMore ? state.page + 1 : 1;
+    set({ loading: true, error: null, page: newPage });
+    
     try {
-      const response = await fetch("/api/templates");
+      const params = new URLSearchParams({
+        page: newPage.toString(),
+        limit: "12",
+        search: state.searchQuery,
+        category: state.category,
+        sort: state.sort,
+      });
+
+      const response = await fetch(`/api/templates?${params.toString()}`);
       
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to fetch templates");
       }
 
-      const { templates } = await response.json();
-      set({ templates, loading: false });
+      const { templates, hasMore } = await response.json();
+      
+      set((currentState) => ({ 
+        templates: loadMore ? [...currentState.templates, ...templates] : templates,
+        hasMore,
+        loading: false 
+      }));
     } catch (err: unknown) {
       console.error("Error fetching templates:", err);
       set({ error: err instanceof Error ? err.message : String(err), loading: false });
