@@ -56,7 +56,7 @@ export function UserNav() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuContent className="w-70 p-2 bg-popover border-border text-popover-foreground shadow-xl" align="end" forceMount>
         {/* Profile */}
         <DropdownMenuLabel className="font-normal p-0 mb-1">
@@ -75,16 +75,16 @@ export function UserNav() {
             </div>
           </DropdownMenuItem>
         </DropdownMenuLabel>
-        
+
         <DropdownMenuSeparator className="-mx-2 bg-border" />
-        
+
         {/* Theme */}
         <DropdownMenuGroup className="my-1">
           <div className="flex items-center justify-between px-3 py-2">
             <span className="text-sm font-medium">Theme</span>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={toggleTheme}
               className="h-8 px-3 text-xs gap-2 rounded-full border-border bg-transparent"
             >
@@ -102,7 +102,7 @@ export function UserNav() {
             </Button>
           </div>
         </DropdownMenuGroup>
-        
+
         <DropdownMenuSeparator className="-mx-2 bg-border" />
 
         {/* Workspace */}
@@ -115,14 +115,14 @@ export function UserNav() {
             <span className="text-xs text-muted-foreground pl-6">Workspace</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        
+
         <DropdownMenuSeparator className="-mx-2 bg-border" />
 
         {/* Sign out */}
-        <DropdownMenuItem 
+        <DropdownMenuItem
           variant="destructive"
-          onClick={handleSignOut} 
-          disabled={loading} 
+          onClick={handleSignOut}
+          disabled={loading}
           className="p-3 cursor-pointer mt-1 rounded-md"
         >
           <LogOut className="w-4 h-4 mr-3" />

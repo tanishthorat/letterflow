@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { Loader, AlertCircle } from "lucide-react";
 import { GoogleIcon, GitHubIcon } from "@/components/ui/icons";
+import { toast } from "@/lib/toast";
 
 interface SocialAuthButtonsProps {
     isLoading?: boolean;
@@ -27,6 +28,7 @@ export function SocialAuthButtons({ isLoading: parentLoading = false }: SocialAu
         } catch (err) {
             const message = err instanceof Error ? err.message : "Google sign in failed";
             setError(message);
+            toast.error("Google sign in failed", { description: message });
             setGoogleLoading(false);
         }
     };
@@ -39,6 +41,7 @@ export function SocialAuthButtons({ isLoading: parentLoading = false }: SocialAu
         } catch (err) {
             const message = err instanceof Error ? err.message : "GitHub sign in failed";
             setError(message);
+            toast.error("GitHub sign in failed", { description: message });
             setGithubLoading(false);
         }
     };

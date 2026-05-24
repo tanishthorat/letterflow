@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { PasswordInput } from "./password-input";
 import { SocialAuthButtons } from "./social-auth-buttons";
 import { AlertCircle } from "lucide-react";
+import { toast } from "@/lib/toast";
 
 export function LoginForm() {
   const router = useRouter();
@@ -62,6 +63,7 @@ export function LoginForm() {
       const message =
         err instanceof Error ? err.message : "Sign in failed. Please try again.";
       setError(message);
+      toast.error("Sign in failed", { description: message });
     } finally {
       setLoading(false);
     }
