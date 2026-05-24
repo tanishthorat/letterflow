@@ -4,7 +4,7 @@ import { Type, Image as ImageIcon, MousePointerClick, Minus } from "lucide-react
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Text as EmailText, Img as EmailImg, Button as EmailButton, Hr as EmailHr, Section } from "@react-email/components";
+import { Heading as EmailHeading, Text as EmailText, Img as EmailImg, Button as EmailButton, Hr as EmailHr, Section } from "@react-email/components";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { AlignmentSelector } from "@/components/ui/alignment-selector";
 import { NumberStepper } from "@/components/ui/number-stepper";
@@ -107,6 +107,49 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
           />
         </div>
 
+        {/* Insert Merge Tags */}
+        <div className="space-y-3 border-t pt-3">
+          <Label className="text-sm font-medium">Insert</Label>
+          <Select
+            value=""
+            onValueChange={(val) => {
+              if (val) {
+                onChange({ content: (p.content || "") + val });
+              }
+            }}
+          >
+            <SelectTrigger className="w-full h-9">
+              <SelectValue placeholder="Merge Tags" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="{{firstName}}">First Name {"{{firstName}}"}</SelectItem>
+              <SelectItem value="{{lastName}}">Last Name {"{{lastName}}"}</SelectItem>
+              <SelectItem value="{{email}}">Email {"{{email}}"}</SelectItem>
+              <SelectItem value="{{currentDate}}">Current Date {"{{currentDate}}"}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Paragraph Style */}
+        <div className="space-y-3 border-t pt-3">
+          <Label className="text-sm font-medium">Paragraph Style</Label>
+          <div className="flex border rounded-md overflow-hidden border-input">
+            {(["p", "h1", "h2", "h3", "h4", "h5", "h6"] as const).map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => onChange({ paragraphStyle: tag })}
+                className={`flex-1 py-1.5 text-xs font-semibold uppercase border-r border-input last:border-r-0 transition-colors ${(p.paragraphStyle || "p") === tag
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background text-muted-foreground hover:bg-muted"
+                  }`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Typography */}
         <div className="space-y-3 border-t pt-3">
           <Label className="text-sm font-medium">Typography</Label>
@@ -173,10 +216,11 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <button onClick={() => onChange({ italic: !p.italic })} className={`px-3 py-1 text-sm border rounded font-serif italic ${p.italic ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>I</button>
-            <button onClick={() => onChange({ underline: !p.underline })} className={`px-3 py-1 text-sm border rounded underline ${p.underline ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>U</button>
-            <button onClick={() => onChange({ strikethrough: !p.strikethrough })} className={`px-3 py-1 text-sm border rounded line-through ${p.strikethrough ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>S</button>
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Text Style</Label>
+            <div className="flex gap-2"><button onClick={() => onChange({ italic: !p.italic })} className={`px-3 py-1 text-sm border rounded font-serif italic ${p.italic ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>I</button>
+              <button onClick={() => onChange({ underline: !p.underline })} className={`px-3 py-1 text-sm border rounded underline ${p.underline ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>U</button>
+              <button onClick={() => onChange({ strikethrough: !p.strikethrough })} className={`px-3 py-1 text-sm border rounded line-through ${p.strikethrough ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>S</button></div>
           </div>
         </div>
 
@@ -250,18 +294,33 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
         paddingBottom: `${p.padding?.bottom ?? 10}px`,
         paddingLeft: `${p.padding?.left ?? 10}px`,
       }}>
-        <EmailText style={{
-          fontSize: `${activeFontSize}px`,
-          color: p.color || "#111111",
-          margin: 0,
-          fontFamily: p.fontFamily || "inherit",
-          fontWeight: p.fontWeight || "normal",
-          fontStyle: p.italic ? "italic" : "normal",
-          textDecoration: textDecoration || "none",
-          lineHeight: p.lineHeightDesktop || "normal",
-        }}>
-          {p.content}
-        </EmailText>
+        {p.paragraphStyle && p.paragraphStyle !== "p" ? (
+          <EmailHeading as={p.paragraphStyle as any} style={{
+            fontSize: `${activeFontSize}px`,
+            color: p.color || "#111111",
+            margin: 0,
+            fontFamily: p.fontFamily || "inherit",
+            fontWeight: p.fontWeight || "normal",
+            fontStyle: p.italic ? "italic" : "normal",
+            textDecoration: textDecoration || "none",
+            lineHeight: p.lineHeightDesktop || "normal",
+          }}>
+            {p.content}
+          </EmailHeading>
+        ) : (
+          <EmailText style={{
+            fontSize: `${activeFontSize}px`,
+            color: p.color || "#111111",
+            margin: 0,
+            fontFamily: p.fontFamily || "inherit",
+            fontWeight: p.fontWeight || "normal",
+            fontStyle: p.italic ? "italic" : "normal",
+            textDecoration: textDecoration || "none",
+            lineHeight: p.lineHeightDesktop || "normal",
+          }}>
+            {p.content}
+          </EmailText>
+        )}
       </div>
     );
   }

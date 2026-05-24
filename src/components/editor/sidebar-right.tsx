@@ -12,6 +12,7 @@ import { StripeInspector } from "./inspectors/stripe-inspector";
 import { StructureInspector } from "./inspectors/structure-inspector";
 import { ColumnInspector } from "./inspectors/column-inspector";
 import { GlobalStylesInspector } from "./inspectors/global-styles-inspector";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function SidebarRight() {
   const { selectedNode, stripes, updateBlock, removeBlock, updateStructureProps, removeStructure, updateColumnProps, updateStripeProps, removeStripe } = useEditorStore();
@@ -57,15 +58,12 @@ export function SidebarRight() {
   }
 
   return (
-    <div className="w-80 border-l border-border bg-card h-full flex flex-col z-10 shrink-0 hidden lg:flex">
+    <div className="w-80 border-l border-border bg-card h-full flex flex-col z-10 shrink-0 lg:flex">
       <Tabs defaultValue="inspector" className="flex-1 flex flex-col">
-        {/* <TabsList className="w-full justify-start rounded-none border-b border-border h-12 px-4 bg-transparent">
-          <TabsTrigger value="inspector" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4">
-            Inspector
-          </TabsTrigger>
-        </TabsList> */}
-        <TabsContent value="inspector" className="flex-1 overflow-y-auto m-0">
-          {content}
+        <TabsContent value="inspector" className="flex-1 m-0 overflow-hidden">
+          <ScrollArea className="h-screen w-full">
+            <div className="mb-20"> {content}</div>
+          </ScrollArea>
         </TabsContent>
       </Tabs>
     </div>

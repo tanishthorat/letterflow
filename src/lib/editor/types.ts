@@ -28,7 +28,7 @@ export interface TextBlock extends BaseBlock {
     blockBackgroundColor?: string;
     lineHeightDesktop?: number | string;
     lineHeightMobile?: number | string;
-    paragraphStyle?: "p" | "h1" | "h2" | "h3" | "h4";
+    paragraphStyle?: "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
     alignDesktop?: "left" | "center" | "right" | "justify";
     alignMobile?: "left" | "center" | "right" | "justify";
     indent?: number;
