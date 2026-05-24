@@ -18,6 +18,12 @@ interface TemplateState {
   fetchTemplates: (loadMore?: boolean) => Promise<void>;
   createTemplate: (templateData: Partial<EmailTemplate>) => Promise<EmailTemplate | null>;
   updateTemplate: (id: string, templateData: Partial<EmailTemplate>) => Promise<EmailTemplate | null>;
+  selectedIds: string[];
+  toggleSelection: (id: string) => void;
+  selectAll: () => void;
+  clearSelection: () => void;
+  deleteTemplates: (ids: string[]) => () => void;
+  duplicateTemplate: (id: string) => Promise<EmailTemplate | null>;
 }
 
 export const useTemplateStore = create<TemplateState>((set, get) => ({
@@ -30,6 +36,24 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
   sort: "date_desc",
   category: "all",
   viewMode: "grid",
+  selectedIds: [],
+
+  toggleSelection: (id) => {
+    set((state) => ({
+      selectedIds: state.selectedIds.includes(id)
+        ? state.selectedIds.filter(selectedId => selectedId !== id)
+        : [...state.selectedIds, id]
+    }));
+  },
+
+  selectAll: () => {
+    const { templates } = get();
+    set({ selectedIds: templates.map(t => t.id) });
+  },
+
+  clearSelection: () => {
+    set({ selectedIds: [] });
+  },
 
   setSearchQuery: (query) => {
     set({ searchQuery: query });
@@ -140,5 +164,47 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
       set({ error: err instanceof Error ? err.message : String(err) });
       return null;
     }
+  },
+
+  deleteTemplates: (ids: string[]) => {
+    const previousTemplates = get().templates;
+    const previousSelected = get().selectedIds;
+    
+    // Optimistic UI update
+    set({ 
+      templates: previousTemplates.filter(t => !ids.includes(t.id)),
+      selectedIds: previousSelected.filter(id => !ids.includes(id))
+    });
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        await Promise.all(
+          ids.map(id => fetch(`/api/templates/${id}`, { method: "DELETE" }))
+        );
+      } catch (err) {
+        console.error("Error deleting templates:", err);
+      }
+    }, 4000);
+
+    // Return a function to undo the optimistic delete
+    return () => {
+      clearTimeout(timeoutId);
+      set({ 
+        templates: previousTemplates,
+        selectedIds: previousSelected
+      });
+    };
+  },
+
+  duplicateTemplate: async (id: string) => {
+    const templateToDuplicate = get().templates.find(t => t.id === id);
+    if (!templateToDuplicate) return null;
+
+    return get().createTemplate({
+      name: `${templateToDuplicate.name} (Copy)`,
+      category: templateToDuplicate.category,
+      body_design: templateToDuplicate.body_design,
+      global_styles: templateToDuplicate.global_styles,
+    });
   },
 }));

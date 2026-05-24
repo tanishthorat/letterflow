@@ -2,13 +2,13 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Loader2, 
-  History, 
-  SlidersHorizontal, 
-  Tag, 
-  LayoutGrid, 
-  ArrowDown, 
+import {
+  Loader2,
+  History,
+  SlidersHorizontal,
+  Tag,
+  LayoutGrid,
+  ArrowDown,
   ChevronDown,
   List
 } from "lucide-react";
@@ -21,7 +21,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "@/lib/toast";
 import { EmptyTemplatesState } from "@/components/dashboard/templates/empty-state";
+import { TemplateCard } from "@/components/dashboard/template-card";
 import { useTemplateStore } from "@/lib/stores/template";
 import type { EmailTemplate } from "@/lib/db.types";
 
@@ -45,11 +47,11 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function TemplatesPage() {
   const router = useRouter();
-  const { 
-    templates, 
-    fetchTemplates, 
-    createTemplate, 
-    loading, 
+  const {
+    templates,
+    fetchTemplates,
+    createTemplate,
+    loading,
     searchQuery,
     sort, setSort,
     category, setCategory,
@@ -135,17 +137,10 @@ export default function TemplatesPage() {
             {templates.length}
           </span>
         </div>
-        
+
         <div className="flex items-center gap-2">
-          <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted text-foreground rounded-md h-8 px-3">
-            <History className="w-4 h-4" />
-            Recents
-          </Button>
 
-          <Button variant="secondary" size="icon" className="bg-muted/50 hover:bg-muted rounded-md h-8 w-8">
-            <SlidersHorizontal className="w-4 h-4" />
-          </Button>
-
+          {/* sort by tags */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
@@ -163,6 +158,7 @@ export default function TemplatesPage() {
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {/* view mode */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
@@ -180,6 +176,7 @@ export default function TemplatesPage() {
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {/* sort by date, name */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
@@ -204,8 +201,8 @@ export default function TemplatesPage() {
         <Card>
           <CardContent className="pt-6 text-center">
             <p className="text-muted-foreground mb-4">No templates found</p>
-            <Button 
-              onClick={handleCreateNew} 
+            <Button
+              onClick={handleCreateNew}
               disabled={isCreating}
               className="bg-accent text-accent-foreground hover:bg-accent/90"
             >
@@ -216,39 +213,12 @@ export default function TemplatesPage() {
         </Card>
       ) : (
         <>
-          <div className={`grid gap-4 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}>
+          <div className={`grid gap-4 ${viewMode === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" : "grid-cols-1"}`}>
             {templates.map((template) => (
-              <Card key={template.id} className="hover:border-accent/50 transition-colors cursor-pointer">
-                <CardHeader>
-                  <div className="flex justify-between items-start gap-2 mb-2">
-                    <CardTitle className="text-base">{template.name}</CardTitle>
-                    <Badge className={statusBadgeColor(template.status)} variant="secondary">
-                      {template.status}
-                    </Badge>
-                  </div>
-                  <CardDescription className="line-clamp-2">
-                    {template.subject || "No subject set"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between items-center text-xs text-muted-foreground">
-                    <Badge variant="outline">
-                      {template.category}
-                    </Badge>
-                    <span>{template.placeholders?.length || 0} vars</span>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => router.push(`/editor/${template.id}`)}
-                  >
-                    Edit
-                  </Button>
-                </CardContent>
-              </Card>
+              <TemplateCard key={template.id} template={template} />
             ))}
           </div>
-          
+
           {/* Infinite scroll trigger */}
           <div ref={observerTarget} className="flex justify-center py-4">
             {hasMore && loading && <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />}

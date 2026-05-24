@@ -10,7 +10,17 @@ import { SearchBar } from "@/components/ui/search-bar";
 import { UserNav } from "@/components/dashboard/user-nav";
 import { useAuth } from "@/lib/auth";
 import { useTemplateStore } from "@/lib/stores/template";
-import { toast } from "@/lib/toast";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface HeaderProps {
   collapsed: boolean;
@@ -20,8 +30,9 @@ export function Header({ collapsed }: HeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { signOut } = useAuth();
-  const { searchQuery, setSearchQuery, createTemplate, loading } = useTemplateStore();
+  const { searchQuery, setSearchQuery, createTemplate, loading, selectedIds, clearSelection, deleteTemplates } = useTemplateStore();
   const [isCreating, setIsCreating] = useState(false);
+  const [isBatchDeleteDialogOpen, setIsBatchDeleteDialogOpen] = useState(false);
 
   const [inputValue, setInputValue] = useState(searchQuery);
   const [debouncedValue] = useDebounce(inputValue, 400);
@@ -71,13 +82,24 @@ export function Header({ collapsed }: HeaderProps) {
       router.push("/login");
     } catch (error) {
       console.error("Sign out failed:", error);
-      toast.error("Sign out failed", {
-        description: error instanceof Error ? error.message : "Please try again.",
-      });
+      toast.error("Sign out failed");
     }
   };
 
+  const handleBatchDelete = () => {
+    setIsBatchDeleteDialogOpen(false);
+    const count = selectedIds.length;
+    const undoAction = deleteTemplates(selectedIds);
+    toast.success(`${count} template${count > 1 ? 's' : ''} deleted`, {
+      action: {
+        label: "Undo",
+        onClick: undoAction
+      }
+    });
+  };
+
   return (
+    <>
     <header
       suppressHydrationWarning
       className={cn(
@@ -105,15 +127,27 @@ export function Header({ collapsed }: HeaderProps) {
         </Button>
       </div>
 
-      {/* Middle section: Search — only on /dashboard/templates */}
+      {/* Middle section: Search or Batch Actions */}
       <div className="flex-1 max-w-2xl px-4 lg:px-8 hidden md:block">
         {pathname === "/dashboard/templates" && (
-          <SearchBar
-            placeholder="Search by name, subject or ID"
-            value={inputValue}
-            onChange={handleSearch}
-            isLoading={loading}
-          />
+          selectedIds.length > 0 ? (
+            <div className="flex items-center justify-between bg-muted/50 rounded-md border px-3 py-1.5 h-10 w-full">
+              <span className="text-sm font-medium text-muted-foreground">
+                {selectedIds.length} template{selectedIds.length > 1 ? 's' : ''} selected
+              </span>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={() => clearSelection()}>Cancel</Button>
+                <Button variant="destructive" size="sm" onClick={() => setIsBatchDeleteDialogOpen(true)}>Delete</Button>
+              </div>
+            </div>
+          ) : (
+            <SearchBar
+              placeholder="Search by name, subject or ID"
+              value={inputValue}
+              onChange={handleSearch}
+              isLoading={loading}
+            />
+          )
         )}
       </div>
 
@@ -135,5 +169,24 @@ export function Header({ collapsed }: HeaderProps) {
         </div>
       </div>
     </header>
+
+    {/* Batch Delete Confirmation Dialog */}
+    <AlertDialog open={isBatchDeleteDialogOpen} onOpenChange={setIsBatchDeleteDialogOpen}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete {selectedIds.length} template{selectedIds.length > 1 ? 's' : ''}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This action can be undone within 4 seconds.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleBatchDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

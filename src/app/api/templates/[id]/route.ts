@@ -67,3 +67,35 @@ export async function PATCH(
     return NextResponse.json({ error: err }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: Request,
+  props: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await props.params;
+    const supabase = await createClient();
+    
+    // Authenticate user via server client
+    const { data: userData, error: authError } = await supabase.auth.getUser();
+    if (authError || !userData?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // The RLS policies in the database automatically enforce that 
+    // the user can only delete a template where user_id matches their auth.uid()
+    const { error } = await supabase
+      .from("email_templates")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    const err = error instanceof Error ? error.message : "Internal Server Error";
+    return NextResponse.json({ error: err }, { status: 500 });
+  }
+}
