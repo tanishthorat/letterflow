@@ -28,10 +28,13 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
         }}
       >
         <Container
+          className="message-container"
+          align={(globalStyles.messageAlignment || "center") as any}
           style={{
             width: "100%",
             maxWidth: stripe.props.fullWidth ? "100%" : `${globalStyles.contentWidth}px`,
-            margin: "0 auto",
+            marginLeft: globalStyles.messageAlignment === "left" ? "0" : "auto",
+            marginRight: globalStyles.messageAlignment === "right" ? "0" : "auto",
           }}
         >
           {stripe.structures.map((structure: Structure) => {
@@ -103,6 +106,11 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
                   width: 100% !important;
                   display: block !important;
                   box-sizing: border-box !important;
+                }
+                .message-container {
+                  margin-left: auto !important;
+                  margin-right: auto !important;
+                  float: none !important;
                 }
               }
             `}

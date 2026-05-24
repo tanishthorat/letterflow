@@ -17,18 +17,19 @@ export function GlobalStylesInspector() {
         <Paintbrush className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-semibold">Global Styles & Layout</h3>
       </div>
-      
+
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Content Background</Label>
-          <ColorPicker 
-            value={globalStyles.contentBackgroundColor} 
-            onChange={(color) => updateGlobalStyles({ contentBackgroundColor: color })} 
+          <ColorPicker
+            value={globalStyles.contentBackgroundColor}
+            onChange={(color) => updateGlobalStyles({ contentBackgroundColor: color })}
             className="w-[140px]"
           />
         </div>
 
-        <div className="space-y-3">
+        {/* Background Image feature currently not implemented */}
+        {/* <div className="space-y-3">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium">Background Image</Label>
             <Switch 
@@ -44,11 +45,11 @@ export function GlobalStylesInspector() {
               onChange={(e) => updateGlobalStyles({ backgroundImage: e.target.value })} 
             />
           )}
-        </div>
+        </div> */}
 
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Message Content Width</Label>
-          <NumberStepper 
+          <NumberStepper
             value={globalStyles.contentWidth}
             onChange={(val) => updateGlobalStyles({ contentWidth: val })}
             min={320}
@@ -60,19 +61,19 @@ export function GlobalStylesInspector() {
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Message Alignment</Label>
           <div className="flex bg-muted rounded-md p-1">
-            <button 
+            <button
               className={`p-1.5 rounded-sm transition-colors ${globalStyles.messageAlignment === 'left' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => updateGlobalStyles({ messageAlignment: 'left' })}
             >
               <AlignLeft className="w-4 h-4" />
             </button>
-            <button 
+            <button
               className={`p-1.5 rounded-sm transition-colors ${globalStyles.messageAlignment === 'center' || !globalStyles.messageAlignment ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => updateGlobalStyles({ messageAlignment: 'center' })}
             >
               <AlignCenter className="w-4 h-4" />
             </button>
-            <button 
+            <button
               className={`p-1.5 rounded-sm transition-colors ${globalStyles.messageAlignment === 'right' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
               onClick={() => updateGlobalStyles({ messageAlignment: 'right' })}
             >
@@ -83,8 +84,8 @@ export function GlobalStylesInspector() {
 
         <div className="flex items-center justify-between border-t border-border pt-4">
           <Label className="text-sm font-medium">Underline Links</Label>
-          <Switch 
-            checked={globalStyles.underlineLinks !== false} 
+          <Switch
+            checked={globalStyles.underlineLinks !== false}
             onCheckedChange={(checked) => updateGlobalStyles({ underlineLinks: checked })}
           />
         </div>
@@ -92,8 +93,8 @@ export function GlobalStylesInspector() {
         <div className="space-y-3 border-t border-border pt-4">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium">Responsive Design</Label>
-            <Switch 
-              checked={globalStyles.responsiveDesign !== false} 
+            <Switch
+              checked={globalStyles.responsiveDesign !== false}
               onCheckedChange={(checked) => updateGlobalStyles({ responsiveDesign: checked })}
             />
           </div>
@@ -106,9 +107,9 @@ export function GlobalStylesInspector() {
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Typography</h4>
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground">Font Family</Label>
-            <select 
+            <select
               className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
-              value={globalStyles.defaultFontFamily} 
+              value={globalStyles.defaultFontFamily}
               onChange={(e) => updateGlobalStyles({ defaultFontFamily: e.target.value })}
             >
               <option value="Inter, sans-serif">Inter</option>
@@ -121,17 +122,17 @@ export function GlobalStylesInspector() {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground">Font Size (px)</Label>
-              <Input 
-                type="number" 
-                value={globalStyles.defaultFontSize} 
-                onChange={(e) => updateGlobalStyles({ defaultFontSize: Number(e.target.value) })} 
+              <Input
+                type="number"
+                value={globalStyles.defaultFontSize}
+                onChange={(e) => updateGlobalStyles({ defaultFontSize: Number(e.target.value) })}
               />
             </div>
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground">Text Color</Label>
-              <ColorPicker 
-                value={globalStyles.defaultTextColor} 
-                onChange={(color) => updateGlobalStyles({ defaultTextColor: color })} 
+              <ColorPicker
+                value={globalStyles.defaultTextColor}
+                onChange={(color) => updateGlobalStyles({ defaultTextColor: color })}
               />
             </div>
           </div>

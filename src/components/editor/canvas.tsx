@@ -303,10 +303,11 @@ function StripeItem({ stripe }: { stripe: Stripe }) {
         }}
       >
         <div
-          className="mx-auto"
           style={{
             width: "100%",
-            maxWidth: stripe.props.fullWidth ? "100%" : `${globalStyles.contentWidth - 40}px`
+            maxWidth: stripe.props.fullWidth ? "100%" : `${globalStyles.contentWidth - 40}px`,
+            marginLeft: globalStyles.messageAlignment === "left" ? "0" : "auto",
+            marginRight: globalStyles.messageAlignment === "right" ? "0" : "auto",
           }}
         >
           <SortableContext items={stripe.structures.map((s: Structure) => s.id)} strategy={verticalListSortingStrategy}>

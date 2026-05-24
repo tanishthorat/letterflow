@@ -4,13 +4,28 @@ import type { TemplateDesign } from "@/lib/editor/types";
 
 export async function POST(request: Request) {
   try {
-    const design: TemplateDesign = await request.json();
+    const body = await request.json();
     
+    let design: TemplateDesign;
+    let variables: Record<string, string> = {};
+
+    if (body && body.design) {
+      design = body.design;
+      variables = body.variables || {};
+    } else {
+      design = body;
+    }
+
     if (!design) {
       return new NextResponse("Invalid design payload", { status: 400 });
     }
 
-    const html = await generateEmailHtml(design);
+    let html = await generateEmailHtml(design);
+
+    if (variables && Object.keys(variables).length > 0) {
+      const { replacePlaceholders } = await import("@/lib/editor/placeholders");
+      html = replacePlaceholders(html, variables);
+    }
 
     // Return the raw HTML as a text/html response
     return new NextResponse(html, {
