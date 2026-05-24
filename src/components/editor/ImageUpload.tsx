@@ -133,7 +133,7 @@ export function ImageUpload({ currentSrc, onUploadSuccess, onRemove }: ImageUplo
         trigger={
           <Button
             type="button"
-            variant="outline"
+            variant="default"
             size="sm"
             className="w-full gap-1.5 h-8 text-xs"
           >

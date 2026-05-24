@@ -85,12 +85,40 @@ export interface ButtonBlock extends BaseBlock {
   type: "button";
   props: {
     text: string;
-    url: string;
-    backgroundColor: string;
+    linkType?: "url" | "email" | "phone" | "sms";
+    href: string;
+    buttonColor: string;
     textColor: string;
-    borderRadius: number;
-    padding: number;
-    align: "left" | "center" | "right";
+    blockBackgroundColor?: string;
+    fontFamily?: string;
+    fontSizeDesktop?: number;
+    fontWeight?: "normal" | "bold" | string;
+    bold?: boolean;
+    italic?: boolean;
+    alignDesktop?: "left" | "center" | "right";
+    fitToContainerDesktop?: boolean;
+    fixedHeight?: boolean;
+    heightDesktop?: number;
+    borderRadius?: number;
+    borderWidth?: number;
+    borderStyle?: "solid" | "dashed" | "dotted";
+    borderColor?: string;
+    paddingDesktop?: {
+      top: number;
+      right: number;
+      bottom: number;
+      left: number;
+      linked: boolean;
+    };
+    marginDesktop?: {
+      top: number;
+      right: number;
+      bottom: number;
+      left: number;
+      linked: boolean;
+    };
+    includeIn?: "both" | "html" | "amp";
+    anchorLink?: string;
   };
 }
 

@@ -175,10 +175,10 @@ export function ImageGallery({ onSelect, trigger }: ImageGalleryProps) {
       </PopoverTrigger>
 
       <PopoverContent
-        side="top"
+        side="right"
         align="center"
         sideOffset={8}
-        className="w-[340px] p-0 rounded-xl shadow-xl border border-border/80 overflow-hidden"
+        className="w-[340px] p-0 rounded-xl border border-border/80 overflow-hidden shadow-2xl"
       >
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-border/60 bg-muted/30">
