@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { UserNav } from "@/components/dashboard/user-nav";
 import { useTemplateStore } from "@/lib/stores/template";
 import { useEditorStore } from "@/lib/editor/store";
+import { useStore } from "zustand";
 import { useDebounce } from "use-debounce";
 import { PreviewModal } from "@/components/editor/preview-modal";
 import { ExportModal } from "./export-modal";
@@ -27,7 +28,8 @@ interface EditorHeaderProps {
 export function EditorHeader({ template }: EditorHeaderProps) {
   const router = useRouter();
   const { updateTemplate } = useTemplateStore();
-  const { isDirty, getDesign, clearDirty, globalStyles } = useEditorStore();
+  const { isDirty, getDesign, clearDirty, globalStyles, metadata } = useEditorStore();
+  const { undo, redo, pastStates, futureStates } = useStore(useEditorStore.temporal, (state) => state);
 
   const [name, setName] = useState(template.name);
   const [debouncedName] = useDebounce(name, 1000);
@@ -66,7 +68,10 @@ export function EditorHeader({ template }: EditorHeaderProps) {
           await updateTemplate(template.id, {
             name: debouncedName.trim(),
             body_design: design,
-            global_styles: design.globalStyles
+            global_styles: design.globalStyles,
+            subject: metadata.subject || undefined,
+            preheader: metadata.preheader || undefined,
+            status: metadata.status || "draft"
           });
 
           clearDirty();
@@ -82,7 +87,7 @@ export function EditorHeader({ template }: EditorHeaderProps) {
 
       return () => clearTimeout(timeoutId);
     }
-  }, [debouncedName, isDirty, globalStyles, template.name, template.id, getDesign, clearDirty, updateTemplate]);
+  }, [debouncedName, isDirty, globalStyles, metadata, template.name, template.id, getDesign, clearDirty, updateTemplate]);
 
   // Prevent accidental navigation if unsaved
   useEffect(() => {
@@ -96,6 +101,30 @@ export function EditorHeader({ template }: EditorHeaderProps) {
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isDirty, saveStatus]);
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check for Ctrl+Z or Cmd+Z
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        if (e.shiftKey) {
+          e.preventDefault();
+          redo();
+        } else {
+          e.preventDefault();
+          undo();
+        }
+      }
+      // Check for Ctrl+Y or Cmd+Y
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        redo();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [undo, redo]);
 
   // Derived state to replace redundant useEffect that triggered cascading renders
   const currentSaveStatus = isSaving || saveStatus === "saving" ? "saving" :
@@ -122,7 +151,10 @@ export function EditorHeader({ template }: EditorHeaderProps) {
       await updateTemplate(template.id, {
         name: name.trim(),
         body_design: { version: design.version, stripes: design.stripes },
-        global_styles: design.globalStyles
+        global_styles: design.globalStyles,
+        subject: metadata.subject || undefined,
+        preheader: metadata.preheader || undefined,
+        status: metadata.status || "draft"
       });
 
       clearDirty();
@@ -198,13 +230,13 @@ export function EditorHeader({ template }: EditorHeaderProps) {
           </div>
 
           <div className="hidden lg:flex items-center bg-muted/30 rounded-md border border-border p-0.5 ml-2">
-            <Button variant="ghost" size="icon" disabled className="h-7 w-8 rounded-sm opacity-50">
+            <Button variant="ghost" size="icon" disabled={pastStates.length === 0} onClick={() => undo()} className="h-7 w-8 rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground">
               <Undo className="w-4 h-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-8 rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground">
+            {/* <Button variant="ghost" size="icon" className="h-7 w-8 rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground">
               <History className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" disabled className="h-7 w-8 rounded-sm opacity-50">
+            </Button> */}
+            <Button variant="ghost" size="icon" disabled={futureStates.length === 0} onClick={() => redo()} className="h-7 w-8 rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground">
               <Redo className="w-4 h-4" />
             </Button>
           </div>

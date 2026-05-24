@@ -10,7 +10,8 @@ import type {
   StructureProps, 
   ColumnProps,
   BlockAddress,
-  SelectedNode
+  SelectedNode,
+  TemplateMetadata
 } from "./types";
 import { LayoutPreset } from "./layoutPresets";
 import { DEFAULT_STRIPE_PROPS, DEFAULT_STRUCTURE_PROPS, DEFAULT_COLUMN_PROPS } from "./config";
@@ -30,6 +31,7 @@ import {
 interface EditorState {
   stripes: Stripe[];
   globalStyles: GlobalStyles;
+  metadata: TemplateMetadata;
   selectedNode: SelectedNode;
   isDirty: boolean;
   
@@ -66,14 +68,20 @@ interface EditorState {
   // Selection & Global
   selectNode: (node: SelectedNode) => void;
   updateGlobalStyles: (styles: Partial<GlobalStyles>) => void;
-  loadDesign: (design: unknown, globalStyles: unknown) => void;
+  updateMetadata: (metadata: Partial<TemplateMetadata>) => void;
+  loadDesign: (design: unknown, globalStyles: unknown, metadata?: TemplateMetadata) => void;
   getDesign: () => TemplateDesign;
   clearDirty: () => void;
 }
 
-export const useEditorStore = create<EditorState>((set, get) => ({
+import { temporal } from "zundo";
+
+export const useEditorStore = create<EditorState>()(
+  temporal(
+    (set, get) => ({
   stripes: [],
   globalStyles: DEFAULT_GLOBAL_STYLES,
+  metadata: { status: "draft" },
   selectedNode: null,
   isDirty: false,
 
@@ -395,7 +403,12 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     isDirty: true 
   })),
 
-  loadDesign: (design, globalStyles) => {
+  updateMetadata: (metadata) => set((state) => ({
+    metadata: { ...state.metadata, ...metadata },
+    isDirty: true
+  })),
+
+  loadDesign: (design, globalStyles, metadata) => {
     const parsed = parseDesign(design);
     if (globalStyles && typeof globalStyles === 'object') {
         parsed.globalStyles = { ...parsed.globalStyles, ...globalStyles };
@@ -403,6 +416,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     set({
       stripes: parsed.stripes,
       globalStyles: parsed.globalStyles,
+      metadata: metadata || { status: "draft" },
       isDirty: false 
     });
   },
@@ -416,5 +430,20 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     };
   },
 
-  clearDirty: () => set({ isDirty: false }),
-}));
+  clearDirty: () => set({ isDirty: false })
+    }),
+    {
+      limit: 7,
+      partialize: (state) => ({
+        stripes: state.stripes,
+        globalStyles: state.globalStyles,
+        metadata: state.metadata,
+        isDirty: state.isDirty
+      }),
+      equality: (current, past) => {
+        if (current.isDirty) return true;
+        return JSON.stringify(current) === JSON.stringify(past);
+      }
+    }
+  )
+);

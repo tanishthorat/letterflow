@@ -12,14 +12,48 @@ import { AlignmentSelector } from "@/components/ui/alignment-selector";
 export function GlobalStylesInspector() {
   const { globalStyles, updateGlobalStyles } = useEditorStore();
 
+  const metadata = useEditorStore((s) => s.metadata);
+
   return (
     <div className="p-4 space-y-6">
       <div className="flex items-center gap-2 pb-4 border-b border-border">
         <Paintbrush className="w-4 h-4 text-primary" />
-        <h3 className="text-sm font-semibold">Global Styles & Layout</h3>
+        <h3 className="text-sm font-semibold">Email Settings & Global Styles</h3>
       </div>
 
       <div className="space-y-6">
+        <div className="space-y-4 border-b border-border pb-6">
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Subject Line</Label>
+            <Input
+              type="text"
+              placeholder="Enter email subject"
+              value={metadata.subject || ""}
+              onChange={(e) => useEditorStore.getState().updateMetadata({ subject: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Preheader Text</Label>
+            <Input
+              type="text"
+              placeholder="Enter preview text"
+              value={metadata.preheader || ""}
+              onChange={(e) => useEditorStore.getState().updateMetadata({ preheader: e.target.value })}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Status</Label>
+            <select
+              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+              value={metadata.status || "draft"}
+              onChange={(e) => useEditorStore.getState().updateMetadata({ status: e.target.value as any })}
+            >
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+        </div>
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Content Background</Label>
           <ColorPicker

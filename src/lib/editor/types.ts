@@ -187,6 +187,12 @@ export interface GlobalStyles {
   responsiveDesign?: boolean;
 }
 
+export interface TemplateMetadata {
+  subject?: string | null;
+  preheader?: string | null;
+  status?: "draft" | "published" | "archived";
+}
+
 export interface TemplateDesign {
   version: '2.0';
   stripes: Stripe[];

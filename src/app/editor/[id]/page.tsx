@@ -33,7 +33,11 @@ export default function EditorPage() {
   // Load the design into the editor store when the template is ready
   useEffect(() => {
     if (template && !hasLoadedDesign.current) {
-      useEditorStore.getState().loadDesign(template.body_design, template.global_styles);
+      useEditorStore.getState().loadDesign(template.body_design, template.global_styles, {
+        subject: template.subject,
+        preheader: template.preheader,
+        status: template.status as "draft" | "published" | "archived"
+      });
       hasLoadedDesign.current = true;
     }
   }, [template]);
