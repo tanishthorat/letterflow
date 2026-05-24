@@ -38,6 +38,7 @@ interface EditorState {
   removeStripe: (stripeId: string) => void;
   duplicateStripe: (stripeId: string) => void;
   moveStripe: (stripeId: string, direction: 'up' | 'down') => void;
+  updateStripe: (stripeId: string, updates: Partial<Stripe>) => void;
   updateStripeProps: (stripeId: string, props: Partial<StripeProps>) => void;
   reorderStripes: (startIndex: number, endIndex: number) => void;
 
@@ -135,6 +136,11 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     stripes.splice(endIndex, 0, removed);
     return { stripes, isDirty: true };
   }),
+
+  updateStripe: (stripeId, updates) => set((state) => ({
+    stripes: updateStripeById(state.stripes, stripeId, s => ({ ...s, ...updates })),
+    isDirty: true
+  })),
 
   updateStripeProps: (stripeId, props) => set((state) => ({
     stripes: updateStripeById(state.stripes, stripeId, s => ({ ...s, props: { ...s.props, ...props } })),

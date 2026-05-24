@@ -92,12 +92,6 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
   return (
     <Html lang="en">
       <Head>
-        <Font
-          fontFamily={globalStyles.defaultFontFamily.split(",")[0].replace(/['"]/g, "")}
-          fallbackFontFamily="sans-serif"
-          fontWeight={400}
-          fontStyle="normal"
-        />
         {globalStyles.responsiveDesign !== false && (
           <style>
             {`

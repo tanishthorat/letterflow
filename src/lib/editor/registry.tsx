@@ -1,5 +1,5 @@
 import React from "react";
-import { BlockType, ContentBlock, TextBlock, ImageBlock, ButtonBlock, DividerBlock } from "./types";
+import { BlockType, ContentBlock, TextBlock, ImageBlock, ButtonBlock, DividerBlock, BaseBlockProps } from "./types";
 import { Type, Image as ImageIcon, MousePointerClick, Minus, AlignStartVertical, AlignCenterVertical, AlignEndVertical } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,22 @@ export interface BlockConfig<T extends ContentBlock> {
   renderEmail: (props: { block: T }) => React.ReactNode;
 }
 
+export function getBaseBlockWrapperStyles(p: BaseBlockProps): React.CSSProperties {
+  return {
+    backgroundColor: p.blockBackgroundColor || "transparent",
+    textAlign: p.alignDesktop,
+    paddingTop: `${p.paddingDesktop?.top ?? 0}px`,
+    paddingRight: `${p.paddingDesktop?.right ?? 0}px`,
+    paddingBottom: `${p.paddingDesktop?.bottom ?? 0}px`,
+    paddingLeft: `${p.paddingDesktop?.left ?? 0}px`,
+    marginTop: `${p.marginDesktop?.top ?? 0}px`,
+    marginRight: `${p.marginDesktop?.right ?? 0}px`,
+    marginBottom: `${p.marginDesktop?.bottom ?? 0}px`,
+    marginLeft: `${p.marginDesktop?.left ?? 0}px`,
+    width: "100%",
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // TEXT BLOCK
 // ─────────────────────────────────────────────────────────────────────────────
@@ -34,9 +50,7 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
   icon: Type,
   defaultProps: {
     content: "",
-    fontSize: 16,
     color: "#111111",
-    align: "left",
     fontFamily: "Arial, sans-serif",
     fontSizeDesktop: 16,
     fontWeight: "normal",
@@ -45,26 +59,20 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
     strikethrough: false,
     paragraphStyle: "p",
     alignDesktop: "left",
-    padding: { top: 10, right: 10, bottom: 10, left: 10, linked: true },
+    paddingDesktop: { top: 10, right: 10, bottom: 10, left: 10, linked: true },
+    marginDesktop: { top: 0, right: 0, bottom: 0, left: 0, linked: true },
+    blockBackgroundColor: "transparent",
   },
   renderCanvas: ({ block, onChange }) => {
     const p = block.props;
     const activeFontSize = p.fontSizeDesktop ?? p.fontSize ?? 16;
-    const activeAlign = p.alignDesktop ?? p.align ?? "left";
     const textDecoration = [
       p.underline ? "underline" : "",
       p.strikethrough ? "line-through" : ""
     ].filter(Boolean).join(" ");
 
     return (
-      <div style={{
-        textAlign: activeAlign as any,
-        backgroundColor: p.blockBackgroundColor || "transparent",
-        paddingTop: `${p.padding?.top ?? 10}px`,
-        paddingRight: `${p.padding?.right ?? 10}px`,
-        paddingBottom: `${p.padding?.bottom ?? 10}px`,
-        paddingLeft: `${p.padding?.left ?? 10}px`,
-      }}>
+      <div style={getBaseBlockWrapperStyles(p)}>
         <Textarea
           ref={(node) => {
             if (node) {
@@ -101,7 +109,8 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
   },
   renderInspector: ({ block, onChange }) => {
     const p = block.props;
-    const padding = p.padding || { top: 10, right: 10, bottom: 10, left: 10, linked: true };
+    const padding = p.paddingDesktop ?? p.padding ?? { top: 10, right: 10, bottom: 10, left: 10, linked: true };
+    const margin = p.marginDesktop ?? { top: 0, right: 0, bottom: 0, left: 0, linked: true };
 
     return (
       <div className="space-y-4">
@@ -225,9 +234,11 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
 
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground">Text Style</Label>
-            <div className="flex gap-2"><button onClick={() => onChange({ italic: !p.italic })} className={`px-3 py-1 text-sm border rounded font-serif italic ${p.italic ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>I</button>
+            <div className="flex gap-2">
+              <button onClick={() => onChange({ italic: !p.italic })} className={`px-3 py-1 text-sm border rounded font-serif italic ${p.italic ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>I</button>
               <button onClick={() => onChange({ underline: !p.underline })} className={`px-3 py-1 text-sm border rounded underline ${p.underline ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>U</button>
-              <button onClick={() => onChange({ strikethrough: !p.strikethrough })} className={`px-3 py-1 text-sm border rounded line-through ${p.strikethrough ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>S</button></div>
+              <button onClick={() => onChange({ strikethrough: !p.strikethrough })} className={`px-3 py-1 text-sm border rounded line-through ${p.strikethrough ? 'bg-primary text-primary-foreground' : 'bg-background'}`}>S</button>
+            </div>
           </div>
         </div>
 
@@ -271,12 +282,28 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
               bottom={padding.bottom}
               left={padding.left}
               linked={padding.linked}
-              onChangeTop={(v) => onChange({ padding: { ...padding, top: v } })}
-              onChangeRight={(v) => onChange({ padding: { ...padding, right: v } })}
-              onChangeBottom={(v) => onChange({ padding: { ...padding, bottom: v } })}
-              onChangeLeft={(v) => onChange({ padding: { ...padding, left: v } })}
-              onChangeAll={(v) => onChange({ padding: { ...padding, top: v, right: v, bottom: v, left: v } })}
-              onToggleLink={(linked) => onChange({ padding: { ...padding, linked } })}
+              onChangeTop={(v) => onChange({ paddingDesktop: { ...padding, top: v } })}
+              onChangeRight={(v) => onChange({ paddingDesktop: { ...padding, right: v } })}
+              onChangeBottom={(v) => onChange({ paddingDesktop: { ...padding, bottom: v } })}
+              onChangeLeft={(v) => onChange({ paddingDesktop: { ...padding, left: v } })}
+              onChangeAll={(v) => onChange({ paddingDesktop: { ...padding, top: v, right: v, bottom: v, left: v } })}
+              onToggleLink={(linked) => onChange({ paddingDesktop: { ...padding, linked } })}
+            />
+          </div>
+          <div className="pt-2">
+            <SpacingControl
+              label="Margin on Desktop"
+              top={margin.top}
+              right={margin.right}
+              bottom={margin.bottom}
+              left={margin.left}
+              linked={margin.linked}
+              onChangeTop={(v) => onChange({ marginDesktop: { ...margin, top: v } })}
+              onChangeRight={(v) => onChange({ marginDesktop: { ...margin, right: v } })}
+              onChangeBottom={(v) => onChange({ marginDesktop: { ...margin, bottom: v } })}
+              onChangeLeft={(v) => onChange({ marginDesktop: { ...margin, left: v } })}
+              onChangeAll={(v) => onChange({ marginDesktop: { ...margin, top: v, right: v, bottom: v, left: v } })}
+              onToggleLink={(linked) => onChange({ marginDesktop: { ...margin, linked } })}
             />
           </div>
         </div>
@@ -286,21 +313,13 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
   renderEmail: ({ block }) => {
     const p = block.props;
     const activeFontSize = p.fontSizeDesktop ?? p.fontSize ?? 16;
-    const activeAlign = p.alignDesktop ?? p.align ?? "left";
     const textDecoration = [
       p.underline ? "underline" : "",
       p.strikethrough ? "line-through" : ""
     ].filter(Boolean).join(" ");
 
     return (
-      <div style={{
-        textAlign: activeAlign as any,
-        backgroundColor: p.blockBackgroundColor || "transparent",
-        paddingTop: `${p.padding?.top ?? 10}px`,
-        paddingRight: `${p.padding?.right ?? 10}px`,
-        paddingBottom: `${p.padding?.bottom ?? 10}px`,
-        paddingLeft: `${p.padding?.left ?? 10}px`,
-      }}>
+      <div style={getBaseBlockWrapperStyles(p)}>
         {p.paragraphStyle && p.paragraphStyle !== "p" ? (
           <EmailHeading as={p.paragraphStyle as any} style={{
             fontSize: `${activeFontSize}px`,
@@ -350,26 +369,17 @@ function ImageCanvas({ block }: { block: ImageBlock }) {
     borderRadius: p.borderRadius ? `${p.borderRadius}px` : undefined,
   };
 
-  const outerStyle: React.CSSProperties = {
-    textAlign: p.align,
-    marginTop: `${p.margin?.top ?? 0}px`,
-    marginRight: `${p.margin?.right ?? 0}px`,
-    marginBottom: `${p.margin?.bottom ?? 0}px`,
-    marginLeft: `${p.margin?.left ?? 0}px`,
-  };
-
   const img = (
     <img
       src={p.src}
       alt={p.alt}
       title={p.addAltToTitle ? p.alt : p.title}
       style={imgStyle}
-      id={p.anchorLink ? p.anchorLink.replace(/^#/, "") : undefined}
     />
   );
 
   return (
-    <div style={outerStyle}>
+    <div style={getBaseBlockWrapperStyles(p)}>
       {p.href ? (
         <a href={p.href} onClick={(e) => e.preventDefault()} style={{ display: "inline-block" }}>
           {img}
@@ -393,7 +403,8 @@ function ImageInspector({
   onChange: (newProps: Partial<ImageBlock["props"]>) => void;
 }) {
   const p = block.props;
-  const margin = p.margin ?? { top: 0, right: 0, bottom: 0, left: 0, linked: true };
+  const padding = p.paddingDesktop ?? { top: 0, right: 0, bottom: 0, left: 0, linked: true };
+  const margin = p.marginDesktop ?? { top: 0, right: 0, bottom: 0, left: 0, linked: true };
 
   const PLACEHOLDER_SRC = "https://placehold.co/600x200/2a2a2a/ffffff?text=Image+Placeholder";
 
@@ -597,12 +608,12 @@ function ImageInspector({
 
       {/* ── Alignment ── */}
       <section className="space-y-3 border-t border-border/50 pt-4">
-        <Label className="text-sm font-semibold text-foreground">Alignment</Label>
+        <Label className="text-sm font-semibold text-foreground">Layout</Label>
         <div className="flex items-center justify-between">
-          <Label className="text-xs text-muted-foreground">Desktop</Label>
+          <Label className="text-xs text-muted-foreground">Alignment</Label>
           <AlignmentSelector
-            value={(p.align ?? "center") as "left" | "center" | "right"}
-            onChange={(val) => onChange({ align: val })}
+            value={(p.alignDesktop ?? p.align ?? "center") as "left" | "center" | "right"}
+            onChange={(val) => onChange({ alignDesktop: val })}
           />
         </div>
       </section>
@@ -623,50 +634,40 @@ function ImageInspector({
         </div>
       </section>
 
-      {/* ── Margins ── */}
+      {/* ── Margins & Padding ── */}
       <section className="space-y-3 border-t border-border/50 pt-4">
-        <SpacingControl
-          label="Margin on Desktop"
-          top={margin.top}
-          right={margin.right}
-          bottom={margin.bottom}
-          left={margin.left}
-          linked={margin.linked}
-          onChangeTop={(v) => onChange({ margin: { ...margin, top: v } })}
-          onChangeRight={(v) => onChange({ margin: { ...margin, right: v } })}
-          onChangeBottom={(v) => onChange({ margin: { ...margin, bottom: v } })}
-          onChangeLeft={(v) => onChange({ margin: { ...margin, left: v } })}
-          onChangeAll={(v) => onChange({ margin: { ...margin, top: v, right: v, bottom: v, left: v } })}
-          onToggleLink={(linked) => onChange({ margin: { ...margin, linked } })}
-        />
-      </section>
-
-      {/* ── Anchor Link ── */}
-      <section className="space-y-3 border-t border-border/50 pt-4 pb-2">
-        <div className="flex items-center justify-between">
-          <Label className="text-sm font-semibold text-foreground">Anchor Link</Label>
-          <Switch
-            checked={!!p.anchorLink}
-            onCheckedChange={(v) => onChange({ anchorLink: v ? "section-name" : "" })}
-            size="sm"
+        <div className="pt-2">
+          <SpacingControl
+            label="Padding on Desktop"
+            top={padding.top}
+            right={padding.right}
+            bottom={padding.bottom}
+            left={padding.left}
+            linked={padding.linked}
+            onChangeTop={(v) => onChange({ paddingDesktop: { ...padding, top: v } })}
+            onChangeRight={(v) => onChange({ paddingDesktop: { ...padding, right: v } })}
+            onChangeBottom={(v) => onChange({ paddingDesktop: { ...padding, bottom: v } })}
+            onChangeLeft={(v) => onChange({ paddingDesktop: { ...padding, left: v } })}
+            onChangeAll={(v) => onChange({ paddingDesktop: { ...padding, top: v, right: v, bottom: v, left: v } })}
+            onToggleLink={(linked) => onChange({ paddingDesktop: { ...padding, linked } })}
           />
         </div>
-        {!!p.anchorLink && (
-          <div className="flex rounded-md border border-input overflow-hidden">
-            <span className="flex items-center px-2 text-xs text-muted-foreground bg-muted border-r border-input">
-              #
-            </span>
-            <Input
-              type="text"
-              placeholder="section-name"
-              value={p.anchorLink.replace(/^#/, "")}
-              onChange={(e) =>
-                onChange({ anchorLink: e.target.value ? `#${e.target.value}` : "" })
-              }
-              className="border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0"
-            />
-          </div>
-        )}
+        <div className="pt-2">
+          <SpacingControl
+            label="Margin on Desktop"
+            top={margin.top}
+            right={margin.right}
+            bottom={margin.bottom}
+            left={margin.left}
+            linked={margin.linked}
+            onChangeTop={(v) => onChange({ marginDesktop: { ...margin, top: v } })}
+            onChangeRight={(v) => onChange({ marginDesktop: { ...margin, right: v } })}
+            onChangeBottom={(v) => onChange({ marginDesktop: { ...margin, bottom: v } })}
+            onChangeLeft={(v) => onChange({ marginDesktop: { ...margin, left: v } })}
+            onChangeAll={(v) => onChange({ marginDesktop: { ...margin, top: v, right: v, bottom: v, left: v } })}
+            onToggleLink={(linked) => onChange({ marginDesktop: { ...margin, linked } })}
+          />
+        </div>
       </section>
     </div>
   );
@@ -721,11 +722,7 @@ function ImageEmailRenderer({ block }: { block: ImageBlock }) {
   );
 
   return (
-    <div
-      id={p.anchorLink ? p.anchorLink.replace(/^#/, "") : undefined}
-      data-include-in={p.includeIn ?? "both"}
-      style={wrapperStyle}
-    >
+    <div style={getBaseBlockWrapperStyles(p)}>
       {inner}
     </div>
   );
@@ -745,7 +742,6 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
     alt: "",
     width: "auto",
     height: "auto",
-    align: "center",
     // New desktop-focused
     addAltToTitle: false,
     title: "",
@@ -759,9 +755,10 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
     imagePosition: "center",
     borderRadius: 0,
     radiusMode: "uniform",
-    margin: { top: 0, right: 0, bottom: 0, left: 0, linked: true },
-    includeIn: "both",
-    anchorLink: "",
+    blockBackgroundColor: "transparent",
+    alignDesktop: "center",
+    paddingDesktop: { top: 0, right: 0, bottom: 0, left: 0, linked: true },
+    marginDesktop: { top: 0, right: 0, bottom: 0, left: 0, linked: true },
   },
   renderCanvas: ({ block }) => <ImageCanvas block={block} />,
   renderInspector: ({ block, onChange }) => (
@@ -800,23 +797,10 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
     borderColor: "#000000",
     paddingDesktop: { top: 10, right: 20, bottom: 10, left: 20, linked: false },
     marginDesktop: { top: 0, right: 0, bottom: 0, left: 0, linked: true },
-    includeIn: "both",
-    anchorLink: "",
   },
   renderCanvas: ({ block }) => {
     const p = block.props;
     
-    // For rendering, the wrapper provides alignment and margins
-    const wrapperStyle: React.CSSProperties = {
-      textAlign: p.alignDesktop,
-      backgroundColor: p.blockBackgroundColor || "transparent",
-      marginTop: `${p.marginDesktop?.top ?? 0}px`,
-      marginRight: `${p.marginDesktop?.right ?? 0}px`,
-      marginBottom: `${p.marginDesktop?.bottom ?? 0}px`,
-      marginLeft: `${p.marginDesktop?.left ?? 0}px`,
-      width: "100%", // Container takes full width to allow text-align to work
-    };
-
     // The button itself
     const buttonStyle: React.CSSProperties = {
       display: p.fitToContainerDesktop ? "block" : "inline-block",
@@ -842,12 +826,11 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
     };
 
     return (
-      <div style={wrapperStyle}>
+      <div style={getBaseBlockWrapperStyles(p)}>
         <a
           href={p.href || "#"}
           onClick={(e) => e.preventDefault()}
           style={buttonStyle}
-          id={p.anchorLink ? p.anchorLink.replace(/^#/, "") : undefined}
         >
           {p.text}
         </a>
@@ -887,7 +870,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
           <div className="flex items-center justify-between">
             <Label className="text-xs text-muted-foreground">Alignment</Label>
             <AlignmentSelector
-              value={p.alignDesktop ?? "center"}
+              value={(p.alignDesktop ?? "center") as "left" | "center" | "right"}
               onChange={(val) => onChange({ alignDesktop: val })}
             />
           </div>
@@ -1112,50 +1095,11 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
             />
           </div>
         </section>
-
-        {/* ── Anchor Link ── */}
-        <section className="space-y-3 border-t border-border/50 pt-4 pb-2">
-          <div className="flex items-center justify-between">
-            <Label className="text-sm font-semibold text-foreground">Anchor Link</Label>
-            <Switch
-              checked={!!p.anchorLink}
-              onCheckedChange={(v) => onChange({ anchorLink: v ? "section-name" : "" })}
-              size="sm"
-            />
-          </div>
-          {!!p.anchorLink && (
-            <div className="flex rounded-md border border-input overflow-hidden">
-              <span className="flex items-center px-2 text-xs text-muted-foreground bg-muted border-r border-input">
-                #
-              </span>
-              <Input
-                type="text"
-                placeholder="section-name"
-                value={p.anchorLink.replace(/^#/, "")}
-                onChange={(e) =>
-                  onChange({ anchorLink: e.target.value ? `#${e.target.value}` : "" })
-                }
-                className="border-0 rounded-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              />
-            </div>
-          )}
-        </section>
-
       </div>
     );
   },
   renderEmail: ({ block }) => {
     const p = block.props;
-    
-    const wrapperStyle: React.CSSProperties = {
-      textAlign: p.alignDesktop,
-      backgroundColor: p.blockBackgroundColor || "transparent",
-      paddingTop: `${p.marginDesktop?.top ?? 0}px`,
-      paddingRight: `${p.marginDesktop?.right ?? 0}px`,
-      paddingBottom: `${p.marginDesktop?.bottom ?? 0}px`,
-      paddingLeft: `${p.marginDesktop?.left ?? 0}px`,
-      width: "100%",
-    };
 
     const buttonStyle: React.CSSProperties = {
       display: p.fitToContainerDesktop ? "block" : "inline-block",
@@ -1181,11 +1125,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
     };
 
     return (
-      <div 
-        style={wrapperStyle}
-        data-include-in={p.includeIn ?? "both"}
-        id={p.anchorLink ? p.anchorLink.replace(/^#/, "") : undefined}
-      >
+      <div style={getBaseBlockWrapperStyles(p)}>
         <EmailButton href={p.href || "#"} style={buttonStyle}>
           {p.text}
         </EmailButton>
@@ -1203,50 +1143,165 @@ const DividerBlockConfig: BlockConfig<DividerBlock> = {
   label: "Divider",
   icon: Minus,
   defaultProps: {
-    lineColor: "#e5e7eb",
+    color: "#e5e7eb",
     lineWidth: 1,
-    padding: 20,
+    widthDesktop: 100,
+    borderStyle: "solid",
+    blockBackgroundColor: "transparent",
+    alignDesktop: "center",
+    paddingDesktop: { top: 20, right: 0, bottom: 20, left: 0, linked: false },
+    marginDesktop: { top: 0, right: 0, bottom: 0, left: 0, linked: true },
   },
-  renderCanvas: ({ block }) => (
-    <div style={{ padding: `${block.props.padding}px 0` }}>
-      <hr style={{ borderColor: block.props.lineColor, borderWidth: `${block.props.lineWidth}px`, borderStyle: 'solid', margin: 0 }} />
-    </div>
-  ),
-  renderInspector: ({ block, onChange }) => (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Line Color</Label>
-          <ColorPicker
-            value={block.props.lineColor || "#e5e7eb"}
-            onChange={(color) => onChange({ lineColor: color })}
-            align="left"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">Height (px)</Label>
-          <Input
-            type="number"
-            value={block.props.lineWidth || 1}
-            onChange={(e) => onChange({ lineWidth: Number(e.target.value) })}
-          />
-        </div>
+  renderCanvas: ({ block }) => {
+    const p = block.props;
+    return (
+      <div style={getBaseBlockWrapperStyles(p)}>
+        <hr style={{ 
+          borderColor: p.color, 
+          borderWidth: `${p.lineWidth}px`, 
+          borderStyle: p.borderStyle || 'solid', 
+          width: `${p.widthDesktop ?? 100}%`,
+          display: 'inline-block',
+          margin: 0
+        }} />
       </div>
-      <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">Vertical Padding (px)</Label>
-        <Input
-          type="number"
-          value={block.props.padding || 20}
-          onChange={(e) => onChange({ padding: Number(e.target.value) })}
-        />
+    );
+  },
+  renderInspector: ({ block, onChange }) => {
+    const p = block.props;
+    const padding = p.paddingDesktop ?? { top: 20, right: 0, bottom: 20, left: 0, linked: false };
+    const margin = p.marginDesktop ?? { top: 0, right: 0, bottom: 0, left: 0, linked: true };
+
+    return (
+      <div className="space-y-4">
+        {/* ── Line Style ── */}
+        <section className="space-y-3">
+          <Label className="text-sm font-semibold text-foreground">Line Style</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs text-muted-foreground">Width (%)</Label>
+            <NumberStepper
+              value={p.widthDesktop ?? 100}
+              onChange={(v) => onChange({ widthDesktop: v })}
+              min={10}
+              max={100}
+              step={5}
+              className="w-28 h-8"
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs text-muted-foreground">Thickness (px)</Label>
+            <NumberStepper
+              value={p.lineWidth || 1}
+              onChange={(v) => onChange({ lineWidth: v })}
+              min={1}
+              max={20}
+              step={1}
+              className="w-28 h-8"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Border Style</Label>
+            <Select
+              value={p.borderStyle || "solid"}
+              onValueChange={(val: any) => onChange({ borderStyle: val })}
+            >
+              <SelectTrigger className="w-full h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="solid">Solid</SelectItem>
+                <SelectItem value="dashed">Dashed</SelectItem>
+                <SelectItem value="dotted">Dotted</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </section>
+
+        {/* ── Colors ── */}
+        <section className="space-y-3 border-t border-border/50 pt-4">
+          <Label className="text-sm font-semibold text-foreground">Colors</Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Line Color</Label>
+              <ColorPicker
+                value={p.color || "#e5e7eb"}
+                onChange={(color) => onChange({ color })}
+                align="left"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Background</Label>
+              <ColorPicker
+                value={p.blockBackgroundColor || "transparent"}
+                onChange={(color) => onChange({ blockBackgroundColor: color })}
+                align="right"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* ── Layout ── */}
+        <section className="space-y-3 border-t border-border/50 pt-4">
+          <Label className="text-sm font-semibold text-foreground">Layout</Label>
+          <div className="flex items-center justify-between">
+            <Label className="text-xs text-muted-foreground">Alignment</Label>
+            <AlignmentSelector
+              value={(p.alignDesktop ?? "center") as "left" | "center" | "right"}
+              onChange={(val) => onChange({ alignDesktop: val })}
+            />
+          </div>
+
+          <div className="pt-2">
+            <SpacingControl
+              label="Padding on Desktop"
+              top={padding.top}
+              right={padding.right}
+              bottom={padding.bottom}
+              left={padding.left}
+              linked={padding.linked}
+              onChangeTop={(v) => onChange({ paddingDesktop: { ...padding, top: v } })}
+              onChangeRight={(v) => onChange({ paddingDesktop: { ...padding, right: v } })}
+              onChangeBottom={(v) => onChange({ paddingDesktop: { ...padding, bottom: v } })}
+              onChangeLeft={(v) => onChange({ paddingDesktop: { ...padding, left: v } })}
+              onChangeAll={(v) => onChange({ paddingDesktop: { ...padding, top: v, right: v, bottom: v, left: v } })}
+              onToggleLink={(linked) => onChange({ paddingDesktop: { ...padding, linked } })}
+            />
+          </div>
+          <div className="pt-2">
+            <SpacingControl
+              label="Margin on Desktop"
+              top={margin.top}
+              right={margin.right}
+              bottom={margin.bottom}
+              left={margin.left}
+              linked={margin.linked}
+              onChangeTop={(v) => onChange({ marginDesktop: { ...margin, top: v } })}
+              onChangeRight={(v) => onChange({ marginDesktop: { ...margin, right: v } })}
+              onChangeBottom={(v) => onChange({ marginDesktop: { ...margin, bottom: v } })}
+              onChangeLeft={(v) => onChange({ marginDesktop: { ...margin, left: v } })}
+              onChangeAll={(v) => onChange({ marginDesktop: { ...margin, top: v, right: v, bottom: v, left: v } })}
+              onToggleLink={(linked) => onChange({ marginDesktop: { ...margin, linked } })}
+            />
+          </div>
+        </section>
       </div>
-    </div>
-  ),
-  renderEmail: ({ block }) => (
-    <div style={{ padding: `${block.props.padding}px 0` }}>
-      <EmailHr style={{ borderColor: block.props.lineColor, borderWidth: `${block.props.lineWidth}px`, borderStyle: 'solid', margin: 0 }} />
-    </div>
-  )
+    );
+  },
+  renderEmail: ({ block }) => {
+    const p = block.props;
+    return (
+      <div style={getBaseBlockWrapperStyles(p)}>
+        <EmailHr style={{ 
+          borderColor: p.color, 
+          borderWidth: `${p.lineWidth}px`, 
+          borderStyle: p.borderStyle || 'solid', 
+          width: `${p.widthDesktop ?? 100}%`,
+          margin: 0,
+          display: "inline-block"
+        }} />
+      </div>
+    );
+  }
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

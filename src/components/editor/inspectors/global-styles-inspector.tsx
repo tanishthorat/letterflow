@@ -29,25 +29,6 @@ export function GlobalStylesInspector() {
           />
         </div>
 
-        {/* Background Image feature currently not implemented */}
-        {/* <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium">Background Image</Label>
-            <Switch 
-              checked={!!globalStyles.backgroundImage} 
-              onCheckedChange={(checked) => updateGlobalStyles({ backgroundImage: checked ? "https://placehold.co/800x600/333/fff?text=Background" : "" })}
-            />
-          </div>
-          {!!globalStyles.backgroundImage && (
-            <Input 
-              type="text" 
-              placeholder="Image URL" 
-              value={globalStyles.backgroundImage} 
-              onChange={(e) => updateGlobalStyles({ backgroundImage: e.target.value })} 
-            />
-          )}
-        </div> */}
-
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Message Content Width</Label>
           <NumberStepper
@@ -86,41 +67,6 @@ export function GlobalStylesInspector() {
           <p className="text-xs text-muted-foreground leading-relaxed">
             Your email will automatically adjust for smaller screens by displaying content in a single column. Side-by-side blocks will be stacked vertically.
           </p>
-        </div>
-
-        <div className="border-t border-border pt-4 space-y-4">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Typography</h4>
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Font Family</Label>
-            <select
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
-              value={globalStyles.defaultFontFamily}
-              onChange={(e) => updateGlobalStyles({ defaultFontFamily: e.target.value })}
-            >
-              <option value="Inter, sans-serif">Inter</option>
-              <option value="Arial, sans-serif">Arial</option>
-              <option value="'Helvetica Neue', Helvetica, sans-serif">Helvetica</option>
-              <option value="Georgia, serif">Georgia</option>
-              <option value="'Times New Roman', Times, serif">Times New Roman</option>
-            </select>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Font Size (px)</Label>
-              <Input
-                type="number"
-                value={globalStyles.defaultFontSize}
-                onChange={(e) => updateGlobalStyles({ defaultFontSize: Number(e.target.value) })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-xs text-muted-foreground">Text Color</Label>
-              <ColorPicker
-                value={globalStyles.defaultTextColor}
-                onChange={(color) => updateGlobalStyles({ defaultTextColor: color })}
-              />
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -5,16 +5,33 @@ export interface BaseBlock {
   type: BlockType;
 }
 
+export interface BaseBlockProps {
+  blockBackgroundColor?: string;
+  alignDesktop?: "left" | "center" | "right" | "justify";
+  paddingDesktop?: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+    linked: boolean;
+  };
+  marginDesktop?: {
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+    linked: boolean;
+  };
+}
+
 export interface TextBlock extends BaseBlock {
   type: "text";
-  props: {
-    // Legacy / Shared Fallbacks
+  props: BaseBlockProps & {
     content: string;
     fontSize?: number; // legacy
     color?: string;
     align?: "left" | "center" | "right" | "justify"; // legacy
 
-    // New Rich Text Properties
     fontFamily?: string;
     fontSizeDesktop?: number;
     fontSizeMobile?: number;
@@ -25,38 +42,33 @@ export interface TextBlock extends BaseBlock {
     subscript?: boolean;
     superscript?: boolean;
     backgroundColor?: string;
-    blockBackgroundColor?: string;
     lineHeightDesktop?: number | string;
     lineHeightMobile?: number | string;
     paragraphStyle?: "p" | "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
-    alignDesktop?: "left" | "center" | "right" | "justify";
     alignMobile?: "left" | "center" | "right" | "justify";
     indent?: number;
     direction?: "ltr" | "rtl";
     fixedHeight?: boolean;
     fixedHeightValue?: number;
-    padding?: {
+    padding?: { // legacy
       top: number;
       right: number;
       bottom: number;
       left: number;
       linked: boolean;
     };
-    anchorLink?: string;
   };
 }
 
 export interface ImageBlock extends BaseBlock {
   type: "image";
-  props: {
-    // Legacy / Shared Fallbacks
+  props: BaseBlockProps & {
     src: string;
     alt: string;
     width: number | "auto";
     height: number | "auto";
-    align: "left" | "center" | "right";
+    align?: "left" | "center" | "right"; // legacy
     
-    // New Desktop-Focused Properties
     addAltToTitle?: boolean;
     title?: string;
     fileName?: string;
@@ -69,33 +81,29 @@ export interface ImageBlock extends BaseBlock {
     imagePosition?: "top" | "center" | "bottom";
     borderRadius?: number;
     radiusMode?: "uniform" | "individual";
-    margin?: {
+    margin?: { // legacy
       top: number;
       right: number;
       bottom: number;
       left: number;
       linked: boolean;
     };
-    includeIn?: "both" | "html" | "amp";
-    anchorLink?: string;
   };
 }
 
 export interface ButtonBlock extends BaseBlock {
   type: "button";
-  props: {
+  props: BaseBlockProps & {
     text: string;
     linkType?: "url" | "email" | "phone" | "sms";
     href: string;
     buttonColor: string;
     textColor: string;
-    blockBackgroundColor?: string;
     fontFamily?: string;
     fontSizeDesktop?: number;
     fontWeight?: "normal" | "bold" | string;
     bold?: boolean;
     italic?: boolean;
-    alignDesktop?: "left" | "center" | "right";
     fitToContainerDesktop?: boolean;
     fixedHeight?: boolean;
     heightDesktop?: number;
@@ -103,31 +111,16 @@ export interface ButtonBlock extends BaseBlock {
     borderWidth?: number;
     borderStyle?: "solid" | "dashed" | "dotted";
     borderColor?: string;
-    paddingDesktop?: {
-      top: number;
-      right: number;
-      bottom: number;
-      left: number;
-      linked: boolean;
-    };
-    marginDesktop?: {
-      top: number;
-      right: number;
-      bottom: number;
-      left: number;
-      linked: boolean;
-    };
-    includeIn?: "both" | "html" | "amp";
-    anchorLink?: string;
   };
 }
 
 export interface DividerBlock extends BaseBlock {
   type: "divider";
-  props: {
-    lineColor: string;
+  props: BaseBlockProps & {
+    color: string;
     lineWidth: number;
-    padding: number;
+    widthDesktop?: number;
+    borderStyle?: "solid" | "dashed" | "dotted";
   };
 }
 
@@ -188,15 +181,10 @@ export interface Stripe {
 
 export interface GlobalStyles {
   contentBackgroundColor: string;
-  backgroundImage?: string;
   contentWidth: number;
   messageAlignment?: 'left' | 'center' | 'right';
   underlineLinks?: boolean;
   responsiveDesign?: boolean;
-  defaultFontFamily: string;
-  defaultFontSize: number;
-  defaultTextColor: string;
-  linkColor: string;
 }
 
 export interface TemplateDesign {

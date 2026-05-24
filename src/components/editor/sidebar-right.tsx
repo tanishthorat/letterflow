@@ -15,13 +15,13 @@ import { GlobalStylesInspector } from "./inspectors/global-styles-inspector";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function SidebarRight() {
-  const { selectedNode, stripes, updateBlock, removeBlock, updateStructureProps, removeStructure, updateColumnProps, updateStripeProps, removeStripe } = useEditorStore();
+  const { selectedNode, stripes, updateBlock, removeBlock, updateStructureProps, removeStructure, updateColumnProps, updateStripeProps, updateStripe, removeStripe } = useEditorStore();
 
   let content = <GlobalStylesInspector />;
 
   if (selectedNode) {
     if (selectedNode.type === 'stripe') {
-      content = <StripeInspector stripeId={selectedNode.stripeId} stripes={stripes} updateStripeProps={updateStripeProps} removeStripe={removeStripe} />;
+      content = <StripeInspector stripeId={selectedNode.stripeId} stripes={stripes} updateStripeProps={updateStripeProps} updateStripe={updateStripe} removeStripe={removeStripe} />;
     } else if (selectedNode.type === 'structure') {
       content = <StructureInspector stripeId={selectedNode.stripeId} structureId={selectedNode.structureId} stripes={stripes} updateStructureProps={updateStructureProps} removeStructure={removeStructure} />;
     } else if (selectedNode.type === 'column') {
@@ -31,9 +31,9 @@ export function SidebarRight() {
       const structure = stripe?.structures.find(s => s.id === selectedNode.structureId);
       const column = structure?.columns.find(c => c.id === selectedNode.columnId);
       const block = column?.blocks.find(b => b.id === selectedNode.blockId);
-
+      
       if (block) {
-        const config = BLOCK_REGISTRY[block.type];
+        const config = BLOCK_REGISTRY[block.type as keyof typeof BLOCK_REGISTRY];
         if (config) {
           content = (
             <div className="p-4 space-y-6">
@@ -47,7 +47,7 @@ export function SidebarRight() {
                 </button>
               </div>
               {config.renderInspector({
-                block,
+                block: block as any,
                 onChange: (props) => updateBlock(selectedNode.stripeId, selectedNode.structureId, selectedNode.columnId, selectedNode.blockId, props),
               })}
             </div>

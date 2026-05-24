@@ -4,8 +4,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Trash2, Rows } from "lucide-react";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { NumberStepper } from "@/components/ui/number-stepper";
+import { Switch } from "@/components/ui/switch";
 
-export function StripeInspector({ stripeId, stripes, updateStripeProps, removeStripe }: any) {
+export function StripeInspector({ stripeId, stripes, updateStripeProps, updateStripe, removeStripe }: any) {
   const stripe = stripes.find((s: any) => s.id === stripeId);
   if (!stripe) return null;
 
@@ -24,7 +26,7 @@ export function StripeInspector({ stripeId, stripes, updateStripeProps, removeSt
       <div className="space-y-4">
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Label</Label>
-          <Input type="text" value={stripe.label || ""} onChange={(e) => updateStripeProps(stripeId, { label: e.target.value })} />
+          <Input type="text" value={stripe.label || ""} onChange={(e) => updateStripe(stripeId, { label: e.target.value })} />
         </div>
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Background Color</Label>
@@ -35,22 +37,33 @@ export function StripeInspector({ stripeId, stripes, updateStripeProps, removeSt
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Padding Top</Label>
-            <Input type="number" value={stripe.props.paddingTop} onChange={(e) => updateStripeProps(stripeId, { paddingTop: Number(e.target.value) })} />
+            <Label className="text-xs text-muted-foreground">Padding Top (px)</Label>
+            <NumberStepper 
+              value={stripe.props.paddingTop || 0} 
+              onChange={(val) => updateStripeProps(stripeId, { paddingTop: val })} 
+              min={0}
+              max={200}
+              step={5}
+            />
           </div>
           <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Padding Bottom</Label>
-            <Input type="number" value={stripe.props.paddingBottom} onChange={(e) => updateStripeProps(stripeId, { paddingBottom: Number(e.target.value) })} />
+            <Label className="text-xs text-muted-foreground">Padding Bottom (px)</Label>
+            <NumberStepper 
+              value={stripe.props.paddingBottom || 0} 
+              onChange={(val) => updateStripeProps(stripeId, { paddingBottom: val })} 
+              min={0}
+              max={200}
+              step={5}
+            />
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <input 
-            type="checkbox" 
+        <div className="flex items-center justify-between py-2 border-t border-border">
+          <Label htmlFor="fullWidth" className="text-xs font-medium">Full Width Background</Label>
+          <Switch 
             id="fullWidth" 
             checked={!!stripe.props.fullWidth} 
-            onChange={(e) => updateStripeProps(stripeId, { fullWidth: e.target.checked })} 
+            onCheckedChange={(checked) => updateStripeProps(stripeId, { fullWidth: checked })} 
           />
-          <Label htmlFor="fullWidth" className="text-xs">Full Width Background</Label>
         </div>
       </div>
     </div>
