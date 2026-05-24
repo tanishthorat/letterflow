@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { extractPlaceholders, replacePlaceholders } from "@/lib/editor/placeholders";
 import { generateEmailHtml } from "@/lib/email/generate";
+import { toast } from "@/lib/toast";
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -109,8 +110,12 @@ export function ExportModal({ isOpen, onClose, templateName }: ExportModalProps)
       await navigator.clipboard.writeText(html);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      toast.success("HTML copied to clipboard!");
     } catch (err) {
       console.error("Failed to copy HTML", err);
+      toast.error("Failed to copy HTML", {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
     }
   };
 
@@ -126,8 +131,12 @@ export function ExportModal({ isOpen, onClose, templateName }: ExportModalProps)
       a.download = `${templateName ? templateName.toLowerCase().replace(/\s+/g, "-") : "email-template"}.html`;
       a.click();
       URL.revokeObjectURL(url);
+      toast.success("HTML file downloaded!");
     } catch (err) {
       console.error("Failed to download HTML", err);
+      toast.error("Download failed", {
+        description: err instanceof Error ? err.message : "Please try again.",
+      });
     } finally {
       setDownloading(false);
     }

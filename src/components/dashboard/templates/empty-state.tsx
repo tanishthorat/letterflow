@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTemplateStore } from "@/lib/stores/template";
+import { toast } from "@/lib/toast";
 
 const TEMPLATE_OPTIONS = [
   {
@@ -48,6 +49,9 @@ export function EmptyTemplatesState() {
       }
     } catch (error) {
       console.error("Failed to create template", error);
+      toast.error("Couldn't create template", {
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
     } finally {
       setIsCreating(null);
     }

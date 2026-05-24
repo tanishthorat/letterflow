@@ -9,6 +9,7 @@ import { SearchBar } from "@/components/ui/search-bar";
 import { UserNav } from "@/components/dashboard/user-nav";
 import { useAuth } from "@/lib/auth";
 import { useTemplateStore } from "@/lib/stores/template";
+import { toast } from "@/lib/toast";
 
 interface HeaderProps {
   collapsed: boolean;
@@ -40,6 +41,9 @@ export function Header({ collapsed }: HeaderProps) {
       }
     } catch (error) {
       console.error("Error creating template", error);
+      toast.error("Couldn't create template", {
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
     } finally {
       setIsCreating(false);
     }
@@ -51,6 +55,9 @@ export function Header({ collapsed }: HeaderProps) {
       router.push("/login");
     } catch (error) {
       console.error("Sign out failed:", error);
+      toast.error("Sign out failed", {
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
     }
   };
 

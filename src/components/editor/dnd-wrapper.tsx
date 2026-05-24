@@ -299,7 +299,7 @@ export function EditorDndWrapper({ children }: { children: React.ReactNode }) {
       onDragEnd={handleDragEnd}
     >
       {children}
-      <DragOverlay dropAnimation={{ duration: 250, easing: 'ease' }} modifiers={[snapCenterToCursor]}>
+      <DragOverlay dropAnimation={null} modifiers={[snapCenterToCursor]}>
         {activeNode ? (
           <div className="bg-zinc-900 border-2 border-primary shadow-2xl rounded-lg flex items-center justify-center p-3 opacity-100 scale-105 pointer-events-none w-20 h-20">
              <div className="w-12 h-12 border border-dashed border-zinc-500 rounded bg-zinc-800 flex items-center justify-center text-zinc-400">

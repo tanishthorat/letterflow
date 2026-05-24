@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "@/lib/toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,6 +29,9 @@ export function UserNav() {
       router.push("/login");
     } catch (error) {
       console.error("Sign out failed:", error);
+      toast.error("Sign out failed", {
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
     }
   };
 

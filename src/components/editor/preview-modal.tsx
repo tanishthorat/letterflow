@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { extractPlaceholders } from "@/lib/editor/placeholders";
+import { toast } from "@/lib/toast";
 import { useDebounce } from "use-debounce";
 import { ExportModal } from "./export-modal";
 
@@ -114,10 +115,15 @@ export function PreviewModal({ isOpen, onClose, templateName }: PreviewModalProp
             const htmlContent = await res.text();
             setHtml(htmlContent);
           } else {
-            console.error("Failed to generate preview:", await res.text());
+            const errText = await res.text();
+            console.error("Failed to generate preview:", errText);
+            toast.error("Preview failed", { description: errText.slice(0, 120) });
           }
         } catch (error) {
           console.error("Preview generation failed", error);
+          toast.error("Preview failed", {
+            description: error instanceof Error ? error.message : "Could not render preview.",
+          });
         } finally {
           setLoading(false);
         }

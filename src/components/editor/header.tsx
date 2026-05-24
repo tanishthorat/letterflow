@@ -11,6 +11,7 @@ import { useEditorStore } from "@/lib/editor/store";
 import { useDebounce } from "use-debounce";
 import { PreviewModal } from "@/components/editor/preview-modal";
 import { ExportModal } from "./export-modal";
+import { toast } from "@/lib/toast";
 import {
   ArrowLeft, CloudUpload, ChevronDown, Undo, History, Redo,
   Monitor, Smartphone, Code, MonitorSmartphone, ClipboardCheck,
@@ -65,6 +66,9 @@ export function EditorHeader({ template }: EditorHeaderProps) {
         } catch (error) {
           console.error("Autosave failed", error);
           setSaveStatus("error");
+          toast.error("Autosave failed", {
+            description: error instanceof Error ? error.message : "Changes may not have been saved.",
+          });
         }
       }, 3000);
 
@@ -106,9 +110,13 @@ export function EditorHeader({ template }: EditorHeaderProps) {
 
       clearDirty();
       setSaveStatus("saved");
+      toast.success("Template saved!");
     } catch (error) {
       console.error("Save failed", error);
       setSaveStatus("error");
+      toast.error("Save failed", {
+        description: error instanceof Error ? error.message : "Please try again.",
+      });
     } finally {
       setIsSaving(false);
     }
