@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Text as EmailText, Img as EmailImg, Button as EmailButton, Hr as EmailHr, Section } from "@react-email/components";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { AlignmentSelector } from "@/components/ui/alignment-selector";
 
 export interface BlockConfig<T extends ContentBlock> {
   type: BlockType;
@@ -61,15 +62,10 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
       </div>
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Alignment</Label>
-        <select 
-          className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
-          value={block.props.align || "left"} 
-          onChange={(e) => onChange({ align: e.target.value as "left" | "center" | "right" })}
-        >
-          <option value="left">Left</option>
-          <option value="center">Center</option>
-          <option value="right">Right</option>
-        </select>
+        <AlignmentSelector
+          value={(block.props.align || "left") as "left" | "center" | "right"}
+          onChange={(val) => onChange({ align: val })}
+        />
       </div>
     </div>
   ),
@@ -145,15 +141,10 @@ const ImageBlockConfig: BlockConfig<ImageBlock> = {
       </div>
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Alignment</Label>
-        <select 
-          className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
-          value={block.props.align || "center"} 
-          onChange={(e) => onChange({ align: e.target.value as "left" | "center" | "right" })}
-        >
-          <option value="left">Left</option>
-          <option value="center">Center</option>
-          <option value="right">Right</option>
-        </select>
+        <AlignmentSelector
+          value={(block.props.align || "center") as "left" | "center" | "right"}
+          onChange={(val) => onChange({ align: val })}
+        />
       </div>
     </div>
   ),
@@ -258,15 +249,10 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
       </div>
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">Alignment</Label>
-        <select 
-          className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
-          value={block.props.align || "center"} 
-          onChange={(e) => onChange({ align: e.target.value as "left" | "center" | "right" })}
-        >
-          <option value="left">Left</option>
-          <option value="center">Center</option>
-          <option value="right">Right</option>
-        </select>
+        <AlignmentSelector
+          value={(block.props.align || "center") as "left" | "center" | "right"}
+          onChange={(val) => onChange({ align: val })}
+        />
       </div>
     </div>
   ),

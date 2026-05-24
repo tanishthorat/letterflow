@@ -7,7 +7,15 @@ import { LAYOUT_PRESETS, type LayoutPreset } from "@/lib/editor/layoutPresets";
 import type { ContentBlock, BlockType } from "@/lib/editor/types";
 import { cn } from "@/lib/utils";
 import { useDraggable } from "@dnd-kit/core";
-import { Plus } from "lucide-react";
+import { Plus, Rows3 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type BlockSidebarItemProps = {
   id: string;
@@ -81,14 +89,14 @@ function DraggableSidebarItem({ id, type, label, icon: Icon, payload, children }
   );
 }
 
-function LayoutThumbnail({ columns }: { columns: number[] }) {
+function LayoutThumbnail({ columns, mini = false }: { columns: number[]; mini?: boolean }) {
   const totalWeight = columns.reduce((a, b) => a + b, 0);
   return (
-    <div className="flex w-full h-8 gap-1 p-1 border border-border/50 rounded bg-muted/20">
+    <div className={cn("flex w-full gap-1 rounded", mini ? "h-5 p-0.5" : "h-8 p-1 border border-border/50 bg-muted/20")}>
       {columns.map((col, i) => (
-        <div 
-          key={i} 
-          className="h-full border border-dashed border-blue-400 bg-blue-50/50 rounded-sm"
+        <div
+          key={i}
+          className="h-full border border-dashed border-blue-400 bg-blue-400/30 rounded-sm"
           style={{ flex: col / totalWeight }}
         />
       ))}
@@ -96,20 +104,64 @@ function LayoutThumbnail({ columns }: { columns: number[] }) {
   );
 }
 
+function AddStripeDropdown() {
+  const { addStripe, addStructure } = useEditorStore();
+
+  const handleSelectLayout = (preset: LayoutPreset) => {
+    const newStripeId = addStripe();
+    addStructure(newStripeId, preset);
+  };
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="w-full flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary py-2 px-4 rounded transition-colors">
+          <Plus className="w-4 h-4" />
+          <span className="text-sm font-medium hidden md:inline">Add Stripe</span>
+          <Rows3 className="w-3.5 h-3.5 opacity-70 hidden md:inline" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="start"
+        side="top"
+        sideOffset={6}
+        className="w-56"
+      >
+        <DropdownMenuLabel className="flex items-center gap-2">
+          <Rows3 className="w-3.5 h-3.5" />
+          Choose a layout
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {LAYOUT_PRESETS.slice(0, 6).map((preset) => (
+          <DropdownMenuItem
+            key={preset.id}
+            onSelect={() => handleSelectLayout(preset)}
+            className="flex items-center gap-3 py-2 cursor-pointer"
+          >
+            <div className="w-20 shrink-0">
+              <LayoutThumbnail columns={preset.columns} mini />
+            </div>
+            <span className="text-xs font-medium truncate">{preset.label}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export function SidebarLeft() {
   const [activeTab, setActiveTab] = useState<"blocks" | "structures">("blocks");
-  const { addStripe } = useEditorStore();
 
   return (
     <div className="w-20 md:w-64 border-r border-border bg-card h-full flex flex-col z-10 shrink-0">
       <div className="flex border-b border-border">
-        <button 
+        <button
           className={cn("flex-1 py-3 text-xs font-semibold border-b-2 transition-colors", activeTab === "blocks" ? "border-primary text-primary" : "border-transparent text-muted-foreground")}
           onClick={() => setActiveTab("blocks")}
         >
           Blocks
         </button>
-        <button 
+        <button
           className={cn("flex-1 py-3 text-xs font-semibold border-b-2 transition-colors", activeTab === "structures" ? "border-primary text-primary" : "border-transparent text-muted-foreground")}
           onClick={() => setActiveTab("structures")}
         >
@@ -140,15 +192,9 @@ export function SidebarLeft() {
           </DraggableSidebarItem>
         ))}
       </div>
-      
+
       <div className="p-4 border-t border-border mt-auto">
-        <button 
-          onClick={() => addStripe()}
-          className="w-full flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary py-2 px-4 rounded transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          <span className="text-sm font-medium">Add Stripe</span>
-        </button>
+        <AddStripeDropdown />
       </div>
     </div>
   );

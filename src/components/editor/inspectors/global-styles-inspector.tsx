@@ -4,9 +4,10 @@ import { useEditorStore } from "@/lib/editor/store";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
-import { Paintbrush, AlignLeft, AlignCenter, AlignRight } from "lucide-react";
+import { Paintbrush } from "lucide-react";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { NumberStepper } from "@/components/ui/number-stepper";
+import { AlignmentSelector } from "@/components/ui/alignment-selector";
 
 export function GlobalStylesInspector() {
   const { globalStyles, updateGlobalStyles } = useEditorStore();
@@ -60,26 +61,10 @@ export function GlobalStylesInspector() {
 
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Message Alignment</Label>
-          <div className="flex bg-muted rounded-md p-1">
-            <button
-              className={`p-1.5 rounded-sm transition-colors ${globalStyles.messageAlignment === 'left' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-              onClick={() => updateGlobalStyles({ messageAlignment: 'left' })}
-            >
-              <AlignLeft className="w-4 h-4" />
-            </button>
-            <button
-              className={`p-1.5 rounded-sm transition-colors ${globalStyles.messageAlignment === 'center' || !globalStyles.messageAlignment ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-              onClick={() => updateGlobalStyles({ messageAlignment: 'center' })}
-            >
-              <AlignCenter className="w-4 h-4" />
-            </button>
-            <button
-              className={`p-1.5 rounded-sm transition-colors ${globalStyles.messageAlignment === 'right' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-              onClick={() => updateGlobalStyles({ messageAlignment: 'right' })}
-            >
-              <AlignRight className="w-4 h-4" />
-            </button>
-          </div>
+          <AlignmentSelector
+            value={(globalStyles.messageAlignment || "center") as "left" | "center" | "right"}
+            onChange={(val) => updateGlobalStyles({ messageAlignment: val })}
+          />
         </div>
 
         <div className="flex items-center justify-between border-t border-border pt-4">
