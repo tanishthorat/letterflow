@@ -75,8 +75,8 @@ export function SignupForm() {
 
             // Brief delay to show success state
             setTimeout(() => {
-                router.push(nextParam ? decodeURIComponent(nextParam) : "/dashboard");
-            }, 1500);
+                router.push("/login?message=Account+created.+Please+verify+your+email+or+log+in.");
+            }, 3000);
         } catch (err) {
             const message =
                 err instanceof Error ? err.message : "Sign up failed. Please try again.";
@@ -98,7 +98,7 @@ export function SignupForm() {
                         Account Created!
                     </h2>
                     <p className="text-sm text-muted-foreground mb-6">
-                        Welcome to Letterflow. Redirecting to your dashboard...
+                        Your account has been successfully created. If email verification is required, please check your inbox. Redirecting to login...
                     </p>
                     <div className="h-1 bg-linear-to-r from-primary to-primary/50 rounded-full" />
                 </div>

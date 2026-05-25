@@ -13,6 +13,7 @@ interface AuthStore {
   signInWithGitHub: (redirectTo?: string) => Promise<void>;
   signOut: () => Promise<void>;
   getSession: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
 }
 
 export const useAuth = create<AuthStore>((set) => {
@@ -110,6 +111,20 @@ export const useAuth = create<AuthStore>((set) => {
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
         set({ user: null });
+      } finally {
+        set({ loading: false });
+      }
+    },
+
+    resetPassword: async (email: string) => {
+      const supabase = createClient();
+      set({ loading: true });
+      try {
+        const origin = typeof window !== "undefined" ? window.location.origin : "";
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${origin}/auth/callback?next=/dashboard/settings/security`, // or some reset-password page
+        });
+        if (error) throw error;
       } finally {
         set({ loading: false });
       }

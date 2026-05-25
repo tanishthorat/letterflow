@@ -99,7 +99,7 @@ export function AIHelper({ content, blockType, onRewrite }: AIHelperProps) {
           className="hover:bg-white/20 p-1 rounded-sm transition-colors flex items-center justify-center text-white relative group"
           title="AI Rewrite"
         >
-          <WandSparkles className="w-4 h-4 text-purple-200 group-hover:text-white" />
+          <WandSparkles className="w-4 h-4 text-primary/70 group-hover:text-primary" />
         </button>
       </PopoverTrigger>
       <PopoverContent
@@ -109,8 +109,8 @@ export function AIHelper({ content, blockType, onRewrite }: AIHelperProps) {
       >
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between border-b border-border pb-2">
-            <div className="flex items-center gap-1.5 font-semibold text-sm text-purple-500">
-              <WandSparkles className="w-4 h-4 text-purple-500" />
+            <div className="flex items-center gap-1.5 font-semibold text-sm text-primary">
+              <WandSparkles className="w-4 h-4 text-primary" />
               <span>AI Assistant</span>
             </div>
             {originalContent !== null && currentSuggestion && (
@@ -132,7 +132,7 @@ export function AIHelper({ content, blockType, onRewrite }: AIHelperProps) {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder="e.g. Make it sound more exciting..."
-                className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground text-xs focus-visible:ring-purple-500/30 focus-visible:border-purple-500 resize-none min-h-8 max-h-8 overflow-y-auto py-1.5"
+                className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground text-xs focus-visible:ring-primary/30 focus-visible:border-primary resize-none min-h-8 max-h-8 overflow-y-auto py-1.5"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -143,10 +143,10 @@ export function AIHelper({ content, blockType, onRewrite }: AIHelperProps) {
               <button
                 onClick={() => prompt.trim() && handleRewrite(prompt)}
                 disabled={isLoading || !prompt.trim()}
-                className="bg-purple-600 hover:bg-purple-500 disabled:bg-muted disabled:text-muted-foreground text-white rounded-lg px-3 flex items-center justify-center transition-all shadow-md active:scale-95 border border-purple-500/25 shrink-0"
+                className="bg-primary hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground text-primary-foreground rounded-lg px-3 flex items-center justify-center transition-all shadow-md active:scale-95 border border-primary/25 shrink-0"
               >
                 {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-purple-300" />
+                  <Loader2 className="w-4 h-4 animate-spin text-primary-foreground/70" />
                 ) : (
                   <SendHorizontal className="w-4 h-4" />
                 )}
@@ -184,9 +184,9 @@ export function AIHelper({ content, blockType, onRewrite }: AIHelperProps) {
 
           {/* Suggestion Preview */}
           {currentSuggestion && (
-            <div className="mt-1 flex flex-col gap-2 bg-purple-500/10 border border-purple-500/20 rounded-lg p-2.5">
+            <div className="mt-1 flex flex-col gap-2 bg-primary/10 border border-primary/20 rounded-lg p-2.5">
               <div className="flex justify-between items-center">
-                <span className="text-[10px] font-bold text-purple-500 uppercase tracking-wider flex items-center gap-1">
+                <span className="text-[10px] font-bold text-primary uppercase tracking-wider flex items-center gap-1">
                   <Sparkles className="w-3 h-3" /> Suggestion
                 </span>
                 <span className="text-[9px] text-muted-foreground">
@@ -196,7 +196,7 @@ export function AIHelper({ content, blockType, onRewrite }: AIHelperProps) {
               <p className="text-xs text-foreground leading-relaxed italic">
                 &ldquo;{currentSuggestion}&rdquo;
               </p>
-              <div className="flex gap-2 justify-end mt-1 border-t border-purple-500/10 pt-2">
+              <div className="flex gap-2 justify-end mt-1 border-t border-primary/10 pt-2">
                 <button
                   onClick={handleDiscard}
                   className="text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-accent border border-transparent hover:border-border transition-all font-medium"
@@ -205,7 +205,7 @@ export function AIHelper({ content, blockType, onRewrite }: AIHelperProps) {
                 </button>
                 <button
                   onClick={handleAccept}
-                  className="text-xs bg-purple-600 hover:bg-purple-500 text-white font-medium px-2.5 py-1 rounded transition-all flex items-center gap-1 shadow-md border border-purple-500/35"
+                  className="text-xs bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-2.5 py-1 rounded transition-all flex items-center gap-1 shadow-md border border-primary/35"
                 >
                   <Check className="w-3 h-3" /> Keep It
                 </button>

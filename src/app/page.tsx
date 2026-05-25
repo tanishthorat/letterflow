@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import LandingHeader from "@/components/landing/header";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -72,85 +73,12 @@ export default async function HomePage() {
             </div>
 
             {/* Right Interactive/Mockup Column */}
-            <div className="flex-1 w-full max-w-[560px] lg:max-w-none flex justify-center items-center z-10">
+            <div className="flex-1 w-full lg:max-w-none flex justify-center items-center z-10">
               <div
-                className="w-full aspect-[0.8717/1] hover:scale-[1.02] hover:rotate-1 transition-all duration-700 ease-out cursor-pointer relative filter drop-shadow-md select-none"
+                className="w-full aspect-[0.8717/1] transition-all duration-700 ease-out cursor-pointer relative  select-none"
                 style={{ contentVisibility: "visible" }}
               >
-                {/* SVG Illustration mapped to downloaded local images */}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 1280 1450"
-                  className="w-full h-full"
-                >
-                  <defs>
-                    <clipPath id="__lottie_element_2">
-                      <rect width="1280" height="1450" x="0" y="0"></rect>
-                    </clipPath>
-                  </defs>
-                  <g clipPath="url(#__lottie_element_2)">
-                    {/* img_24: Left block icons sidebar */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 75.29, 194.04)">
-                      <image width="195px" height="1845px" href="/images/landing/img_24.svg" />
-                    </g>
-                    {/* img_22: Main canvas backdrop */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 271.78, 191.05)">
-                      <image width="1426px" height="1767px" href="/images/landing/img_22.svg" />
-                    </g>
-                    {/* img_17: Editor Header */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 331, 350)">
-                      <image width="1239px" height="276px" href="/images/landing/img_17.svg" />
-                    </g>
-                    {/* img_16: Banner Block */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 330, 298.61)">
-                      <image width="1245px" height="354px" href="/images/landing/img_16.svg" />
-                    </g>
-                    {/* img_13: Paragraph block text */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 331, 568)">
-                      <image width="1239px" height="699px" href="/images/landing/img_13.svg" />
-                    </g>
-                    {/* img_12: Image Block placeholder */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 331, 536.79)">
-                      <image width="1245px" height="753px" href="/images/landing/img_12.svg" />
-                    </g>
-                    {/* img_10: Floating Add/Edit Node Icon 1 */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 435.76, 771.55)">
-                      <image width="57px" height="57px" href="/images/landing/img_10.svg" />
-                    </g>
-                    {/* img_9: Floating Add/Edit Node Icon 2 */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 510.2, 468.06)">
-                      <image width="57px" height="57px" href="/images/landing/img_9.svg" />
-                    </g>
-                    {/* img_7: Grid Item bottom right */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 777.75, 1093.92)">
-                      <image width="486px" height="96px" href="/images/landing/img_7.svg" />
-                    </g>
-                    {/* img_6: Grid Item bottom left */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 354.02, 1093.8)">
-                      <image width="483px" height="96px" href="/images/landing/img_6.svg" />
-                    </g>
-                    {/* img_5: Grid block bottom row */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 331, 1038)">
-                      <image width="1245px" height="228px" href="/images/landing/img_5.svg" />
-                    </g>
-                    {/* img_3: Editor central content layout block */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 486.97, 647.03)">
-                      <image width="831px" height="417px" href="/images/landing/img_3.svg" />
-                    </g>
-                    {/* img_2: Mouse pointer icon 2 */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 315.99, 966.95)">
-                      <image width="366px" height="224px" href="/images/landing/img_2.svg" />
-                    </g>
-                    {/* img_1: Mouse pointer icon 1 */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 656.28, 411.18)">
-                      <image width="366px" height="224px" href="/images/landing/img_1.svg" />
-                    </g>
-                    {/* img_0: "David" collaborator cursor avatar */}
-                    <g transform="matrix(0.65, 0, 0, 0.65, 849.65, 854.37)">
-                      <image width="366px" height="224px" href="/images/landing/img_0.svg" />
-                    </g>
-                  </g>
-                </svg>
+                <Image src="/images/landing/Letterflow-hero-image.webp" alt="hero" fill className="object-contain scale-125" />
               </div>
             </div>
 

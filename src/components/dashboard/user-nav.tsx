@@ -41,7 +41,7 @@ export function UserNav() {
 
   const name = user?.user_metadata?.name || user?.user_metadata?.full_name || "User";
   const email = user?.email || "";
-  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || "";
+  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || undefined;
   const initials = name.slice(0, 2).toUpperCase();
 
   return (

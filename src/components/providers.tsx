@@ -42,7 +42,8 @@ function AuthGuard() {
         pathname.startsWith("/auth/") ||
         pathname.startsWith("/api/") ||
         pathname === "/login" ||
-        pathname === "/signup";
+        pathname === "/signup" ||
+        pathname === "/forgot-password";
 
       if (!isPublicRoute) {
         const currentSearch = searchParams?.toString();

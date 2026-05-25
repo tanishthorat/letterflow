@@ -46,6 +46,7 @@ export async function updateSession(request: NextRequest) {
     url.pathname.startsWith('/api/') || 
     url.pathname === '/login' || 
     url.pathname === '/signup' ||
+    url.pathname === '/forgot-password' ||
     url.pathname.startsWith('/images/') ||
     url.pathname === '/icon.svg' ||
     url.pathname === '/icon.png' ||
@@ -53,7 +54,7 @@ export async function updateSession(request: NextRequest) {
     url.pathname === '/manifest.json' ||
     url.pathname === '/favicon.ico';
 
-  const isAuthRoute = url.pathname === '/login' || url.pathname === '/signup';
+  const isAuthRoute = url.pathname === '/login' || url.pathname === '/signup' || url.pathname === '/forgot-password';
 
   // If unauthenticated and trying to access a protected route
   if (!user && !isPublicRoute) {

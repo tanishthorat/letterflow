@@ -130,7 +130,7 @@ export function LoginForm() {
           <div className="flex items-end justify-end">
             {/* <Label htmlFor="password">Password</Label> */}
             <Link
-              href="#"
+              href="/forgot-password"
               className="text-sm text-primary hover:underline"
             >
               Forgot Password?

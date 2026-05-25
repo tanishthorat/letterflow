@@ -18,6 +18,9 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 interface RichTextEditorProps {
   content: string
@@ -28,6 +31,8 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ content, onChange, readOnly = false, className, style }: RichTextEditorProps) {
+  const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false)
+  const [linkUrl, setLinkUrl] = useState('')
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -106,23 +111,54 @@ export function RichTextEditor({ content, onChange, readOnly = false, className,
             <Strikethrough className="w-4 h-4" />
           </button>
           <div className="w-px h-4 bg-border mx-1" />
-          <div className="w-px h-4 bg-border mx-1" />
-          <button
-            onClick={() => {
-              const previousUrl = editor.getAttributes('link').href
-              const url = window.prompt('URL', previousUrl)
-              if (url === null) return
-              if (url === '') {
-                editor.chain().focus().extendMarkRange('link').unsetLink().run()
-                return
-              }
-              editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
-            }}
-            className={cn("p-1.5 rounded hover:bg-muted", editor.isActive('link') && "bg-muted text-blue-500")}
-            title="Link"
-          >
-            <LinkIcon className="w-4 h-4" />
-          </button>
+          <Popover open={isLinkPopoverOpen} onOpenChange={setIsLinkPopoverOpen}>
+            <PopoverTrigger asChild>
+              <button
+                onClick={() => {
+                  const previousUrl = editor.getAttributes('link').href
+                  setLinkUrl(previousUrl || '')
+                }}
+                className={cn("p-1.5 rounded hover:bg-muted", editor.isActive('link') && "bg-muted text-blue-500")}
+                title="Link"
+              >
+                <LinkIcon className="w-4 h-4" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-2 flex items-center gap-2 shadow-lg" sideOffset={8}>
+              <Input
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                placeholder="https://..."
+                className="h-8 text-xs"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    if (linkUrl === '') {
+                      editor.chain().focus().extendMarkRange('link').unsetLink().run()
+                    } else {
+                      editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run()
+                    }
+                    setIsLinkPopoverOpen(false)
+                  }
+                }}
+                autoFocus
+              />
+              <Button 
+                size="sm" 
+                className="h-8 px-3 text-xs"
+                onClick={() => {
+                  if (linkUrl === '') {
+                    editor.chain().focus().extendMarkRange('link').unsetLink().run()
+                  } else {
+                    editor.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run()
+                  }
+                  setIsLinkPopoverOpen(false)
+                }}
+              >
+                Save
+              </Button>
+            </PopoverContent>
+          </Popover>
         </BubbleMenu>
       )}
       <EditorContent editor={editor} className={cn("w-full outline-none", readOnly && "pointer-events-none")} />
