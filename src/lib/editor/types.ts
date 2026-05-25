@@ -191,6 +191,7 @@ export interface TemplateMetadata {
   subject?: string | null;
   preheader?: string | null;
   status?: "draft" | "published" | "archived";
+  category?: "transactional" | "marketing" | "support" | "billing" | "system" | "other";
 }
 
 export interface TemplateDesign {

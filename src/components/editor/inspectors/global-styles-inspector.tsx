@@ -64,6 +64,25 @@ export function GlobalStylesInspector() {
               </SelectContent>
             </Select>
           </div>
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Tag / Category</Label>
+            <Select
+              value={metadata.category || "other"}
+              onValueChange={(val) => useEditorStore.getState().updateMetadata({ category: val as any })}
+            >
+              <SelectTrigger className="w-full bg-background border-input text-foreground h-9">
+                <SelectValue placeholder="Select tag" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="transactional">Transactional</SelectItem>
+                <SelectItem value="marketing">Marketing</SelectItem>
+                <SelectItem value="support">Support</SelectItem>
+                <SelectItem value="billing">Billing</SelectItem>
+                <SelectItem value="system">System</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Content Background</Label>

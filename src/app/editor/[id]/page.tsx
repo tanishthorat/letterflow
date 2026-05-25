@@ -36,7 +36,8 @@ export default function EditorPage() {
       useEditorStore.getState().loadDesign(template.body_design, template.global_styles, {
         subject: template.subject,
         preheader: template.preheader,
-        status: template.status as "draft" | "published" | "archived"
+        status: template.status as "draft" | "published" | "archived",
+        category: template.category
       });
       hasLoadedDesign.current = true;
     }

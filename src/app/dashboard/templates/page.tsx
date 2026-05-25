@@ -24,33 +24,11 @@ import {
 import { toast } from "@/lib/toast";
 import { EmptyTemplatesState } from "@/components/dashboard/templates/empty-state";
 import { TemplateCard } from "@/components/dashboard/template-card";
+import { TemplateFilters } from "@/components/dashboard/template-filters";
 import { useTemplateStore } from "@/lib/stores/template";
 import type { EmailTemplate } from "@/lib/db.types";
 
-const SORT_LABELS: Record<string, string> = {
-  name_asc: "Name (A-Z)",
-  name_desc: "Name (Z-A)",
-  date_desc: "Date Created",
-  date_asc: "Oldest First",
-  modified_desc: "Last Modified",
-};
 
-const CATEGORY_LABELS: Record<string, string> = {
-  all: "All Tags",
-  marketing: "Marketing",
-  transactional: "Transactional",
-  support: "Support",
-  billing: "Billing",
-  system: "System",
-  other: "Other",
-};
-
-const STATUS_LABELS: Record<string, string> = {
-  all: "All Statuses",
-  draft: "Draft",
-  published: "Published",
-  archived: "Archived",
-};
 
 export default function TemplatesPage() {
   const router = useRouter();
@@ -132,109 +110,33 @@ export default function TemplatesPage() {
     );
   }
 
-  if (templates.length === 0 && !searchQuery && category === "all") {
+  if (templates.length === 0 && !searchQuery && category === "all" && statusFilter === "all") {
     return <EmptyTemplatesState />;
   }
 
   return (
     <div className="space-y-6">
-      {/* Toolbar exactly matching image */}
-      <div className="flex items-center gap-4 border-b border-border pb-4">
-        <div className="flex items-center gap-2">
-          <h1 className="text-lg font-semibold">Emails</h1>
-          <span className="flex items-center justify-center bg-muted text-muted-foreground text-[10px] font-medium rounded-full w-5 h-5">
-            {templates.length}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-
-          {/* sort by tags */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
-                <Tag className="w-4 h-4" />
-                {CATEGORY_LABELS[category] || "All Tags"}
-                <ChevronDown className="w-3 h-3 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
-                <DropdownMenuItem key={key} onClick={() => setCategory(key)}>
-                  {label} {category === key && "✓"}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* sort by status */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
-                <SlidersHorizontal className="w-4 h-4" />
-                {STATUS_LABELS[statusFilter] || "All Statuses"}
-                <ChevronDown className="w-3 h-3 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {Object.entries(STATUS_LABELS).map(([key, label]) => (
-                <DropdownMenuItem key={key} onClick={() => setStatusFilter(key)}>
-                  {label} {statusFilter === key && "✓"}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* view mode */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
-                {viewMode === "grid" ? <LayoutGrid className="w-4 h-4" /> : <List className="w-4 h-4" />}
-                <ChevronDown className="w-3 h-3 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              <DropdownMenuItem onClick={() => setViewMode("grid")}>
-                Grid View {viewMode === "grid" && "✓"}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setViewMode("list")}>
-                List View {viewMode === "list" && "✓"}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* sort by date, name */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
-                <ArrowDown className="w-4 h-4" />
-                {SORT_LABELS[sort] || "Sort"}
-                <ChevronDown className="w-3 h-3 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {Object.entries(SORT_LABELS).map(([key, label]) => (
-                <DropdownMenuItem key={key} onClick={() => setSort(key)}>
-                  {label} {sort === key && "✓"}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+      <TemplateFilters
+        totalTemplates={templates.length}
+        category={category} setCategory={setCategory}
+        statusFilter={statusFilter} setStatusFilter={setStatusFilter}
+        viewMode={viewMode as "grid" | "list"} setViewMode={setViewMode}
+        sort={sort} setSort={setSort}
+      />
 
       {/* Templates Grid/List */}
       {templates.length === 0 ? (
         <Card>
           <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground mb-4">No templates found</p>
+            <p className="text-muted-foreground mb-4">No templates found matching your filters.</p>
             <Button
-              onClick={handleCreateNew}
-              disabled={isCreating}
-              className="bg-accent text-accent-foreground hover:bg-accent/90"
+              variant="outline"
+              onClick={() => {
+                setCategory("all");
+                setStatusFilter("all");
+              }}
             >
-              {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-              Create your first template
+              Clear Filters
             </Button>
           </CardContent>
         </Card>
