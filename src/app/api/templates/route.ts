@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     const search = searchParams.get("search") || "";
     const category = searchParams.get("category") || "all";
     const sort = searchParams.get("sort") || "date_desc";
+    const status = searchParams.get("status") || "all";
 
     const offset = (page - 1) * limit;
 
@@ -30,6 +31,10 @@ export async function GET(request: Request) {
 
     if (category !== "all") {
       query = query.eq("category", category);
+    }
+
+    if (status !== "all") {
+      query = query.eq("status", status);
     }
 
     switch (sort) {

@@ -11,9 +11,11 @@ interface TemplateState {
   hasMore: boolean;
   sort: string;
   category: string;
+  statusFilter: string;
   viewMode: "grid" | "list";
   setSort: (sort: string) => void;
   setCategory: (category: string) => void;
+  setStatusFilter: (status: string) => void;
   setViewMode: (viewMode: "grid" | "list") => void;
   fetchTemplates: (loadMore?: boolean) => Promise<void>;
   createTemplate: (templateData: Partial<EmailTemplate>) => Promise<EmailTemplate | null>;
@@ -37,6 +39,7 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
   hasMore: false,
   sort: "date_desc",
   category: "all",
+  statusFilter: "all",
   viewMode: "grid",
   selectedIds: [],
 
@@ -72,6 +75,11 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
     get().fetchTemplates(false);
   },
 
+  setStatusFilter: (statusFilter) => {
+    set({ statusFilter });
+    get().fetchTemplates(false);
+  },
+
   setViewMode: (viewMode) => set({ viewMode }),
 
   fetchTemplates: async (loadMore = false) => {
@@ -90,6 +98,7 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
         search: state.searchQuery,
         category: state.category,
         sort: state.sort,
+        status: state.statusFilter,
       });
 
       const response = await fetch(`/api/templates?${params.toString()}`);

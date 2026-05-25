@@ -9,10 +9,12 @@ import { cn } from "@/lib/utils";
 import type { EmailTemplate } from "@/lib/db.types";
 import { useTemplateStore } from "@/lib/stores/template";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { Popover, PopoverContent, PopoverTrigger, PopoverAnchor } from "@/components/ui/popover";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -27,7 +29,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { DeleteDialog } from "@/components/ui/delete-dialog";
 
 interface TemplateCardProps {
   template: EmailTemplate;
@@ -113,7 +114,9 @@ export function TemplateCard({ template }: TemplateCardProps) {
         Edit
       </ContextMenuItem>
 
-      <ContextMenuItem onSelect={() => setIsRenaming(true)}>
+      <ContextMenuItem onSelect={(e) => {
+        setTimeout(() => setIsRenaming(true), 0);
+      }}>
         <FolderPen className="w-4 h-4 mr-2" />
         Rename
       </ContextMenuItem>
@@ -146,7 +149,9 @@ export function TemplateCard({ template }: TemplateCardProps) {
         Edit
       </DropdownMenuItem>
 
-      <DropdownMenuItem onSelect={() => setIsRenaming(true)}>
+      <DropdownMenuItem onSelect={(e) => {
+        setTimeout(() => setIsRenaming(true), 0);
+      }}>
         <FolderPen className="w-4 h-4 mr-2" />
         Rename
       </DropdownMenuItem>
@@ -174,124 +179,133 @@ export function TemplateCard({ template }: TemplateCardProps) {
 
   return (
     <>
-      <ContextMenu>
-        <ContextMenuTrigger asChild>
-          <div
-            className={cn(
-              "group relative w-full aspect-2/3 max-h-80 flex flex-col rounded-xl overflow-hidden cursor-pointer transition-all duration-200 border-2",
-              isSelected ? "border-primary shadow-md" : "border-transparent bg-muted/20 hover:border-accent/50"
-            )}
-            onClick={handleEdit}
-          >
-            {/* Visual Preview Section (Top) */}
-            <div className="flex-1 bg-white flex flex-col relative overflow-hidden items-center justify-center pointer-events-none p-4">
-              {template.body_html ? (
-                <div className="w-full h-full absolute inset-0 flex items-start justify-center overflow-hidden opacity-80 pointer-events-none p-4">
-                  <iframe
-                    srcDoc={template.body_html}
-                    sandbox=""
-                    scrolling="no"
-                    tabIndex={-1}
-                    className="origin-top border-none bg-transparent"
-                    style={{ width: "600px", height: "800px", transform: "scale(0.6)" }}
-                  />
-                </div>
-              ) : (
-                <div className="w-16 h-4 bg-muted rounded animate-pulse" />
+      <Popover open={isRenaming} onOpenChange={setIsRenaming}>
+        <ContextMenu>
+          <ContextMenuTrigger asChild>
+            <div
+              className={cn(
+                "group relative w-full aspect-2/3 max-h-80 flex flex-col rounded-xl overflow-hidden cursor-pointer transition-all duration-200 border-2",
+                isSelected ? "border-primary shadow-md" : "border-transparent bg-muted/20 hover:border-accent/50"
               )}
-            </div>
+              onClick={handleEdit}
+            >
+              {/* Visual Preview Section (Top) */}
+              <div className="flex-1 bg-white flex flex-col relative overflow-hidden items-center justify-center pointer-events-none p-4">
+                {template.body_html ? (
+                  <div className="w-full h-full absolute inset-0 flex items-start justify-center overflow-hidden opacity-80 pointer-events-none p-4">
+                    <iframe
+                      srcDoc={template.body_html}
+                      sandbox=""
+                      scrolling="no"
+                      tabIndex={-1}
+                      className="origin-top border-none bg-transparent"
+                      style={{ width: "600px", height: "800px", transform: "scale(0.6)" }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-16 h-4 bg-muted rounded animate-pulse" />
+                )}
+              </div>
 
-            {/* Dark Details Section (Bottom) */}
-            <div className="absolute w-full max-w-11/12 bottom-0 left-1/2 -translate-x-1/2 bg-background text-white flex flex-col items-center justify-center p-2 z-10 my-2 rounded-lg">
-              <Popover open={isRenaming} onOpenChange={setIsRenaming}>
-                <PopoverTrigger asChild>
-                  <span
-                    className="text-sm font-medium truncate w-full text-center cursor-text"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsRenaming(true);
-                    }}
-                  >
+              {/* Dark Details Section (Bottom) */}
+              <div className="absolute w-full max-w-11/12 bottom-0 left-1/2 -translate-x-1/2 bg-background text-white flex flex-col items-center justify-center p-2 z-10 my-2 rounded-lg">
+                <PopoverAnchor asChild>
+                  <span className="text-sm font-medium truncate w-full text-center">
                     {template.name}
                   </span>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-64 p-2"
-                  side="top"
-                  align="center"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="flex items-center gap-2">
-                    <Input
-                      value={renameValue}
-                      onChange={(e) => setRenameValue(e.target.value)}
-                      className="h-8"
-                      autoFocus
-                      onKeyDown={(e) => {
-                        e.stopPropagation();
-                        if (e.key === 'Enter') handleRenameSave();
-                      }}
-                    />
-                    <Button size="icon" className="h-8 w-8" onClick={(e) => {
-                      e.stopPropagation();
-                      handleRenameSave();
-                    }}>
-                      <Check className="w-4 h-4" />
+                </PopoverAnchor>
+                <div className="flex items-center justify-center gap-2 mt-1 w-full">
+                  <span className="text-[10px] text-zinc-400">
+                    {template.created_at ? formatDistanceToNow(new Date(template.created_at), { addSuffix: true }) : "Unknown date"}
+                  </span>
+
+                  <Badge
+                    variant="outline"
+                    className={cn("text-[9px] px-1.5 py-0 rounded-full font-semibold uppercase border tracking-wider h-4 flex items-center justify-center",
+                      template.status === "published" ? "bg-green-500/15 text-green-400 border-green-500/30" :
+                        template.status === "archived" ? "bg-zinc-500/15 text-zinc-400 border-zinc-500/30" :
+                          "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                    )}
+                  >
+                    {template.status || "draft"}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Absolute positioning overlays */}
+
+              <div
+                className={cn(
+                  "absolute top-3 left-3 z-20 transition-opacity flex items-center justify-center cursor-pointer p-1 rounded-sm",
+                  isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleToggleSelection();
+                }}
+              >
+                <Checkbox
+                  checked={isSelected}
+                  className="w-5 h-5 bg-white/50 backdrop-blur-md border-zinc-300 data-[state=checked]:bg-primary pointer-events-none"
+                />
+              </div>
+
+              {/* Top Right Dropdown Trigger */}
+              <div
+                className={cn(
+                  "absolute top-2 right-2 z-20 transition-opacity",
+                  isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                )}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-white/50 hover:bg-white backdrop-blur-md">
+                      <MoreVertical className="w-4 h-4 text-zinc-700" />
                     </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
-              <span className="text-xs text-zinc-400 mt-1">
-                {template.created_at ? formatDistanceToNow(new Date(template.created_at), { addSuffix: true }) : "Unknown date"}
-              </span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItems />
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
             </div>
+          </ContextMenuTrigger>
 
-            {/* Absolute positioning overlays */}
+          {/* Context Menu (Right Click) */}
+          <ContextMenuContent className="w-48">
+            <ContextMenuItems />
+          </ContextMenuContent>
+        </ContextMenu>
 
-            <div
-              className={cn(
-                "absolute top-3 left-3 z-20 transition-opacity flex items-center justify-center cursor-pointer p-1 rounded-sm",
-                isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-              )}
-              onClick={(e) => {
+        <PopoverContent
+          className="w-64 p-2 bg-card border border-border text-foreground rounded-lg z-50"
+          side="top"
+          align="center"
+          onClick={(e) => e.stopPropagation()}
+          onFocusOutside={(e) => e.preventDefault()}
+        >
+          <div className="flex items-center gap-2">
+            <Input
+              value={renameValue}
+              onChange={(e) => setRenameValue(e.target.value)}
+              className="h-8 bg-background text-foreground text-xs"
+              autoFocus
+              onKeyDown={(e) => {
                 e.stopPropagation();
-                handleToggleSelection();
+                if (e.key === 'Enter') handleRenameSave();
               }}
-            >
-              <Checkbox
-                checked={isSelected}
-                className="w-5 h-5 bg-white/50 backdrop-blur-md border-zinc-300 data-[state=checked]:bg-primary pointer-events-none"
-              />
-            </div>
-
-            {/* Top Right Dropdown Trigger */}
-            <div
-              className={cn(
-                "absolute top-2 right-2 z-20 transition-opacity",
-                isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-              )}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-white/50 hover:bg-white backdrop-blur-md">
-                    <MoreVertical className="w-4 h-4 text-zinc-700" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItems />
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
+            />
+            <Button size="icon" className="h-8 w-8" onClick={(e) => {
+              e.stopPropagation();
+              handleRenameSave();
+            }}>
+              <Check className="w-4 h-4" />
+            </Button>
           </div>
-        </ContextMenuTrigger>
-
-        {/* Context Menu (Right Click) */}
-        <ContextMenuContent className="w-48">
-          <ContextMenuItems />
-        </ContextMenuContent>
-      </ContextMenu>
+        </PopoverContent>
+      </Popover>
 
       {/* Delete Confirmation Dialog */}
       <DeleteDialog

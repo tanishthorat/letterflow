@@ -10,9 +10,10 @@ import { useTemplateStore } from "@/lib/stores/template";
 import { useEditorStore } from "@/lib/editor/store";
 import { useStore } from "zustand";
 import { useDebounce } from "use-debounce";
-import { PreviewModal } from "@/components/editor/preview-modal";
+import { PreviewModal, getMockDefault } from "@/components/editor/preview-modal";
 import { ExportModal } from "./export-modal";
 import { toast } from "@/lib/toast";
+import { extractPlaceholders } from "@/lib/editor/placeholders";
 import {
   ArrowLeft, CloudUpload, ChevronDown, Undo, History, Redo,
   Monitor, Smartphone, Code, MonitorSmartphone, ClipboardCheck,
@@ -38,6 +39,8 @@ export function EditorHeader({ template }: EditorHeaderProps) {
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "unsaved" | "error">("saved");
   const [prevTemplateId, setPrevTemplateId] = useState(template.id);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState<string | null>(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
 
   // Sync state if template changes (e.g. from undefined to loaded)
@@ -171,6 +174,41 @@ export function EditorHeader({ template }: EditorHeaderProps) {
     }
   };
 
+  const handlePreviewClick = async () => {
+    if (isPreviewLoading) return;
+    setIsPreviewLoading(true);
+    try {
+      const design = getDesign();
+      const detected = extractPlaceholders(design);
+      const initialVars: Record<string, string> = {};
+      detected.forEach(key => {
+        initialVars[key] = getMockDefault(key);
+      });
+
+      const res = await fetch("/api/preview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ design, variables: initialVars }),
+      });
+      if (res.ok) {
+        const htmlContent = await res.text();
+        setPreviewHtml(htmlContent);
+        setIsPreviewOpen(true);
+      } else {
+        const errText = await res.text();
+        console.error("Failed to generate preview:", errText);
+        toast.error("Preview failed", { description: errText.slice(0, 120) });
+      }
+    } catch (error) {
+      console.error("Preview generation failed", error);
+      toast.error("Preview failed", {
+        description: error instanceof Error ? error.message : "Could not render preview.",
+      });
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
+
   const renderSaveStatusIcon = () => {
     if (currentSaveStatus === "saving") return <Loader2 className="w-4 h-4 animate-spin text-primary" />;
     if (currentSaveStatus === "error") return <CloudUpload className="w-4 h-4 text-destructive" />;
@@ -250,10 +288,6 @@ export function EditorHeader({ template }: EditorHeaderProps) {
           <Button variant="ghost" size="icon" className="h-7 w-8 rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground">
             <Smartphone className="w-4 h-4" />
           </Button>
-          <div className="w-px h-4 bg-border mx-0.5" />
-          <Button variant="ghost" size="icon" className="h-7 w-5 rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground">
-            <ChevronDown className="w-3 h-3" />
-          </Button>
         </div>
 
         {/* Right Section */}
@@ -262,14 +296,24 @@ export function EditorHeader({ template }: EditorHeaderProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground gap-2 px-3 hidden md:flex"
-            onClick={() => setIsPreviewOpen(true)}
+            className="h-8 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground gap-2 px-3 hidden md:flex cursor-pointer"
+            onClick={handlePreviewClick}
+            disabled={isPreviewLoading}
           >
-            <MonitorSmartphone className="w-4 h-4" />
+            {isPreviewLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin text-primary" />
+            ) : (
+              <MonitorSmartphone className="w-4 h-4" />
+            )}
             Preview
           </Button>
 
-          <PreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} templateName={name} />
+          <PreviewModal
+            isOpen={isPreviewOpen}
+            onClose={() => setIsPreviewOpen(false)}
+            templateName={name}
+            initialHtml={previewHtml}
+          />
 
           {/* <Button variant="ghost" size="icon" className="h-8 w-8 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground hidden lg:flex">
             <ClipboardCheck className="w-4 h-4" />

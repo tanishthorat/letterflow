@@ -45,6 +45,13 @@ const CATEGORY_LABELS: Record<string, string> = {
   other: "Other",
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  all: "All Statuses",
+  draft: "Draft",
+  published: "Published",
+  archived: "Archived",
+};
+
 export default function TemplatesPage() {
   const router = useRouter();
   const {
@@ -56,6 +63,7 @@ export default function TemplatesPage() {
     searchQuery,
     sort, setSort,
     category, setCategory,
+    statusFilter, setStatusFilter,
     viewMode, setViewMode,
     hasMore
   } = useTemplateStore();
@@ -154,6 +162,24 @@ export default function TemplatesPage() {
               {Object.entries(CATEGORY_LABELS).map(([key, label]) => (
                 <DropdownMenuItem key={key} onClick={() => setCategory(key)}>
                   {label} {category === key && "✓"}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* sort by status */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" size="sm" className="gap-2 bg-muted/50 hover:bg-muted rounded-md h-8 px-3">
+                <SlidersHorizontal className="w-4 h-4" />
+                {STATUS_LABELS[statusFilter] || "All Statuses"}
+                <ChevronDown className="w-3 h-3 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              {Object.entries(STATUS_LABELS).map(([key, label]) => (
+                <DropdownMenuItem key={key} onClick={() => setStatusFilter(key)}>
+                  {label} {statusFilter === key && "✓"}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>

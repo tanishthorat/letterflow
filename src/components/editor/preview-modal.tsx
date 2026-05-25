@@ -3,9 +3,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useEditorStore } from "@/lib/editor/store";
 import { useAuth } from "@/lib/auth";
-import { 
-  X, Loader2, Monitor, Smartphone, Send, Key, 
-  AlertCircle, CheckCircle2, HelpCircle, Sparkles 
+import {
+  X, Loader2, Monitor, Smartphone, Send, Key,
+  AlertCircle, CheckCircle2, HelpCircle, Sparkles,
+  Upload,
+  UploadIcon
 } from "lucide-react";
 import { PreviewDeviceWrapper } from "./preview-wrappers";
 import { Button } from "@/components/ui/button";
@@ -17,13 +19,7 @@ import { toast } from "@/lib/toast";
 import { useDebounce } from "use-debounce";
 import { ExportModal } from "./export-modal";
 
-interface PreviewModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  templateName?: string;
-}
-
-const getMockDefault = (key: string): string => {
+export const getMockDefault = (key: string): string => {
   const k = key.toLowerCase();
   if (k.includes("name") && k.includes("first")) return "John";
   if (k.includes("name") && k.includes("last")) return "Doe";
@@ -36,11 +32,19 @@ const getMockDefault = (key: string): string => {
   return `[${key}]`;
 };
 
-export function PreviewModal({ isOpen, onClose, templateName }: PreviewModalProps) {
-  const [html, setHtml] = useState<string | null>(null);
+interface PreviewModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  templateName?: string;
+  initialHtml?: string | null;
+}
+
+export function PreviewModal({ isOpen, onClose, templateName, initialHtml }: PreviewModalProps) {
+  const [html, setHtml] = useState<string | null>(initialHtml || null);
   const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const isFirstLoad = useRef(true);
   const { getDesign } = useEditorStore();
   const { user } = useAuth();
 
@@ -55,9 +59,14 @@ export function PreviewModal({ isOpen, onClose, templateName }: PreviewModalProp
   const [variables, setVariables] = useState<Record<string, string>>({});
   const [debouncedVariables] = useDebounce(variables, 400);
 
+  const metadata = useEditorStore((s) => s.metadata);
+  const testSubject = metadata.subject || "";
+  const setTestSubject = (val: string) => {
+    useEditorStore.getState().updateMetadata({ subject: val });
+  };
+
   // Send Test States
   const [toEmail, setToEmail] = useState("");
-  const [testSubject, setTestSubject] = useState("");
   const [fromEmail, setFromEmail] = useState("");
   const [customApiKey, setCustomApiKey] = useState("");
   const [isApiKeyExpanded, setIsApiKeyExpanded] = useState(false);
@@ -67,13 +76,22 @@ export function PreviewModal({ isOpen, onClose, templateName }: PreviewModalProp
 
   const fileSizeKB = html ? new Blob([html]).size / 1024 : 0;
 
+  // Reset first load ref and sync initialHtml when closed/opened
+  useEffect(() => {
+    if (!isOpen) {
+      isFirstLoad.current = true;
+    } else if (initialHtml) {
+      setHtml(initialHtml);
+    }
+  }, [isOpen, initialHtml]);
+
   // Initialize data on open
   useEffect(() => {
     if (isOpen) {
       const design = getDesign();
       const detected = extractPlaceholders(design);
       setPlaceholders(detected);
-      
+
       // Seed default variables
       setVariables(prev => {
         const next: Record<string, string> = { ...prev };
@@ -89,7 +107,9 @@ export function PreviewModal({ isOpen, onClose, templateName }: PreviewModalProp
       if (user?.email) {
         setToEmail(user.email);
       }
-      setTestSubject(templateName ? `Test: ${templateName}` : "Test Email - Letterflow");
+      if (!metadata.subject) {
+        setTestSubject(templateName ? `Test: ${templateName}` : "Test Email - Letterflow");
+      }
 
       // Load saved API key
       const savedKey = localStorage.getItem("letterflow_resend_api_key");
@@ -97,11 +117,16 @@ export function PreviewModal({ isOpen, onClose, templateName }: PreviewModalProp
         setCustomApiKey(savedKey);
       }
     }
-  }, [isOpen, getDesign, user, templateName]);
+  }, [isOpen, getDesign, user, templateName, metadata.subject]);
 
   // Fetch Preview HTML
   useEffect(() => {
     if (isOpen) {
+      if (isFirstLoad.current && initialHtml) {
+        isFirstLoad.current = false;
+        return;
+      }
+
       const fetchPreview = async () => {
         setLoading(true);
         try {
@@ -131,7 +156,7 @@ export function PreviewModal({ isOpen, onClose, templateName }: PreviewModalProp
 
       fetchPreview();
     }
-  }, [isOpen, getDesign, debouncedVariables]);
+  }, [isOpen, getDesign, debouncedVariables, initialHtml]);
 
   // Handle sending test email
   const handleSendTest = async () => {
@@ -190,21 +215,21 @@ export function PreviewModal({ isOpen, onClose, templateName }: PreviewModalProp
             <h2 className="font-semibold text-foreground">Interactive Email Preview</h2>
             {loading && <Loader2 className="w-4 h-4 animate-spin text-primary ml-2" />}
           </div>
-          
+
           {/* Device Switcher */}
           <div className="flex items-center bg-muted rounded-md p-1">
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className={cn("h-7 px-3 text-xs gap-2 rounded-sm cursor-pointer", viewMode === "desktop" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")}
               onClick={() => setViewMode("desktop")}
             >
               <Monitor className="w-4 h-4" />
               Desktop
             </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className={cn("h-7 px-3 text-xs gap-2 rounded-sm cursor-pointer", viewMode === "mobile" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")}
               onClick={() => setViewMode("mobile")}
             >
@@ -215,35 +240,36 @@ export function PreviewModal({ isOpen, onClose, templateName }: PreviewModalProp
 
           {/* Modal Controls */}
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+
               size="sm"
               className="h-8 text-xs cursor-pointer"
               onClick={() => setIsExportOpen(true)}
               disabled={loading}
             >
-              Export HTML
+
+              <UploadIcon />Export HTML
             </Button>
             <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full text-muted-foreground hover:text-foreground cursor-pointer">
               <X className="w-5 h-5" />
             </Button>
           </div>
         </div>
-        
+
         {/* Shell Layout */}
         <div className="flex-1 flex overflow-hidden">
-          
+
           {/* Left Control Panel Sidebar - Dev mode only */}
           {isDev && (
             <div className="w-85 border-r border-border bg-card flex flex-col overflow-y-auto text-card-foreground select-none">
-              
+
               {/* Section 1: Variables Configuration */}
               <div className="p-4 border-b border-border space-y-4">
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-primary" />
                   <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Dynamic Placeholders</h3>
                 </div>
-                
+
                 {placeholders.length === 0 ? (
                   <div className="p-3.5 rounded-lg border border-primary/20 bg-primary/5 text-xs text-muted-foreground leading-relaxed">
                     <span className="font-semibold text-foreground block mb-1">💡 Dynamic Variables Tip</span>
@@ -326,7 +352,7 @@ export function PreviewModal({ isOpen, onClose, templateName }: PreviewModalProp
                         <HelpCircle className="w-3.5 h-3.5 opacity-60" />
                       </span>
                     </button>
-                    
+
                     {isApiKeyExpanded && (
                       <div className="p-3 border-t border-border/80 space-y-2">
                         <Label className="text-[10px] text-zinc-400">Custom Resend API Key</Label>
@@ -388,16 +414,16 @@ export function PreviewModal({ isOpen, onClose, templateName }: PreviewModalProp
 
           {/* Right Iframe Visual Preview Panel */}
           <div className="flex-1 bg-zinc-950/95 dark:bg-muted/30 overflow-hidden flex justify-center items-start">
-            <PreviewDeviceWrapper 
-              viewMode={viewMode} 
+            <PreviewDeviceWrapper
+              viewMode={viewMode}
               fileSizeKB={fileSizeKB}
               subject={testSubject}
               workspaceName={user?.user_metadata?.name ? `${user.user_metadata.name}'s workspace` : "Letterflow Workspace"}
             >
-              <iframe 
-                ref={iframeRef} 
+              <iframe
+                ref={iframeRef}
                 srcDoc={html || ""}
-                className="w-full h-full border-none bg-white" 
+                className="w-full h-full border-none bg-white"
                 title="Email Preview"
               />
             </PreviewDeviceWrapper>
@@ -406,9 +432,9 @@ export function PreviewModal({ isOpen, onClose, templateName }: PreviewModalProp
         </div>
       </div>
 
-      <ExportModal 
-        isOpen={isExportOpen} 
-        onClose={() => setIsExportOpen(false)} 
+      <ExportModal
+        isOpen={isExportOpen}
+        onClose={() => setIsExportOpen(false)}
         templateName={templateName}
       />
     </>

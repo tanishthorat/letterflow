@@ -141,7 +141,7 @@ function ColumnZone({ col, stripeId, structureId }: { col: Column, stripeId: str
         </div>
       )}
       <SortableContext items={col.blocks.map((b: EditorBlock) => b.id)} strategy={verticalListSortingStrategy}>
-        <div 
+        <div
           className="flex flex-col flex-1"
           style={{
             justifyContent: col.props.verticalAlign === 'middle' ? 'center' : col.props.verticalAlign === 'bottom' ? 'flex-end' : 'flex-start'
@@ -158,7 +158,13 @@ function ColumnZone({ col, stripeId, structureId }: { col: Column, stripeId: str
               ))}
             </>
           ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center opacity-80 pointer-events-none" style={{ color: NODE_COLORS.column.color }}>
+            <div
+              className={cn(
+                "absolute inset-1 flex flex-col items-center justify-center border border-dashed opacity-80 pointer-events-none rounded-md",
+                NODE_COLORS.column.lightBg
+              )}
+              style={{ color: NODE_COLORS.column.color, borderColor: NODE_COLORS.column.color }}
+            >
               <span className="text-[11px] font-medium tracking-wide">Drop content here</span>
             </div>
           )}

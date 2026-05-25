@@ -8,6 +8,13 @@ import { Paintbrush } from "lucide-react";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { NumberStepper } from "@/components/ui/number-stepper";
 import { AlignmentSelector } from "@/components/ui/alignment-selector";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function GlobalStylesInspector() {
   const { globalStyles, updateGlobalStyles } = useEditorStore();
@@ -43,15 +50,19 @@ export function GlobalStylesInspector() {
           </div>
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground">Status</Label>
-            <select
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+            <Select
               value={metadata.status || "draft"}
-              onChange={(e) => useEditorStore.getState().updateMetadata({ status: e.target.value as any })}
+              onValueChange={(val) => useEditorStore.getState().updateMetadata({ status: val as any })}
             >
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-              <option value="archived">Archived</option>
-            </select>
+              <SelectTrigger className="w-full bg-background border-input text-foreground h-9">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="published">Published</SelectItem>
+                <SelectItem value="archived">Archived</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         <div className="flex items-center justify-between">

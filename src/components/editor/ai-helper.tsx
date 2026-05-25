@@ -1,5 +1,5 @@
 import React from "react";
-import { Sparkles, Loader2, Check, X, WandSparkles, Send, Briefcase, Smile, Scissors, Megaphone } from "lucide-react";
+import { Sparkles, Loader2, Check, X, WandSparkles, Send, Briefcase, Smile, Scissors, Megaphone, SendHorizontal } from "lucide-react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { useEditorStore } from "@/lib/editor/store";
@@ -99,7 +99,7 @@ export function AIHelper({ content, blockType, onRewrite }: AIHelperProps) {
           className="hover:bg-white/20 p-1 rounded-sm transition-colors flex items-center justify-center text-white relative group"
           title="AI Rewrite"
         >
-          <WandSparkles className="w-4 h-4 text-purple-200 animate-pulse group-hover:text-white" />
+          <WandSparkles className="w-4 h-4 text-purple-200 group-hover:text-white" />
         </button>
       </PopoverTrigger>
       <PopoverContent
@@ -110,7 +110,7 @@ export function AIHelper({ content, blockType, onRewrite }: AIHelperProps) {
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between border-b border-border pb-2">
             <div className="flex items-center gap-1.5 font-semibold text-sm text-purple-500">
-              <WandSparkles className="w-4 h-4 text-purple-500 animate-pulse" />
+              <WandSparkles className="w-4 h-4 text-purple-500" />
               <span>AI Assistant</span>
             </div>
             {originalContent !== null && currentSuggestion && (
@@ -131,8 +131,8 @@ export function AIHelper({ content, blockType, onRewrite }: AIHelperProps) {
               <Textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="e.g. Make it sound more exciting, shorten it..."
-                className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground text-xs focus-visible:ring-purple-500/30 focus-visible:border-purple-500 resize-none min-h-[50px] max-h-[120px] overflow-y-auto py-1.5"
+                placeholder="e.g. Make it sound more exciting..."
+                className="bg-muted/50 border-border text-foreground placeholder:text-muted-foreground text-xs focus-visible:ring-purple-500/30 focus-visible:border-purple-500 resize-none min-h-8 max-h-8 overflow-y-auto py-1.5"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -148,7 +148,7 @@ export function AIHelper({ content, blockType, onRewrite }: AIHelperProps) {
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin text-purple-300" />
                 ) : (
-                  <Send className="w-4 h-4" />
+                  <SendHorizontal className="w-4 h-4" />
                 )}
               </button>
             </div>

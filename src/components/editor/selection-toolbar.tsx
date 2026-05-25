@@ -42,7 +42,7 @@ export function SelectionToolbar({
           <Grip className="w-4 h-4" />
         </div>
       )}
-      
+
       {showAiRewrite && (
         <AIHelper content={content} blockType={blockType} onRewrite={onRewrite} />
       )}
