@@ -6,7 +6,7 @@ import { BLOCK_REGISTRY } from "@/lib/editor/registry";
 import { NODE_COLORS } from "@/lib/editor/config";
 import { cn } from "@/lib/utils";
 import { SelectionToolbar } from "./selection-toolbar";
-import { EditorBlock } from "@/lib/editor/types";
+import { EditorBlock, TextBlock, ButtonBlock } from "@/lib/editor/types";
 
 export function EditorBlockWrapper({ block, stripeId, structureId, colId }: { block: EditorBlock, stripeId: string, structureId: string, colId: string }) {
   const { selectedNode, selectNode, duplicateBlock, removeBlock, updateBlock } = useEditorStore();
@@ -48,6 +48,21 @@ export function EditorBlockWrapper({ block, stripeId, structureId, colId }: { bl
       {isSelected && (
         <SelectionToolbar
           type="block"
+          blockType={block.type}
+          content={
+            block.type === "text"
+              ? (block as TextBlock).props.content
+              : block.type === "button"
+              ? (block as ButtonBlock).props.text
+              : undefined
+          }
+          onRewrite={(newContent) => {
+            if (block.type === "text") {
+              updateBlock(stripeId, structureId, colId, block.id, { content: newContent });
+            } else if (block.type === "button") {
+              updateBlock(stripeId, structureId, colId, block.id, { text: newContent });
+            }
+          }}
           attributes={attributes}
           listeners={listeners}
           onDuplicate={() => duplicateBlock(stripeId, structureId, colId, block.id)}
