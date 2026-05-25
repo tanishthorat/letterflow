@@ -206,8 +206,8 @@ export function EditorHeader({ template }: EditorHeaderProps) {
                     : undefined
               }
               className={`h-8 w-37.5 sm:w-55 border-transparent bg-transparent hover:border-border focus-visible:bg-background focus-visible:ring-1 px-2 shadow-none font-medium ${isNameInvalid
-                  ? "focus-visible:border-destructive focus-visible:ring-destructive/30"
-                  : "focus-visible:border-primary"
+                ? "focus-visible:border-destructive focus-visible:ring-destructive/30"
+                : "focus-visible:border-primary"
                 }`}
             />
           </div>
@@ -258,9 +258,6 @@ export function EditorHeader({ template }: EditorHeaderProps) {
 
         {/* Right Section */}
         <div className="flex items-center gap-1 sm:gap-1.5">
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-md bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground hidden lg:flex">
-            <Code className="w-4 h-4" />
-          </Button>
 
           <Button
             variant="ghost"

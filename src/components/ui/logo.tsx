@@ -8,7 +8,7 @@ const Logo = (props: React.SVGProps<SVGSVGElement>) => (
     {...props}
   >
     {/* Icon - Rounded square with L */}
-    
+
     <image href="/icon.svg" x="5" y="5" width="40" height="40" />
 
     {/* "letter" text */}

@@ -52,6 +52,7 @@ export default function TemplatesPage() {
     fetchTemplates,
     createTemplate,
     loading,
+    isInitialized,
     searchQuery,
     sort, setSort,
     category, setCategory,
@@ -115,7 +116,7 @@ export default function TemplatesPage() {
     }
   };
 
-  if (loading && templates.length === 0) {
+  if (!isInitialized || (loading && templates.length === 0)) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />

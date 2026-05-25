@@ -319,6 +319,16 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
       p.strikethrough ? "line-through" : ""
     ].filter(Boolean).join(" ");
 
+    const renderContentWithBreaks = (content?: string) => {
+      if (!content) return null;
+      return content.split('\n').map((line, i, arr) => (
+        <React.Fragment key={i}>
+          {line}
+          {i < arr.length - 1 && <br />}
+        </React.Fragment>
+      ));
+    };
+
     return (
       <div style={getBaseBlockWrapperStyles(p)}>
         {p.paragraphStyle && p.paragraphStyle !== "p" ? (
@@ -332,7 +342,7 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
             textDecoration: textDecoration || "none",
             lineHeight: p.lineHeightDesktop || "normal",
           }}>
-            {p.content}
+            {renderContentWithBreaks(p.content)}
           </EmailHeading>
         ) : (
           <EmailText style={{
@@ -345,7 +355,7 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
             textDecoration: textDecoration || "none",
             lineHeight: p.lineHeightDesktop || "normal",
           }}>
-            {p.content}
+            {renderContentWithBreaks(p.content)}
           </EmailText>
         )}
       </div>

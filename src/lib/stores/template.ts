@@ -24,11 +24,13 @@ interface TemplateState {
   clearSelection: () => void;
   deleteTemplates: (ids: string[]) => () => void;
   duplicateTemplate: (id: string) => Promise<EmailTemplate | null>;
+  isInitialized: boolean;
 }
 
 export const useTemplateStore = create<TemplateState>((set, get) => ({
   templates: [],
   loading: false,
+  isInitialized: false,
   error: null,
   searchQuery: "",
   page: 1,
@@ -102,11 +104,12 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
       set((currentState) => ({ 
         templates: loadMore ? [...currentState.templates, ...templates] : templates,
         hasMore,
-        loading: false 
+        loading: false,
+        isInitialized: true
       }));
     } catch (err: unknown) {
       console.error("Error fetching templates:", err);
-      set({ error: err instanceof Error ? err.message : String(err), loading: false });
+      set({ error: err instanceof Error ? err.message : String(err), loading: false, isInitialized: true });
     }
   },
 

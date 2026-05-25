@@ -28,7 +28,7 @@ export function DeleteDialog({
 }: DeleteDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-[#1E1E1E] border-none text-white sm:rounded-2xl max-w-[400px] p-4">
+      <AlertDialogContent className="bg-[#1E1E1E] border-none text-white sm:rounded-2xl max-w-[400px] p-8">
         <button
           onClick={() => onOpenChange(false)}
           className="absolute right-4 top-4 text-zinc-400 hover:text-white transition-colors"

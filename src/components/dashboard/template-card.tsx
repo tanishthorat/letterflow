@@ -193,7 +193,7 @@ export function TemplateCard({ template }: TemplateCardProps) {
                     scrolling="no"
                     tabIndex={-1}
                     className="origin-top border-none bg-transparent"
-                    style={{ width: "600px", height: "800px", transform: "scale(0.35)" }}
+                    style={{ width: "600px", height: "800px", transform: "scale(0.6)" }}
                   />
                 </div>
               ) : (

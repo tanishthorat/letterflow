@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Logo from "@/components/ui/logo";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "../ui/button";
 
 interface LandingHeaderProps {
   initialIsLoggedIn: boolean;
@@ -77,20 +78,23 @@ export default function LandingHeader({ initialIsLoggedIn }: LandingHeaderProps)
             </>
           ) : (
             <>
-              <Link
-                href="/dashboard/templates"
-                className="flex items-center gap-1.5 px-5 py-2.5 bg-white border border-[#EAEAEA] text-sm font-semibold rounded-lg hover:bg-[#F8F9FA] transition-all duration-200 text-[#1F1F1F] shadow-2xs"
-              >
-                <span>Open Editor</span>
-                <span className="text-xs text-gray-400 font-bold ml-1">➔</span>
-              </Link>
-              <button
+              <Button
+                variant={"ghost"}
                 onClick={handleLogout}
                 disabled={isPending}
-                className="px-5 py-2.5 bg-[#111111] text-white text-sm font-semibold rounded-lg hover:bg-gray-800 transition-all duration-200 disabled:opacity-50"
+                className="px-5 py-2.5 text-sm font-semibold rounded-lg transition-all duration-200 disabled:opacity-50"
               >
                 {isPending ? "Logging out..." : "Logout"}
-              </button>
+              </Button>
+              <Link
+                href="/dashboard/templates"
+                className="flex items-center gap-1.5 text-sm font-semibold rounded-lg transition-all duration-200"
+              >
+                <Button ><span>Open Editor</span>
+                  <span className="text-xs  font-bold ml-1">➔</span></Button>
+              </Link>
+
+
             </>
           )}
         </div>
