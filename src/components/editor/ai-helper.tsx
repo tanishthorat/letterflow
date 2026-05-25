@@ -99,7 +99,7 @@ export function AIHelper({ content, blockType, onRewrite }: AIHelperProps) {
           className="hover:bg-white/20 p-1 rounded-sm transition-colors flex items-center justify-center text-white relative group"
           title="AI Rewrite"
         >
-          <WandSparkles className="w-4 h-4 text-primary/70 group-hover:text-primary" />
+          <WandSparkles className="w-4 h-4" />
         </button>
       </PopoverTrigger>
       <PopoverContent
