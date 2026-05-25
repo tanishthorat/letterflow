@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Sparkles, Send, Key, AlertCircle, CheckCircle2,
-  HelpCircle, Clipboard, Check, Download, Loader2
+  HelpCircle, Clipboard, Check, Download, Loader2,
+  Upload
 } from "lucide-react";
 import { extractPlaceholders, replacePlaceholders } from "@/lib/editor/placeholders";
 import { generateEmailHtml } from "@/lib/email/generate";
@@ -51,10 +52,13 @@ export function ExportModal({ isOpen, onClose, templateName }: ExportModalProps)
 
   // Send Test States
   const [toEmail, setToEmail] = useState("");
-  const [testSubject, setTestSubject] = useState("");
+  const metadata = useEditorStore((s) => s.metadata);
+  const testSubject = metadata.subject ?? (templateName ? `Test: ${templateName}` : "Test Email - Letterflow");
+  const setTestSubject = (val: string) => {
+    useEditorStore.getState().updateMetadata({ subject: val });
+  };
   const [fromEmail, setFromEmail] = useState("");
   const [customApiKey, setCustomApiKey] = useState("");
-  const [isApiKeyExpanded, setIsApiKeyExpanded] = useState(false);
   const [sendingTest, setSendingTest] = useState(false);
   const [sendSuccess, setSendSuccess] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
@@ -81,7 +85,6 @@ export function ExportModal({ isOpen, onClose, templateName }: ExportModalProps)
       if (user?.email) {
         setToEmail(user.email);
       }
-      setTestSubject(templateName ? `Test: ${templateName}` : "Test Email - Letterflow");
 
       // Load saved API key
       const savedKey = localStorage.getItem("letterflow_resend_api_key");
@@ -144,11 +147,16 @@ export function ExportModal({ isOpen, onClose, templateName }: ExportModalProps)
 
   // Send Test Email
   const handleSendTest = async () => {
-    if (!toEmail) {
+    if (!toEmail || toEmail.trim() === "") {
       setSendError("Recipient email address is required.");
       return;
     }
-    if (!testSubject) {
+    const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!isValidEmail(toEmail)) {
+      setSendError("Please enter a valid email address.");
+      return;
+    }
+    if (!testSubject || testSubject.trim() === "") {
       setSendError("Subject line is required.");
       return;
     }
@@ -192,7 +200,7 @@ export function ExportModal({ isOpen, onClose, templateName }: ExportModalProps)
       <DialogContent className="sm:max-w-2xl p-8 bg-card border-border/80 text-foreground select-none max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground font-semibold">
-            <Sparkles className="w-5 h-5 text-primary" />
+            <Upload className="w-5 h-5 text-primary" />
             Export Email Template
           </DialogTitle>
           <DialogDescription className="text-muted-foreground text-xs">
@@ -287,52 +295,6 @@ export function ExportModal({ isOpen, onClose, templateName }: ExportModalProps)
                   className="h-8.5 text-xs border-border/80"
                 />
               </div>
-
-              {/* <div className="space-y-1.5">
-                <Label className="text-[11px] font-semibold text-zinc-300">From Email (Optional)</Label>
-                <Input
-                  value={fromEmail}
-                  onChange={(e) => setFromEmail(e.target.value)}
-                  placeholder="e.g. Sender Name <sender@domain.com>"
-                  className="h-8.5 text-xs border-border/80"
-                />
-                <p className="text-[9px] text-muted-foreground leading-normal">
-                  Defaults to verified domain or <code className="bg-muted px-1 rounded">contact@tanishdev.me</code>.
-                </p>
-              </div> */}
-
-              {/* Collapsible API Key Override */}
-              {/* <div className="border border-border/60 rounded-md overflow-hidden bg-muted/5">
-                <button
-                  type="button"
-                  onClick={() => setIsApiKeyExpanded(!isApiKeyExpanded)}
-                  className="w-full flex items-center justify-between px-3 py-1.5 text-[11px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/20 transition-colors cursor-pointer"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Key className="w-3 h-3" />
-                    Resend API Key Override
-                  </span>
-                  <span title="Uses server RESEND_API_KEY env key by default. Provide yours to override and send via your Resend account.">
-                    <HelpCircle className="w-3 h-3 opacity-60" />
-                  </span>
-                </button>
-                
-                {isApiKeyExpanded && (
-                  <div className="p-3 border-t border-border/60 space-y-1.5">
-                    <Label className="text-[10px] text-zinc-400">Custom Resend API Key</Label>
-                    <Input
-                      type="password"
-                      value={customApiKey}
-                      onChange={(e) => {
-                        setCustomApiKey(e.target.value);
-                        localStorage.setItem("letterflow_resend_api_key", e.target.value);
-                      }}
-                      placeholder="re_..."
-                      className="h-8 text-xs font-mono bg-muted/20 border-border/80"
-                    />
-                  </div>
-                )}
-              </div> */}
 
               {/* Send Status */}
               {sendSuccess && (

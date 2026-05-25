@@ -84,8 +84,8 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
 
   fetchTemplates: async (loadMore = false) => {
     const state = get();
-    // Prevent fetching if we are already loading or if there's no more data and we're trying to load more
-    if (state.loading) return;
+    // Prevent fetching if we are already loading more, or if there's no more data
+    if (loadMore && state.loading) return;
     if (loadMore && !state.hasMore) return;
 
     const newPage = loadMore ? state.page + 1 : 1;

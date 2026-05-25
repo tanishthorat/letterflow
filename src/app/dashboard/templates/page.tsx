@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Loader2,
@@ -47,6 +47,11 @@ export default function TemplatesPage() {
   } = useTemplateStore();
   const [isCreating, setIsCreating] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  const handleClearFilters = useCallback(() => {
+    useTemplateStore.setState({ category: "all", statusFilter: "all", searchQuery: "" });
+    fetchTemplates(false);
+  }, [fetchTemplates]);
 
   useEffect(() => {
     fetchTemplates();
@@ -131,10 +136,7 @@ export default function TemplatesPage() {
             <p className="text-muted-foreground mb-4">No templates found matching your filters.</p>
             <Button
               variant="outline"
-              onClick={() => {
-                setCategory("all");
-                setStatusFilter("all");
-              }}
+              onClick={handleClearFilters}
             >
               Clear Filters
             </Button>

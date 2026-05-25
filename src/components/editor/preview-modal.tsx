@@ -60,7 +60,7 @@ export function PreviewModal({ isOpen, onClose, templateName, initialHtml }: Pre
   const [debouncedVariables] = useDebounce(variables, 400);
 
   const metadata = useEditorStore((s) => s.metadata);
-  const testSubject = metadata.subject || "";
+  const testSubject = metadata.subject ?? "";
   const setTestSubject = (val: string) => {
     useEditorStore.getState().updateMetadata({ subject: val });
   };
@@ -160,11 +160,16 @@ export function PreviewModal({ isOpen, onClose, templateName, initialHtml }: Pre
 
   // Handle sending test email
   const handleSendTest = async () => {
-    if (!toEmail) {
+    if (!toEmail || toEmail.trim() === "") {
       setSendError("Recipient email address is required.");
       return;
     }
-    if (!testSubject) {
+    const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!isValidEmail(toEmail)) {
+      setSendError("Please enter a valid email address.");
+      return;
+    }
+    if (!testSubject || testSubject.trim() === "") {
       setSendError("Subject line is required.");
       return;
     }
