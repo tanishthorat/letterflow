@@ -103,8 +103,6 @@ export function UserNav() {
           </div>
         </DropdownMenuGroup>
 
-        <DropdownMenuSeparator className="-mx-2 bg-border" />
-
         {/* Workspace to be implemented in future*/}
         {/* <DropdownMenuGroup className="my-1">
           <DropdownMenuItem className="flex flex-col items-start gap-1.5 p-3 cursor-pointer rounded-md">
