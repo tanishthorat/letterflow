@@ -13,7 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { ImageUpload } from "@/components/editor/ImageUpload";
 import { LinkInput } from "@/components/editor/LinkInput";
-
+import { RichTextEditor } from "@/components/editor/rich-text-editor";
+import parse from "html-react-parser";
 export interface BlockConfig<T extends ContentBlock> {
   type: BlockType;
   label: string;
@@ -73,27 +74,13 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
     ].filter(Boolean).join(" ");
 
     return (
-      <div style={getBaseBlockWrapperStyles(p)}>
-        <Textarea
-          ref={(node) => {
-            if (node) {
-              node.style.height = 'inherit';
-              node.style.height = `${node.scrollHeight}px`;
-            }
-          }}
-          value={p.content || ""}
-          onChange={(e) => {
-            e.target.style.height = 'inherit';
-            e.target.style.height = `${e.target.scrollHeight}px`;
-            onChange?.({ content: e.target.value });
-          }}
-          onFocus={(e) => {
-            e.target.style.height = 'inherit';
-            e.target.style.height = `${e.target.scrollHeight}px`;
-          }}
-          className="w-full !bg-transparent !border-none !shadow-none !ring-0 !outline-none focus-visible:!ring-0 focus-visible:!ring-offset-0 focus-visible:!outline-none hover:!bg-transparent focus:!bg-transparent resize-none overflow-hidden m-0 p-1"
+      <div style={getBaseBlockWrapperStyles(p)} className="relative group/rte">
+        <RichTextEditor
+          content={p.content || ""}
+          onChange={(newContent) => onChange?.({ content: newContent })}
+          readOnly={!onChange} // If no onChange, it means it's not currently selected or it's a preview
+          className="m-0 p-1"
           style={{
-            minHeight: '40px',
             color: p.color || "inherit",
             textAlign: 'inherit',
             fontSize: `${activeFontSize}px`,
@@ -103,7 +90,6 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
             textDecoration: textDecoration || "none",
             lineHeight: p.lineHeightDesktop || "normal",
           }}
-          placeholder="Enter text here..."
         />
       </div>
     );
@@ -117,11 +103,12 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
       <div className="space-y-4">
         <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">Content</Label>
-          <Textarea
-            value={p.content || ""}
-            onChange={(e) => onChange({ content: e.target.value })}
-            className="min-h-[100px]"
-          />
+          <div className="border rounded-md p-1 min-h-[100px] max-h-[300px] overflow-y-auto bg-background">
+            <RichTextEditor
+              content={p.content || ""}
+              onChange={(newContent) => onChange({ content: newContent })}
+            />
+          </div>
         </div>
 
         {/* Insert Merge Tags */}
@@ -319,45 +306,20 @@ const TextBlockConfig: BlockConfig<TextBlock> = {
       p.strikethrough ? "line-through" : ""
     ].filter(Boolean).join(" ");
 
-    const renderContentWithBreaks = (content?: string) => {
-      if (!content) return null;
-      return content.split('\n').map((line, i, arr) => (
-        <React.Fragment key={i}>
-          {line}
-          {i < arr.length - 1 && <br />}
-        </React.Fragment>
-      ));
-    };
-
     return (
       <div style={getBaseBlockWrapperStyles(p)}>
-        {p.paragraphStyle && p.paragraphStyle !== "p" ? (
-          <EmailHeading as={p.paragraphStyle as any} style={{
-            fontSize: `${activeFontSize}px`,
-            color: p.color || "#111111",
-            margin: 0,
-            fontFamily: p.fontFamily || "inherit",
-            fontWeight: p.fontWeight || "normal",
-            fontStyle: p.italic ? "italic" : "normal",
-            textDecoration: textDecoration || "none",
-            lineHeight: p.lineHeightDesktop || "normal",
-          }}>
-            {renderContentWithBreaks(p.content)}
-          </EmailHeading>
-        ) : (
-          <EmailText style={{
-            fontSize: `${activeFontSize}px`,
-            color: p.color || "#111111",
-            margin: 0,
-            fontFamily: p.fontFamily || "inherit",
-            fontWeight: p.fontWeight || "normal",
-            fontStyle: p.italic ? "italic" : "normal",
-            textDecoration: textDecoration || "none",
-            lineHeight: p.lineHeightDesktop || "normal",
-          }}>
-            {renderContentWithBreaks(p.content)}
-          </EmailText>
-        )}
+        <div style={{
+          fontSize: `${activeFontSize}px`,
+          color: p.color || "#111111",
+          margin: 0,
+          fontFamily: p.fontFamily || "inherit",
+          fontWeight: p.fontWeight || "normal",
+          fontStyle: p.italic ? "italic" : "normal",
+          textDecoration: textDecoration || "none",
+          lineHeight: p.lineHeightDesktop || "normal",
+        }}>
+          {parse(p.content || "")}
+        </div>
       </div>
     );
   }
