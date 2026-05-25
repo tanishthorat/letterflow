@@ -10,6 +10,7 @@ import { SidebarLeft } from "@/components/editor/sidebar-left";
 import { SidebarRight } from "@/components/editor/sidebar-right";
 import { Canvas } from "@/components/editor/canvas";
 import type { EmailTemplate } from "@/lib/db.types";
+import { EditorLoader } from "@/components/editor/editor-loader";
 
 import { EditorDndWrapper } from "@/components/editor/dnd-wrapper";
 
@@ -19,7 +20,7 @@ export default function EditorPage() {
   const id = params.id as string;
   const { templates, fetchTemplates, loading } = useTemplateStore();
   const hasLoadedDesign = useRef(false);
-  
+
   const template = useMemo<EmailTemplate | undefined>(() => {
     return templates.find((t) => t.id === id);
   }, [templates, id]);
@@ -44,7 +45,7 @@ export default function EditorPage() {
   }, [template]);
 
   if (loading && !template) {
-    return <div className="flex items-center justify-center min-h-screen">Loading editor...</div>;
+    return <EditorLoader />;
   }
 
   if (!template && !loading) {
