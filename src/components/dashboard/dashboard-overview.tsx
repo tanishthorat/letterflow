@@ -171,7 +171,7 @@ function AIDraftPanel({ onDraftCreated }: { onDraftCreated: () => void }) {
     setMessage("");
 
     try {
-      const res = await fetch("/api/ai/draft", {
+      const res = await fetch("/api/ai/template", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: prompt.trim() }),
@@ -216,10 +216,10 @@ function AIDraftPanel({ onDraftCreated }: { onDraftCreated: () => void }) {
             <Sparkles className="w-4 h-4 text-accent" />
           </div>
           <div>
-            <CardTitle className="text-base">AI Quick-Draft</CardTitle>
+            <CardTitle className="text-base">AI Layout Generator</CardTitle>
             <CardDescription className="text-xs mt-0.5">
               Describe your email in plain English — AI generates a full,
-              ready-to-edit template in seconds.
+              editable layout in seconds.
             </CardDescription>
           </div>
         </div>
@@ -232,7 +232,7 @@ function AIDraftPanel({ onDraftCreated }: { onDraftCreated: () => void }) {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder='e.g. "Welcome email for new users who just signed up for my SaaS product, warm and friendly tone"'
+            placeholder='e.g. "A 2-column product launch email with a hero image and CTA"'
             className="flex-1 w-full bg-background border border-border rounded-lg px-3.5 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent/50 transition-all placeholder:text-muted-foreground/60"
           />
           <div className="absolute bottom-2.5 right-2.5 text-[10px] text-muted-foreground/50">
@@ -289,7 +289,7 @@ function AIDraftPanel({ onDraftCreated }: { onDraftCreated: () => void }) {
             )}
           </Button>
           <span className="text-xs text-muted-foreground hidden sm:block">
-            Powered by Gemini AI
+            Powered by Groq
           </span>
         </div>
       </CardContent>

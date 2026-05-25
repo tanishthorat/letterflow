@@ -282,8 +282,8 @@ function StripeItem({ stripe }: { stripe: Stripe }) {
       ref={setNodeRef}
       style={style}
       className={cn(
-        "relative group ring-2 ring-inset transition-colors",
-        isSelected ? `${NODE_COLORS.stripe.ring} z-20` : `ring-transparent ${NODE_COLORS.stripe.hoverRing}`
+        "relative group transition-colors",
+        isSelected ? "z-20" : ""
       )}
       onClick={(e) => {
         e.stopPropagation();
@@ -300,6 +300,16 @@ function StripeItem({ stripe }: { stripe: Stripe }) {
           onRemove={() => removeStripe(stripe.id)}
         />
       )}
+
+      {/* Ring Highlight Overlay */}
+      <div
+        className={cn(
+          "absolute inset-0 pointer-events-none transition-all z-10",
+          isSelected
+            ? `ring-2 ring-inset ${NODE_COLORS.stripe.ring}`
+            : `ring-transparent group-hover:ring-2 group-hover:ring-inset ${NODE_COLORS.stripe.hoverRing}`
+        )}
+      />
 
       <div
         className={cn("w-full mx-auto")}
