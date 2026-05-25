@@ -9,6 +9,7 @@ import Logo, { CompactLogo } from "../ui/logo";
 const navigation = [
   { name: "Home", href: "/dashboard", icon: Home },
   { name: "Templates", href: "/dashboard/templates", icon: Mail },
+  { name: "Pre-built", href: "/dashboard/pre-built", icon: Palette },
   //  coming soon in future
   // { name: "Components", href: "/dashboard/components", icon: Palette }, 
   // { name: "Settings", href: "/dashboard/settings", icon: Settings },
