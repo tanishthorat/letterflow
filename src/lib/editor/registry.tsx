@@ -37,6 +37,7 @@ export function getBaseBlockWrapperStyles(p: BaseBlockProps): React.CSSPropertie
     marginBottom: `${p.marginDesktop?.bottom ?? 0}px`,
     marginLeft: `${p.marginDesktop?.left ?? 0}px`,
     width: "100%",
+    boxSizing: "border-box",
   };
 }
 
@@ -718,7 +719,7 @@ function ImageEmailRenderer({ block }: { block: ImageBlock }) {
       {img}
     </EmailLink>
   ) : (
-    img
+    <span style={{ display: "inline-block" }}>{img}</span>
   );
 
   return (

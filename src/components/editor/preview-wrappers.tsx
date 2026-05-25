@@ -24,20 +24,22 @@ export function PreviewDeviceWrapper({
   return (
     <div className="flex flex-col items-center w-full h-full max-h-full shrink-0 gap-4 overflow-hidden pt-4 pb-8 px-4">
       {/* Top Controls Area */}
-      <div 
+      <div
         className={cn(
           "transition-all duration-500 ease-in-out flex flex-col w-full shrink-0",
           isMobile ? "max-w-[375px]" : "max-w-[1200px]"
         )}
       >
         <div className="h-9 relative w-full flex items-center">
-           <div className={cn("absolute left-0 transition-opacity duration-500", isMobile ? "opacity-0 pointer-events-none" : "opacity-100")}>
-             <span className="bg-[#f59e0b] text-black text-[11px] font-bold px-2.5 py-1 rounded-sm shadow-sm inline-block">
-               Preview Emulation Mode
-             </span>
-           </div>
-           
-           <div className={cn("absolute inset-0 transition-opacity duration-500", isMobile ? "opacity-100" : "opacity-0 pointer-events-none")}>
+          <div className={cn("absolute left-0 transition-opacity duration-500", "opacity-100")}>
+            <span className="bg-[#f59e0b] text-black text-[11px] font-bold px-2.5 py-1 rounded-sm shadow-sm inline-block">
+              Preview Emulation Mode
+            </span>
+          </div>
+
+          {/* for future implementaion to view email in diff phone sizes */}
+
+          {/* <div className={cn("absolute inset-0 transition-opacity duration-500", isMobile ? "opacity-100" : "opacity-0 pointer-events-none")}>
              <Select defaultValue="iphone-se">
                <SelectTrigger className="w-full bg-muted/30 border-border h-9 text-xs font-medium">
                  <SelectValue placeholder="Select device" />
@@ -48,21 +50,21 @@ export function PreviewDeviceWrapper({
                  <SelectItem value="iphone-14-pro">iPhone 14 Pro, 15</SelectItem>
                </SelectContent>
              </Select>
-           </div>
+           </div> */}
         </div>
       </div>
 
       {/* Device Frame */}
-      <div 
+      <div
         className={cn(
           "bg-background overflow-hidden flex flex-col shadow-2xl relative transition-all duration-500 ease-in-out shrink-0",
-          isMobile 
-            ? "w-[375px] h-[812px] max-h-[85vh] rounded-[2.5rem] border-[12px] border-[#2a2a2a] dark:border-[#1e1e1e]" 
+          isMobile
+            ? "w-[375px] h-[812px] max-h-[85vh] rounded-[2.5rem] border-[12px] border-[#2a2a2a] dark:border-[#1e1e1e]"
             : "w-full max-w-[1200px] h-full rounded-lg border border-border"
         )}
       >
         {/* Desktop Header */}
-        <div 
+        <div
           className={cn(
             "flex flex-col w-full transition-all duration-500 ease-in-out overflow-hidden shrink-0",
             isMobile ? "h-0 opacity-0" : "h-[64px] opacity-100"
@@ -92,7 +94,7 @@ export function PreviewDeviceWrapper({
         </div>
 
         {/* Mobile Header */}
-        <div 
+        <div
           className={cn(
             "flex flex-col w-full transition-all duration-500 ease-in-out overflow-hidden shrink-0 bg-background text-blue-500",
             isMobile ? "h-14 opacity-100 border-b border-border/50" : "h-0 opacity-0 border-transparent"
@@ -116,7 +118,7 @@ export function PreviewDeviceWrapper({
         </div>
 
         {/* Mobile Footer */}
-        <div 
+        <div
           className={cn(
             "flex flex-col w-full transition-all duration-500 ease-in-out overflow-hidden shrink-0 bg-background text-blue-500",
             isMobile ? "h-14 opacity-100 border-t border-border/50" : "h-0 opacity-0 border-transparent"

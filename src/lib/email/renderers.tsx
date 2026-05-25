@@ -24,7 +24,8 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           padding: `${stripe.props.paddingTop || 0}px 0 ${stripe.props.paddingBottom || 0}px 0`,
-          width: "100%"
+          width: "100%",
+          boxSizing: "border-box",
         }}
       >
         <Container
@@ -45,6 +46,8 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
                 style={{
                   padding: `${structure.props.marginTop || 0}px ${structure.props.marginRight || 0}px ${structure.props.marginBottom || 0}px ${structure.props.marginLeft || 0}px`,
                   backgroundColor: "transparent",
+                  width: "100%",
+                  boxSizing: "border-box",
                 }}
               >
                 <Section
@@ -54,6 +57,8 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
                       ? structure.props.backgroundColor
                       : globalStyles.contentBackgroundColor,
                     padding: `${structure.props.paddingTop || 0}px ${structure.props.paddingRight || 0}px ${structure.props.paddingBottom || 0}px ${structure.props.paddingLeft || 0}px`,
+                    width: "100%",
+                    boxSizing: "border-box",
                   }}
                 >
                   <EmailRow>
@@ -65,7 +70,8 @@ export function TemplateRenderer({ design, previewText }: RenderEmailProps) {
                           width: totalRatio > 0 ? `${(col.widthRatio / totalRatio) * 100}%` : "100%",
                           backgroundColor: col.props.backgroundColor || "transparent",
                           padding: `${col.props.paddingTop || 0}px ${col.props.paddingRight || 0}px ${col.props.paddingBottom || 0}px ${col.props.paddingLeft || 0}px`,
-                          verticalAlign: col.props.verticalAlign || "top"
+                          verticalAlign: col.props.verticalAlign || "top",
+                          boxSizing: "border-box",
                         }}
                       >
                         {col.blocks.map((block: ContentBlock) => {
