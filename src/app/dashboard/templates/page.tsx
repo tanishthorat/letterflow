@@ -91,6 +91,7 @@ export default function TemplatesPage() {
       }
     } catch (error) {
       console.error("Error creating template", error);
+      toast.error("Failed to create template", { description: error instanceof Error ? error.message : "Unknown error" });
     } finally {
       setIsCreating(false);
     }

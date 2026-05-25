@@ -31,10 +31,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface TemplateCardProps {
-  template: EmailTemplate;
+  template: any; // Using any or a union type to accommodate both EmailTemplate and PreBuiltTemplate
+  isPreBuilt?: boolean;
+  onUseTemplate?: () => void;
 }
 
-export function TemplateCard({ template }: TemplateCardProps) {
+export function TemplateCard({ template, isPreBuilt, onUseTemplate }: TemplateCardProps) {
   const router = useRouter();
   const {
     selectedIds,
@@ -177,100 +179,120 @@ export function TemplateCard({ template }: TemplateCardProps) {
     </>
   );
 
+  const cardContent = (
+    <div
+      className={cn(
+        "group relative w-full aspect-2/3 max-h-80 flex flex-col rounded-xl overflow-hidden cursor-pointer transition-all duration-200 border-2",
+        !isPreBuilt && isSelected ? "border-primary shadow-md" : "border-transparent bg-muted/20 hover:border-accent/50"
+      )}
+      onClick={isPreBuilt ? onUseTemplate : handleEdit}
+    >
+      {/* Visual Preview Section (Top) */}
+      <div className="flex-1 bg-white flex flex-col relative overflow-hidden items-center justify-center pointer-events-none p-4">
+        {template.thumbnail ? (
+          <img src={template.thumbnail} alt={template.name} className="w-full h-full object-cover opacity-90 transition-opacity" />
+        ) : template.body_html ? (
+          <div className="w-full h-full absolute inset-0 flex items-start justify-center overflow-hidden opacity-80 pointer-events-none p-4">
+            <iframe
+              srcDoc={template.body_html}
+              sandbox=""
+              scrolling="no"
+              tabIndex={-1}
+              className="origin-top border-none bg-transparent"
+              style={{ width: "600px", height: "800px", transform: "scale(0.6)" }}
+            />
+          </div>
+        ) : (
+          <div className="w-16 h-4 bg-muted rounded animate-pulse" />
+        )}
+      </div>
+
+      {/* Dark Details Section (Bottom) */}
+      <div className="absolute w-full max-w-11/12 bottom-0 left-1/2 -translate-x-1/2 bg-background text-white flex flex-col items-center justify-center p-2 z-10 my-2 rounded-lg">
+        {!isPreBuilt ? (
+          <PopoverAnchor asChild>
+            <span className="text-sm font-medium truncate w-full text-center">
+              {template.name}
+            </span>
+          </PopoverAnchor>
+        ) : (
+          <span className="text-sm font-medium truncate w-full text-center">
+            {template.name}
+          </span>
+        )}
+        <div className="flex items-center justify-center gap-2 mt-1 w-full">
+          <span className="text-[10px] text-zinc-400 capitalize">
+            {isPreBuilt ? template.category : (template.created_at ? formatDistanceToNow(new Date(template.created_at), { addSuffix: true }) : "Unknown date")}
+          </span>
+
+          {!isPreBuilt && (
+            <Badge
+              variant="outline"
+              className={cn("text-[9px] px-1.5 py-0 rounded-full font-semibold uppercase border tracking-wider h-4 flex items-center justify-center",
+                template.status === "published" ? "bg-green-500/15 text-green-400 border-green-500/30" :
+                  template.status === "archived" ? "bg-zinc-500/15 text-zinc-400 border-zinc-500/30" :
+                    "bg-amber-500/15 text-amber-400 border-amber-500/30"
+              )}
+            >
+              {template.status || "draft"}
+            </Badge>
+          )}
+        </div>
+      </div>
+
+      {/* Absolute positioning overlays */}
+      {!isPreBuilt && (
+        <>
+          <div
+            className={cn(
+              "absolute top-3 left-3 z-20 transition-opacity flex items-center justify-center cursor-pointer p-1 rounded-sm",
+              isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleSelection();
+            }}
+          >
+            <Checkbox
+              checked={isSelected}
+              className="w-5 h-5 bg-white/50 backdrop-blur-md border-zinc-300 data-[state=checked]:bg-primary pointer-events-none"
+            />
+          </div>
+
+          {/* Top Right Dropdown Trigger */}
+          <div
+            className={cn(
+              "absolute top-2 right-2 z-20 transition-opacity",
+              isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-white/50 hover:bg-white backdrop-blur-md">
+                  <MoreVertical className="w-4 h-4 text-zinc-700" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItems />
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
+  if (isPreBuilt) {
+    return cardContent;
+  }
+
   return (
     <>
       <Popover open={isRenaming} onOpenChange={setIsRenaming}>
         <ContextMenu>
           <ContextMenuTrigger asChild>
-            <div
-              className={cn(
-                "group relative w-full aspect-2/3 max-h-80 flex flex-col rounded-xl overflow-hidden cursor-pointer transition-all duration-200 border-2",
-                isSelected ? "border-primary shadow-md" : "border-transparent bg-muted/20 hover:border-accent/50"
-              )}
-              onClick={handleEdit}
-            >
-              {/* Visual Preview Section (Top) */}
-              <div className="flex-1 bg-white flex flex-col relative overflow-hidden items-center justify-center pointer-events-none p-4">
-                {template.body_html ? (
-                  <div className="w-full h-full absolute inset-0 flex items-start justify-center overflow-hidden opacity-80 pointer-events-none p-4">
-                    <iframe
-                      srcDoc={template.body_html}
-                      sandbox=""
-                      scrolling="no"
-                      tabIndex={-1}
-                      className="origin-top border-none bg-transparent"
-                      style={{ width: "600px", height: "800px", transform: "scale(0.6)" }}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-16 h-4 bg-muted rounded animate-pulse" />
-                )}
-              </div>
-
-              {/* Dark Details Section (Bottom) */}
-              <div className="absolute w-full max-w-11/12 bottom-0 left-1/2 -translate-x-1/2 bg-background text-white flex flex-col items-center justify-center p-2 z-10 my-2 rounded-lg">
-                <PopoverAnchor asChild>
-                  <span className="text-sm font-medium truncate w-full text-center">
-                    {template.name}
-                  </span>
-                </PopoverAnchor>
-                <div className="flex items-center justify-center gap-2 mt-1 w-full">
-                  <span className="text-[10px] text-zinc-400">
-                    {template.created_at ? formatDistanceToNow(new Date(template.created_at), { addSuffix: true }) : "Unknown date"}
-                  </span>
-
-                  <Badge
-                    variant="outline"
-                    className={cn("text-[9px] px-1.5 py-0 rounded-full font-semibold uppercase border tracking-wider h-4 flex items-center justify-center",
-                      template.status === "published" ? "bg-green-500/15 text-green-400 border-green-500/30" :
-                        template.status === "archived" ? "bg-zinc-500/15 text-zinc-400 border-zinc-500/30" :
-                          "bg-amber-500/15 text-amber-400 border-amber-500/30"
-                    )}
-                  >
-                    {template.status || "draft"}
-                  </Badge>
-                </div>
-              </div>
-
-              {/* Absolute positioning overlays */}
-
-              <div
-                className={cn(
-                  "absolute top-3 left-3 z-20 transition-opacity flex items-center justify-center cursor-pointer p-1 rounded-sm",
-                  isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                )}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleToggleSelection();
-                }}
-              >
-                <Checkbox
-                  checked={isSelected}
-                  className="w-5 h-5 bg-white/50 backdrop-blur-md border-zinc-300 data-[state=checked]:bg-primary pointer-events-none"
-                />
-              </div>
-
-              {/* Top Right Dropdown Trigger */}
-              <div
-                className={cn(
-                  "absolute top-2 right-2 z-20 transition-opacity",
-                  isSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                )}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-white/50 hover:bg-white backdrop-blur-md">
-                      <MoreVertical className="w-4 h-4 text-zinc-700" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItems />
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-            </div>
+            {cardContent}
           </ContextMenuTrigger>
 
           {/* Context Menu (Right Click) */}

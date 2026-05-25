@@ -1,6 +1,6 @@
 import React from "react";
 import { BlockType, ContentBlock, TextBlock, ImageBlock, ButtonBlock, DividerBlock, BaseBlockProps } from "./types";
-import { Type, Image as ImageIcon, MousePointerClick, Minus, AlignStartVertical, AlignCenterVertical, AlignEndVertical } from "lucide-react";
+import { Type, Image as ImageIcon, MousePointerClick, Minus, AlignStartVertical, AlignCenterVertical, AlignEndVertical, AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -500,8 +500,8 @@ function ImageInspector({
               type="button"
               onClick={() => onChange({ width: "auto" })}
               className={`px-2 py-1 text-xs rounded border transition-colors ${p.width === "auto"
-                  ? "bg-primary text-primary-foreground border-primary"
-                  : "border-input text-muted-foreground hover:bg-muted"
+                ? "bg-primary text-primary-foreground border-primary"
+                : "border-input text-muted-foreground hover:bg-muted"
                 }`}
             >
               Auto
@@ -542,8 +542,8 @@ function ImageInspector({
                     type="button"
                     onClick={() => onChange({ imageFit: fit })}
                     className={`flex-1 py-1.5 text-xs capitalize border-r border-input last:border-r-0 transition-colors ${(p.imageFit ?? "cover") === fit
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-background text-muted-foreground hover:bg-muted"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-background text-muted-foreground hover:bg-muted"
                       }`}
                   >
                     {fit}
@@ -556,17 +556,17 @@ function ImageInspector({
               <Label className="text-xs text-muted-foreground">Vertical Position</Label>
               <div className="flex border rounded-md overflow-hidden border-input">
                 {([
-                  { val: "top" as const, Icon: AlignStartVertical },
-                  { val: "center" as const, Icon: AlignCenterVertical },
-                  { val: "bottom" as const, Icon: AlignEndVertical },
+                  { val: "top" as const, Icon: AlignStartHorizontal },
+                  { val: "center" as const, Icon: AlignCenterHorizontal },
+                  { val: "bottom" as const, Icon: AlignEndHorizontal },
                 ]).map(({ val, Icon }) => (
                   <button
                     key={val}
                     type="button"
                     onClick={() => onChange({ imagePosition: val })}
                     className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-xs border-r border-input last:border-r-0 transition-colors ${(p.imagePosition ?? "center") === val
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-background text-muted-foreground hover:bg-muted"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-background text-muted-foreground hover:bg-muted"
                       }`}
                   >
                     <Icon className="w-3.5 h-3.5" />
@@ -579,14 +579,23 @@ function ImageInspector({
         )}
       </section>
 
-      {/* ── Alignment ── */}
+      {/* ── Alignment & Background ── */}
       <section className="space-y-3 border-t border-border/50 pt-4">
-        <Label className="text-sm font-semibold text-foreground">Layout</Label>
+        <Label className="text-sm font-semibold text-foreground">Layout & Colors</Label>
+        
         <div className="flex items-center justify-between">
           <Label className="text-xs text-muted-foreground">Alignment</Label>
           <AlignmentSelector
             value={(p.alignDesktop ?? p.align ?? "center") as "left" | "center" | "right"}
             onChange={(val) => onChange({ alignDesktop: val })}
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Label className="text-xs text-muted-foreground">Background Color</Label>
+          <ColorPicker
+            value={p.blockBackgroundColor || "transparent"}
+            onChange={(color) => onChange({ blockBackgroundColor: color })}
           />
         </div>
       </section>
@@ -773,7 +782,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
   },
   renderCanvas: ({ block }) => {
     const p = block.props;
-    
+
     // The button itself
     const buttonStyle: React.CSSProperties = {
       display: p.fitToContainerDesktop ? "block" : "inline-block",
@@ -817,7 +826,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
 
     return (
       <div className="space-y-5">
-        
+
         {/* ── Link & Text ── */}
         <section className="space-y-3">
           <Label className="text-sm font-semibold text-foreground">Content</Label>
@@ -829,7 +838,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
               onChange={(e) => onChange({ text: e.target.value })}
             />
           </div>
-          
+
           <LinkInput
             linkType={p.linkType ?? "url"}
             href={p.href ?? ""}
@@ -884,7 +893,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
         {/* ── Typography ── */}
         <section className="space-y-3 border-t border-border/50 pt-4">
           <Label className="text-sm font-semibold text-foreground">Typography</Label>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-xs text-muted-foreground">Font Family</Label>
@@ -919,7 +928,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-             <div className="space-y-2">
+            <div className="space-y-2">
               <Label className="text-xs text-muted-foreground">Weight</Label>
               <Select
                 value={String(p.fontWeight || "normal")}
@@ -980,7 +989,7 @@ const ButtonBlockConfig: BlockConfig<ButtonBlock> = {
         {/* ── Borders ── */}
         <section className="space-y-3 border-t border-border/50 pt-4">
           <Label className="text-sm font-semibold text-foreground">Borders</Label>
-          
+
           <div className="flex items-center justify-between">
             <Label className="text-xs text-muted-foreground">Corner Radius (px)</Label>
             <NumberStepper
@@ -1129,10 +1138,10 @@ const DividerBlockConfig: BlockConfig<DividerBlock> = {
     const p = block.props;
     return (
       <div style={getBaseBlockWrapperStyles(p)}>
-        <hr style={{ 
-          borderColor: p.color, 
-          borderWidth: `${p.lineWidth}px`, 
-          borderStyle: p.borderStyle || 'solid', 
+        <hr style={{
+          borderColor: p.color,
+          borderWidth: `${p.lineWidth}px`,
+          borderStyle: p.borderStyle || 'solid',
           width: `${p.widthDesktop ?? 100}%`,
           display: 'inline-block',
           margin: 0
@@ -1264,10 +1273,10 @@ const DividerBlockConfig: BlockConfig<DividerBlock> = {
     const p = block.props;
     return (
       <div style={getBaseBlockWrapperStyles(p)}>
-        <EmailHr style={{ 
-          borderColor: p.color, 
-          borderWidth: `${p.lineWidth}px`, 
-          borderStyle: p.borderStyle || 'solid', 
+        <EmailHr style={{
+          borderColor: p.color,
+          borderWidth: `${p.lineWidth}px`,
+          borderStyle: p.borderStyle || 'solid',
           width: `${p.widthDesktop ?? 100}%`,
           margin: 0,
           display: "inline-block"

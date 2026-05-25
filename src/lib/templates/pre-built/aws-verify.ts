@@ -51,7 +51,7 @@ export const awsVerifyTemplate: TemplateDesign = {
                   id: "aws-block-logo",
                   type: "image",
                   props: {
-                    src: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/256px-Amazon_Web_Services_Logo.svg.png",
+                    src: "https://www.kaizenanalytix.com/wp-content/uploads/2024/09/aws-white.png",
                     alt: "AWS Logo",
                     width: 75,
                     height: "auto",

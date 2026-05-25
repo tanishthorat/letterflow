@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { EmailTemplate } from "@/lib/db.types";
+import { toast } from "@/lib/toast";
 
 interface TemplateState {
   templates: EmailTemplate[];
@@ -118,7 +119,9 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
       }));
     } catch (err: unknown) {
       console.error("Error fetching templates:", err);
-      set({ error: err instanceof Error ? err.message : String(err), loading: false, isInitialized: true });
+      const message = err instanceof Error ? err.message : String(err);
+      set({ error: message, loading: false, isInitialized: true });
+      toast.error("Failed to fetch templates", { description: message });
     }
   },
 
@@ -146,7 +149,9 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
       return template;
     } catch (err: unknown) {
       console.error("Error creating template:", err);
-      set({ error: err instanceof Error ? err.message : String(err), loading: false });
+      const message = err instanceof Error ? err.message : String(err);
+      set({ error: message, loading: false });
+      toast.error("Failed to create template", { description: message });
       return null;
     }
   },
@@ -173,7 +178,9 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
       return template;
     } catch (err: unknown) {
       console.error("Error updating template:", err);
-      set({ error: err instanceof Error ? err.message : String(err) });
+      const message = err instanceof Error ? err.message : String(err);
+      set({ error: message });
+      toast.error("Failed to update template", { description: message });
       return null;
     }
   },
@@ -193,8 +200,10 @@ export const useTemplateStore = create<TemplateState>((set, get) => ({
         await Promise.all(
           ids.map(id => fetch(`/api/templates/${id}`, { method: "DELETE" }))
         );
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Error deleting templates:", err);
+        const message = err instanceof Error ? err.message : String(err);
+        toast.error("Failed to delete templates", { description: message });
       }
     }, 4000);
 

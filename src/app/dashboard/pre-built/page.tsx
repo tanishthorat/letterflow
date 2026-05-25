@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ExternalLink } from "lucide-react";
+import { TemplateCard } from "@/components/dashboard/template-card";
 
 export default function PreBuiltTemplatesPage() {
   const router = useRouter();
@@ -43,47 +44,22 @@ export default function PreBuiltTemplatesPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {PRE_BUILT_TEMPLATES.map((template) => (
-          <Card key={template.id} className="flex flex-col hover:shadow-lg transition-shadow border-border/50">
-            <CardHeader className="pb-4">
-              <div className="flex justify-between items-start mb-2">
-                <Badge variant="secondary" className="capitalize">{template.category}</Badge>
+          <div key={template.id} className="relative group flex flex-col h-full">
+            <TemplateCard
+              template={template}
+              isPreBuilt={true}
+              onUseTemplate={() => handleUseTemplate(template)}
+            />
+            {/* Show a loading overlay if this specific template is being prepared */}
+            {loadingId === template.id && (
+              <div className="absolute inset-0 z-50 bg-background/50 backdrop-blur-sm flex flex-col items-center justify-center rounded-xl border border-border">
+                <Loader2 className="w-6 h-6 animate-spin text-primary mb-2" />
+                <span className="text-sm font-medium text-foreground">Preparing...</span>
               </div>
-              <CardTitle className="text-lg">{template.name}</CardTitle>
-              <CardDescription className="line-clamp-2">{template.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 bg-muted/20 relative overflow-hidden flex items-center justify-center p-0 group">
-               {/* We can use a miniature renderer or simple placeholder here */}
-               {template.thumbnail ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={template.thumbnail} alt={template.name} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
-               ) : (
-                 <div className="w-full h-40 flex items-center justify-center text-muted-foreground bg-gradient-to-br from-muted/50 to-muted">
-                    <span className="text-sm">Template Preview</span>
-                 </div>
-               )}
-            </CardContent>
-            <CardFooter className="pt-4 border-t border-border/50">
-              <Button 
-                onClick={() => handleUseTemplate(template)} 
-                className="w-full"
-                disabled={loadingId !== null}
-              >
-                {loadingId === template.id ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Preparing...
-                  </>
-                ) : (
-                  <>
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Use Template
-                  </>
-                )}
-              </Button>
-            </CardFooter>
-          </Card>
+            )}
+          </div>
         ))}
       </div>
     </div>

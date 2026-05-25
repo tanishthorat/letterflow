@@ -31,6 +31,7 @@ import {
 import Link from "next/link";
 import { useTemplateStore } from "@/lib/stores/template";
 import type { EmailTemplate } from "@/lib/db.types";
+import { toast } from "@/lib/toast";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -180,7 +181,9 @@ function AIDraftPanel({ onDraftCreated }: { onDraftCreated: () => void }) {
 
       if (!res.ok) {
         setState("error");
-        setMessage(data.error || "Something went wrong.");
+        const errMsg = data.error || "Something went wrong.";
+        setMessage(errMsg);
+        toast.error("Generation failed", { description: errMsg });
         return;
       }
 
@@ -193,7 +196,9 @@ function AIDraftPanel({ onDraftCreated }: { onDraftCreated: () => void }) {
       }, 1200);
     } catch {
       setState("error");
-      setMessage("Network error. Please try again.");
+      const errMsg = "Network error. Please try again.";
+      setMessage(errMsg);
+      toast.error("Generation failed", { description: errMsg });
     }
   };
 
