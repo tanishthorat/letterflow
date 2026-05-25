@@ -105,8 +105,8 @@ export function UserNav() {
 
         <DropdownMenuSeparator className="-mx-2 bg-border" />
 
-        {/* Workspace */}
-        <DropdownMenuGroup className="my-1">
+        {/* Workspace to be implemented in future*/}
+        {/* <DropdownMenuGroup className="my-1">
           <DropdownMenuItem className="flex flex-col items-start gap-1.5 p-3 cursor-pointer rounded-md">
             <div className="flex items-center gap-2">
               <Monitor className="w-4 h-4 text-muted-foreground group-focus/dropdown-menu-item:text-sidebar-foreground" />
@@ -114,7 +114,7 @@ export function UserNav() {
             </div>
             <span className="text-xs text-muted-foreground pl-6">Workspace</span>
           </DropdownMenuItem>
-        </DropdownMenuGroup>
+        </DropdownMenuGroup> */}
 
         <DropdownMenuSeparator className="-mx-2 bg-border" />
 
