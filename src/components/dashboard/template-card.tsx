@@ -138,7 +138,7 @@ export function TemplateCard({ template, isPreBuilt, onUseTemplate }: TemplateCa
         className="text-destructive focus:bg-destructive/10 focus:text-destructive"
         onSelect={() => setIsDeleteDialogOpen(true)}
       >
-        <Trash2 className="w-4 h-4 mr-2" />
+        <Trash2 className="w-4 h-4 mr-2 text-destructive!" />
         Delete
       </ContextMenuItem>
     </>
@@ -208,7 +208,7 @@ export function TemplateCard({ template, isPreBuilt, onUseTemplate }: TemplateCa
       </div>
 
       {/* Dark Details Section (Bottom) */}
-      <div className="absolute w-full max-w-11/12 bottom-0 left-1/2 -translate-x-1/2 bg-background text-white flex flex-col items-center justify-center p-2 z-10 my-2 rounded-lg">
+      <div className="absolute w-full max-w-11/12 bottom-0 left-1/2 -translate-x-1/2 bg-foreground dark:bg-background text-white flex flex-col items-center justify-center p-2 z-10 my-2 rounded-lg">
         {!isPreBuilt ? (
           <PopoverAnchor asChild>
             <span className="text-sm font-medium truncate w-full text-center">
@@ -336,7 +336,7 @@ export function TemplateCard({ template, isPreBuilt, onUseTemplate }: TemplateCa
         title="Confirm removal"
         description={
           <>
-            Are you sure you want to remove “<b className="text-white font-medium">{template.name}</b>”?
+            Are you sure you want to remove “<b className="text-foreground font-medium">{template.name}</b>”?
           </>
         }
         onConfirm={handleDelete}

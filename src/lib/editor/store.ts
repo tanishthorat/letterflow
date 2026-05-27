@@ -34,6 +34,7 @@ interface EditorState {
   metadata: TemplateMetadata;
   selectedNode: SelectedNode;
   isDirty: boolean;
+  viewMode: 'desktop' | 'mobile';
   
   // Stripe Actions
   addStripe: (label?: string, insertIndex?: number) => string;
@@ -67,6 +68,7 @@ interface EditorState {
 
   // Selection & Global
   selectNode: (node: SelectedNode) => void;
+  setViewMode: (mode: 'desktop' | 'mobile') => void;
   updateGlobalStyles: (styles: Partial<GlobalStyles>) => void;
   updateMetadata: (metadata: Partial<TemplateMetadata>) => void;
   loadDesign: (design: unknown, globalStyles: unknown, metadata?: TemplateMetadata) => void;
@@ -84,6 +86,7 @@ export const useEditorStore = create<EditorState>()(
   metadata: { status: "draft" },
   selectedNode: null,
   isDirty: false,
+  viewMode: 'desktop',
 
   addStripe: (label, insertIndex) => {
     const newStripe: Stripe = {
@@ -397,6 +400,8 @@ export const useEditorStore = create<EditorState>()(
   }),
 
   selectNode: (node) => set({ selectedNode: node }),
+
+  setViewMode: (mode) => set({ viewMode: mode }),
 
   updateGlobalStyles: (styles) => set((state) => ({ 
     globalStyles: { ...state.globalStyles, ...styles },

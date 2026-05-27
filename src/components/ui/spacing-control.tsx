@@ -52,7 +52,7 @@ export function SpacingControl({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-          <Label className="text-xs font-semibold text-zinc-300">{label}</Label>
+          <Label className="text-xs font-semibold text-muted-foreground">{label}</Label>
         </div>
 
         {/* Figma Style Lock/Unlock Toggle */}
@@ -61,7 +61,7 @@ export function SpacingControl({
           title={isLocked ? "Unlock side values" : "Lock values together"}
           className={`p-1.5 rounded-md border transition-colors cursor-pointer ${isLocked
             ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/20'
-            : 'bg-zinc-800/80 border-zinc-700 text-zinc-400 hover:text-white hover:bg-zinc-700'
+            : 'bg-secondary border-border text-muted-foreground hover:text-foreground hover:bg-secondary/80'
             }`}
           onClick={handleToggleLock}
         >
@@ -71,8 +71,8 @@ export function SpacingControl({
 
       {/* Inputs Layout */}
       {isLocked ? (
-        <div className="flex items-center justify-between gap-4 p-2.5 rounded-lg border border-zinc-800/50">
-          <span className="text-xs text-zinc-400 font-medium pl-1">All Sides</span>
+        <div className="flex items-center justify-between gap-4 p-2.5 rounded-lg border border-border">
+          <span className="text-xs text-muted-foreground font-medium pl-1">All Sides</span>
           <NumberStepper
             value={top}
             onChange={onChangeAll}
@@ -83,9 +83,9 @@ export function SpacingControl({
           />
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 p-2.5 rounded-lg border border-zinc-800/50">
+        <div className="grid grid-cols-2 gap-3 p-2.5 rounded-lg border border-border">
           <div className="space-y-1">
-            <span className="text-[11px] text-zinc-400 font-medium">{baseLabel} Top</span>
+            <span className="text-[11px] text-muted-foreground font-medium">{baseLabel} Top</span>
             <NumberStepper
               value={top}
               onChange={handleTop}
@@ -96,7 +96,7 @@ export function SpacingControl({
             />
           </div>
           <div className="space-y-1">
-            <span className="text-[11px] text-zinc-400 font-medium">{baseLabel} Bottom</span>
+            <span className="text-[11px] text-muted-foreground font-medium">{baseLabel} Bottom</span>
             <NumberStepper
               value={bottom}
               onChange={handleBottom}
@@ -107,7 +107,7 @@ export function SpacingControl({
             />
           </div>
           <div className="space-y-1">
-            <span className="text-[11px] text-zinc-400 font-medium">{baseLabel} Left</span>
+            <span className="text-[11px] text-muted-foreground font-medium">{baseLabel} Left</span>
             <NumberStepper
               value={left}
               onChange={handleLeft}
@@ -118,7 +118,7 @@ export function SpacingControl({
             />
           </div>
           <div className="space-y-1">
-            <span className="text-[11px] text-zinc-400 font-medium">{baseLabel} Right</span>
+            <span className="text-[11px] text-muted-foreground font-medium">{baseLabel} Right</span>
             <NumberStepper
               value={right}
               onChange={handleRight}

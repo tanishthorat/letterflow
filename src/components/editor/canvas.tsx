@@ -351,7 +351,8 @@ export function Canvas() {
   const {
     stripes,
     globalStyles,
-    selectNode
+    selectNode,
+    viewMode
   } = useEditorStore();
 
   return (
@@ -360,10 +361,15 @@ export function Canvas() {
       onClick={() => selectNode(null)}
     >
       <div
-        className="shadow-2xl min-h-200 transition-all relative border border-border/50 my-auto"
+        className={cn(
+          "shadow-2xl min-h-200 transition-all relative my-auto",
+          viewMode === 'mobile'
+            ? "border border-border overflow-hidden"
+            : "border border-border/50"
+        )}
         style={{
           width: "100%",
-          maxWidth: "100%",
+          maxWidth: viewMode === 'mobile' ? "375px" : "100%",
           backgroundColor: globalStyles.contentBackgroundColor,
         }}
         onClick={(e) => e.stopPropagation()}

@@ -29,7 +29,7 @@ interface EditorHeaderProps {
 export function EditorHeader({ template }: EditorHeaderProps) {
   const router = useRouter();
   const { updateTemplate } = useTemplateStore();
-  const { isDirty, getDesign, clearDirty, globalStyles, metadata } = useEditorStore();
+  const { isDirty, getDesign, clearDirty, globalStyles, metadata, viewMode, setViewMode } = useEditorStore();
   const { undo, redo, pastStates, futureStates } = useStore(useEditorStore.temporal, (state) => state);
 
   const [name, setName] = useState(template.name);
@@ -282,10 +282,20 @@ export function EditorHeader({ template }: EditorHeaderProps) {
 
         {/* Center Section */}
         <div className="hidden md:flex items-center bg-muted/30 rounded-md border border-border p-0.5 absolute left-1/2 -translate-x-1/2">
-          <Button variant="ghost" size="icon" className="h-7 w-8 rounded-sm bg-border text-foreground">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={`h-7 w-8 rounded-sm ${viewMode === 'desktop' ? 'bg-border text-foreground shadow-sm' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
+            onClick={() => setViewMode('desktop')}
+          >
             <Monitor className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-8 rounded-sm hover:bg-muted text-muted-foreground hover:text-foreground">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={`h-7 w-8 rounded-sm ${viewMode === 'mobile' ? 'bg-border text-foreground shadow-sm' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}
+            onClick={() => setViewMode('mobile')}
+          >
             <Smartphone className="w-4 h-4" />
           </Button>
         </div>

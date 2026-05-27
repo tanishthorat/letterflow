@@ -28,19 +28,19 @@ export function DeleteDialog({
 }: DeleteDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-[#1E1E1E] border-none text-white sm:rounded-2xl max-w-[400px] p-8">
+      <AlertDialogContent className="bg-card border border-border text-card-foreground sm:rounded-2xl max-w-[400px] p-8">
         <button
           onClick={() => onOpenChange(false)}
-          className="absolute right-4 top-4 text-zinc-400 hover:text-white transition-colors"
+          className="absolute right-4 top-4 text-muted-foreground hover:text-foreground transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
 
         <AlertDialogHeader className="space-y-4">
-          <AlertDialogTitle className="text-xl text-center font-medium">
+          <AlertDialogTitle className="text-xl text-center font-medium text-foreground">
             {title}
           </AlertDialogTitle>
-          <AlertDialogDescription className="text-zinc-300 text-center text-base">
+          <AlertDialogDescription className="text-foreground/80 text-center text-base">
             {description}
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -49,12 +49,12 @@ export function DeleteDialog({
           <AlertDialogAction
             variant={"destructive"}
             onClick={onConfirm}
-            className="bg-destructive text-white hover:bg-destructive/90 rounded-xl px-6 font-medium gap-2 m-0"
+            className="text-white rounded-xl not-dark:text-foreground hover:not-dark:text-foreground px-6 font-medium gap-2 m-0 hover:text-white"
           >
             <Trash2 className="w-4 h-4" />
             Yes, remove
           </AlertDialogAction>
-          <AlertDialogCancel className="bg-[#333333] text-white hover:bg-[#404040] hover:text-white border-none rounded-xl px-6 font-medium m-0 mt-0">
+          <AlertDialogCancel className="bg-transparent text-foreground hover:bg-muted/50 hover:text-foreground border border-border rounded-xl px-6 font-medium m-0 mt-0">
             Cancel
           </AlertDialogCancel>
         </AlertDialogFooter>

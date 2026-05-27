@@ -17,13 +17,13 @@ export function StructureInspector({ stripeId, structureId, stripes, updateStruc
   if (!structure) return null;
 
   return (
-    <div className="p-4 space-y-6 text-zinc-100">
-      <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+    <div className="p-4 space-y-6 text-foreground">
+      <div className="flex items-center justify-between pb-4 border-b border-border">
         <h3 className="text-sm font-semibold flex items-center gap-2">
           <BoxSelect className="w-4 h-4 text-orange-500" />
           Structure Settings
         </h3>
-        <button onClick={() => removeStructure(stripeId, structureId)} className="text-red-500 hover:bg-red-500/10 p-1.5 rounded-md transition-colors">
+        <button onClick={() => removeStructure(stripeId, structureId)} className="text-destructive hover:bg-destructive/10 p-1.5 rounded-md transition-colors">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
@@ -34,7 +34,7 @@ export function StructureInspector({ stripeId, structureId, stripes, updateStruc
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <Label className="text-xs font-medium text-zinc-300">Containers Gap on Desktop</Label>
+              <Label className="text-xs font-medium text-muted-foreground">Containers Gap on Desktop</Label>
             </div>
             <NumberStepper
               value={structure.props.columnGap || 0}
@@ -78,7 +78,7 @@ export function StructureInspector({ stripeId, structureId, stripes, updateStruc
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs font-medium text-zinc-300">Background Color</Label>
+          <Label className="text-xs font-medium text-muted-foreground">Background Color</Label>
           <ColorPicker
             value={structure.props.backgroundColor}
             onChange={(color) => updateStructureProps(stripeId, structureId, { backgroundColor: color })}
