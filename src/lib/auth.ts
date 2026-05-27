@@ -14,6 +14,7 @@ interface AuthStore {
   signOut: () => Promise<void>;
   getSession: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
 }
 
 export const useAuth = create<AuthStore>((set) => {
@@ -122,8 +123,19 @@ export const useAuth = create<AuthStore>((set) => {
       try {
         const origin = typeof window !== "undefined" ? window.location.origin : "";
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${origin}/auth/callback?next=/dashboard/settings/security`, // or some reset-password page
+          redirectTo: `${origin}/auth/callback?next=/update-password`,
         });
+        if (error) throw error;
+      } finally {
+        set({ loading: false });
+      }
+    },
+
+    updatePassword: async (password: string) => {
+      const supabase = createClient();
+      set({ loading: true });
+      try {
+        const { error } = await supabase.auth.updateUser({ password });
         if (error) throw error;
       } finally {
         set({ loading: false });
